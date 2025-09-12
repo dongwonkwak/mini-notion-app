@@ -2,22 +2,33 @@
 
 ## 프로젝트 설정 및 인프라 구축
 
-- [-] 1. 모노레포 구조 및 개발 환경 초기화
+- [x] 1. 모노레포 구조 및 개발 환경 초기화
   - Turbo + pnpm workspace로 mini-notion-app 루트 디렉토리 생성
   - 패키지 구조 설정 (ui, editor, collaboration, auth, database, types, ai, config)
   - 공통 TypeScript, ESLint, Prettier 설정 구성
   - SQLite 데이터베이스와 Docker Compose 서비스로 개발 환경 설정
   - **추가 완료 작업:**
     - 포괄적인 테스트 프레임워크 설정 (Jest, Playwright, Testing Library)
-    - 데이터베이스 테스트 스위트 (Unit, Integration, Performance, Schema Validation)
-    - SQL 검증 스크립트 및 자동화 도구 (`validate-schema.ts`)
+    - 최신 라이브러리 버전 적용 (React 18.3.1, Next.js 15.1.3, TypeScript 5.7.2)
+    - API 문서화 가이드라인 (JSDoc 기반 단계적 국제화 전략)
+    - 라이브러리 버전 관리 자동화 도구 및 가이드라인
     - Agent Hooks 설정 (Spec 동기화, Git 워크플로우, 품질 검사)
-    - 테스트 전략 문서 및 Steering 규칙 등록
+    - 기술 부채 추적 시스템 구축
     - E2E 테스트 환경 구성 (Playwright)
-    - 모노레포 구조 검증 테스트
+    - 전체 프로젝트 빌드 성공 확인
+  - **🔄 태스크 2 연결 작업 (기술부채):**
+    - Database 패키지 테스트 재활성화 (Prisma 스키마 완성 후)
+    - Jest Setup 파일 ES6 Import 문제 해결
+    - Prisma seed.ts 파일 TypeScript 설정 수정
+    - 데이터베이스 테스트 스위트 전체 활성화
   - _요구사항: 모든 요구사항이 적절한 프로젝트 구조에 의존_
 
 - [ ] 2. 데이터베이스 스키마 및 ORM 설정
+  - **🔄 태스크 1 미완료 작업 해결:**
+    - Database 패키지 테스트 재활성화 및 수정
+    - Jest Setup 파일 ES6 Import 문제 해결 (CommonJS 변환 또는 ES6 모듈 설정)
+    - Prisma seed.ts TypeScript 설정 수정 (@types/node 적용)
+    - 데이터베이스 테스트 스위트 전체 검증 및 활성화
   - 다중 프로바이더 지원 Prisma 설정 (개발용 SQLite, 운영용 PostgreSQL)
   - 사용자, 워크스페이스, 페이지, 문서, 댓글, 세션 테이블 생성
   - 테스트 데이터로 데이터베이스 시딩 스크립트 구현 (사용자 5명, 워크스페이스 1개, 페이지 10개)

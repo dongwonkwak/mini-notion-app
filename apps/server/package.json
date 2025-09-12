@@ -16,14 +16,14 @@
     "@editor/database": "workspace:*",
     "@editor/auth": "workspace:*",
     "@editor/types": "workspace:*",
-    "@hocuspocus/server": "^2.0.0",
-    "@hocuspocus/extension-redis": "^2.0.0",
-    "@hocuspocus/extension-database": "^2.0.0",
-    "yjs": "^13.0.0"
+    "@hocuspocus/server": "^2.15.0",
+    "@hocuspocus/extension-redis": "^2.15.0",
+    "@hocuspocus/extension-database": "^2.15.0",
+    "yjs": "^13.6.20"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "tsx": "^3.12.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }

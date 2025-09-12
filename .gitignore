@@ -132,3 +132,5 @@ benchmark-results/
 *.crt
 secrets/
 credentials.json
+
+issue-template.md

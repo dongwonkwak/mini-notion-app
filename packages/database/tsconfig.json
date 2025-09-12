@@ -1,5 +1,5 @@
 {
-  "extends": "@editor/config/tsconfig/node.json",
+  "extends": "../config/tsconfig/node.json",
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
@@ -7,6 +7,6 @@
     "sourceMap": true,
     "noEmit": false
   },
-  "include": ["src/**/*", "prisma/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/__tests__/**/*", "prisma/**/*"]
 }
