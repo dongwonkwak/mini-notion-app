@@ -212,8 +212,11 @@ interface Workspace {
   id: string;
   name: string;
   ownerId: string;
+  owner: User;
   members: WorkspaceMember[];
   settings: WorkspaceSettings;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Page {
@@ -224,12 +227,33 @@ interface Page {
   children: string[];
   documentId: string;
   permissions: PagePermissions;
+  position: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface WorkspaceMember {
+  id: string;
+  workspaceId: string;
   userId: string;
-  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  user: User;
+  workspace: Workspace;
+  role: 'admin' | 'editor' | 'viewer';
   joinedAt: Date;
+}
+
+interface WorkspaceSettings {
+  defaultPermissions: 'read' | 'write' | 'admin';
+  allowGuestAccess: boolean;
+  theme: 'light' | 'dark' | 'auto';
+  language: string;
+}
+
+interface PagePermissions {
+  read: string[];
+  write: string[];
+  admin: string[];
+  inherit: boolean;
 }
 ```
 
@@ -378,10 +402,23 @@ CREATE TABLE users (
 CREATE TABLE workspaces (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
-  owner_id UUID REFERENCES users(id),
+  owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
   settings JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### Workspace Members Table
+```sql
+CREATE TABLE workspace_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'editor', 'viewer')),
+  joined_at TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(workspace_id, user_id)
 );
 ```
 

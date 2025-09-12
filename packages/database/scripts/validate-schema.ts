@@ -233,7 +233,8 @@ class SchemaValidator {
       const workspace = await this.prisma.workspace.create({
         data: {
           name: 'FK Test Workspace',
-          ownerId: user.id
+          ownerId: user.id,
+          settings: {}
         }
       });
 
@@ -295,9 +296,13 @@ class SchemaValidator {
           workspaceId: workspace.id,
           title: 'DataType Test Page',
           documentId: 'datatype-doc-123',
+          permissions: {
+            read: true,
+            write: true,
+            admin: false
+          },
           document: {
             create: {
-              id: 'datatype-doc-123',
               state: Buffer.from([1, 2, 3, 255, 254]),
               version: 1,
               sizeBytes: 5
@@ -311,7 +316,7 @@ class SchemaValidator {
 
       // 데이터 타입 검증
       const isJsonValid = typeof workspace.settings === 'object';
-      const isBlobValid = Buffer.isBuffer(page.document?.state);
+      const isBlobValid = page.document?.state instanceof Buffer || page.document?.state instanceof Uint8Array;
       const isIntegerValid = typeof page.document?.version === 'number';
 
       // 정리
@@ -335,6 +340,7 @@ class SchemaValidator {
         };
       }
     } catch (error) {
+      console.error('데이터 타입 검증 오류 상세:', error);
       return {
         success: false,
         message: '데이터 타입 검증 중 오류가 발생했습니다',

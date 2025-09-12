@@ -13,6 +13,22 @@
 
 ## 📋 현재 기술 부채 목록
 
+### ✅ **해결 완료된 기술 부채**
+
+#### ✅ [해결 완료] 4. WorkspaceMember 스키마 충돌 문제
+**해결 일시**: 2025-09-12
+**문제**: WorkspaceMember 모델에서 owner와 user 관계가 동일한 userId를 참조하여 Prisma 스키마 충돌 발생
+**해결 방법**: 
+- WorkspaceMember에서 owner 관계 제거
+- Workspace 모델에서 직접 ownerId로 소유자 관리
+- User 모델에 ownedWorkspaces 관계 추가 ("WorkspaceOwner" 관계명)
+- 소유권과 멤버십을 명확히 분리
+**관련 파일**: `packages/database/prisma/schema.prisma`
+**개선 효과**: 
+- 데이터베이스 초기화 성공
+- 소유자와 멤버 관계 명확화
+- 쿼리 효율성 향상
+
 ### 🧪 **테스트 관련 기술 부채**
 
 #### 1. Database 패키지 테스트 비활성화 (태스크 1에서 발생)
