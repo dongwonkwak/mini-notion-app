@@ -228,3 +228,14 @@ uirement 18
 2. WHEN 사용자가 태블릿에서 편집하면 THEN 시스템은 가상 키보드와 호환되는 단축키를 지원해야 합니다
 3. WHEN 화면 크기가 변경되면 THEN 시스템은 반응형으로 레이아웃을 조정해야 합니다
 4. WHEN 모바일에서 드래그 앤 드롭을 사용하면 THEN 시스템은 터치 제스처로 블록 이동을 지원해야 합니다
+
+### Requirement 22
+
+**User Story:** 개발자로서, API 엔드포인트에 자동으로 JSDoc 주석이 추가되어야 하므로, 나중에 문서 생성 라이브러리를 사용하여 API 문서를 자동으로 생성할 수 있습니다.
+
+#### Acceptance Criteria
+
+1. WHEN API 엔드포인트를 작성하면 THEN 시스템은 자동으로 표준화된 JSDoc 주석을 추가해야 합니다
+2. WHEN JSDoc 주석을 작성하면 THEN 매개변수, 반환값, 오류 코드, 예제를 포함해야 합니다
+3. WHEN API 스키마가 변경되면 THEN 시스템은 관련 JSDoc 주석을 자동으로 업데이트해야 합니다
+4. WHEN 문서 생성 도구를 실행하면 THEN JSDoc 주석에서 OpenAPI/Swagger 스펙을 생성할 수 있어야 합니다

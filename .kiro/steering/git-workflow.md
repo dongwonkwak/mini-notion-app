@@ -56,10 +56,18 @@ test(collaboration): Y.js 실시간 동기화 테스트 추가
 ```
 
 ### 3. PR 및 머지 프로세스
-1. 태스크 완료 후 `git push origin feature/task-{번호}-{설명}`
-2. GitHub에서 develop 브랜치로 Pull Request 생성
-3. 코드 리뷰 및 테스트 통과 후 머지
-4. 브랜치 삭제 후 다음 태스크로 이동
+1. **커밋 전 .gitignore 검증**
+   ```bash
+   # 추적되지 않는 파일 확인
+   git status --ignored
+   
+   # 필요시 .gitignore 정리 Hook 실행
+   # "🧹 .gitignore 정리" 버튼 클릭
+   ```
+2. 태스크 완료 후 `git push origin feature/task-{번호}-{설명}`
+3. GitHub에서 develop 브랜치로 Pull Request 생성
+4. 코드 리뷰 및 테스트 통과 후 머지
+5. 브랜치 삭제 후 다음 태스크로 이동
 
 ## GitHub Issues 관리
 

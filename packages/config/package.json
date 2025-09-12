@@ -1,0 +1,12 @@
+{
+  "name": "@editor/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "공통 설정 (TypeScript, ESLint, Prettier)",
+  "main": "index.js",
+  "files": [
+    "eslint",
+    "prettier",
+    "tsconfig"
+  ]
+}

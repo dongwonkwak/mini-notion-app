@@ -1,0 +1,17 @@
+{
+  "name": "GitIgnore Auto Update",
+  "description": "Git으로 관리할 필요가 없는 파일이나 폴더를 자동으로 .gitignore에 추가합니다",
+  "trigger": {
+    "type": "manual",
+    "button_text": "🧹 .gitignore 정리"
+  },
+  "conditions": [
+    {
+      "type": "file_exists",
+      "path": ".gitignore"
+    }
+  ],
+  "prompt": "파일 변경이 감지되었습니다: {{changed_files}}\n\n다음 파일들이 Git으로 관리할 필요가 없는지 확인하고, 필요시 .gitignore에 자동으로 추가해주세요:\n\n## 🔍 자동 .gitignore 추가 대상\n\n### 1. **테스트 결과 파일**\n- `coverage/` - 테스트 커버리지 리포트\n- `test-results/` - Playwright 테스트 결과\n- `*.lcov` - 커버리지 데이터 파일\n- `junit.xml` - 테스트 결과 XML\n- `test-report.html` - 테스트 리포트\n- `*.log` - 테스트 로그 파일\n\n### 2. **빌드 및 임시 파일**\n- `dist/` - 빌드 결과물\n- `build/` - 빌드 디렉토리\n- `.next/` - Next.js 빌드 캐시\n- `.turbo/` - Turbo 캐시\n- `*.tsbuildinfo` - TypeScript 빌드 정보\n- `*.tmp` - 임시 파일\n- `*.temp` - 임시 파일\n\n### 3. **데이터베이스 파일**\n- `*.db` - SQLite 데이터베이스\n- `*.db-journal` - SQLite 저널\n- `*.sqlite` - SQLite 파일\n- `*.sqlite3` - SQLite3 파일\n- `prisma/migrations/` - Prisma 마이그레이션 (개발 환경)\n\n### 4. **로그 및 디버그 파일**\n- `*.log` - 로그 파일\n- `logs/` - 로그 디렉토리\n- `debug.log` - 디버그 로그\n- `error.log` - 에러 로그\n- `npm-debug.log*` - npm 디버그 로그\n- `yarn-debug.log*` - yarn 디버그 로그\n- `pnpm-debug.log*` - pnpm 디버그 로그\n\n### 5. **IDE 및 에디터 파일**\n- `.vscode/settings.json` - 개인 VS Code 설정\n- `.idea/` - IntelliJ IDEA 설정\n- `*.swp` - Vim 스왑 파일\n- `*.swo` - Vim 스왑 파일\n- `.DS_Store` - macOS 파일\n- `Thumbs.db` - Windows 썸네일\n\n### 6. **환경 및 설정 파일**\n- `.env.local` - 로컬 환경 변수\n- `.env.development.local` - 개발 환경 변수\n- `.env.test.local` - 테스트 환경 변수\n- `.env.production.local` - 프로덕션 환경 변수\n- `config.local.json` - 로컬 설정\n\n### 7. **성능 및 프로파일링 파일**\n- `*.cpuprofile` - CPU 프로파일\n- `*.heapprofile` - 힙 프로파일\n- `*.heapsnapshot` - 힙 스냅샷\n- `profile-*` - 프로파일링 결과\n- `benchmark-results/` - 벤치마크 결과\n\n### 8. **보안 및 인증 파일**\n- `*.pem` - 인증서 파일\n- `*.key` - 키 파일\n- `*.crt` - 인증서 파일\n- `secrets/` - 시크릿 디렉토리\n- `credentials.json` - 인증 정보\n\n## 📋 작업 수행 방법\n\n1. **변경된 파일 분석**: 위 목록과 비교하여 .gitignore에 추가해야 할 패턴 식별\n2. **현재 .gitignore 확인**: 이미 추가된 패턴인지 확인\n3. **자동 추가**: 누락된 패턴을 .gitignore에 추가\n4. **그룹별 정리**: 관련 패턴들을 주석과 함께 그룹화\n5. **변경 사항 요약**: 어떤 패턴이 추가되었는지 리포트\n\n## ✅ .gitignore 업데이트 형식\n\n```gitignore\n# 테스트 결과\ncoverage/\ntest-results/\n*.lcov\n\n# 빌드 결과물\ndist/\nbuild/\n.next/\n.turbo/\n\n# 데이터베이스 파일\n*.db\n*.db-journal\n*.sqlite\n\n# 로그 파일\n*.log\nlogs/\nnpm-debug.log*\n```\n\n**중요**: 이미 Git에 추가된 파일은 .gitignore에 추가해도 추적이 계속되므로, 필요시 `git rm --cached` 명령어 사용을 안내해주세요.\n\n변경사항이 없다면 \"추가할 .gitignore 패턴 없음\"이라고 응답해주세요.",
+  "auto_execute": false,
+  "enabled": true
+}

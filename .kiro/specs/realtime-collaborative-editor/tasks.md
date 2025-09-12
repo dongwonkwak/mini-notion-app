@@ -2,11 +2,19 @@
 
 ## 프로젝트 설정 및 인프라 구축
 
-- [ ] 1. 모노레포 구조 및 개발 환경 초기화
+- [-] 1. 모노레포 구조 및 개발 환경 초기화
   - Turbo + pnpm workspace로 mini-notion-app 루트 디렉토리 생성
   - 패키지 구조 설정 (ui, editor, collaboration, auth, database, types, ai, config)
   - 공통 TypeScript, ESLint, Prettier 설정 구성
   - SQLite 데이터베이스와 Docker Compose 서비스로 개발 환경 설정
+  - **추가 완료 작업:**
+    - 포괄적인 테스트 프레임워크 설정 (Jest, Playwright, Testing Library)
+    - 데이터베이스 테스트 스위트 (Unit, Integration, Performance, Schema Validation)
+    - SQL 검증 스크립트 및 자동화 도구 (`validate-schema.ts`)
+    - Agent Hooks 설정 (Spec 동기화, Git 워크플로우, 품질 검사)
+    - 테스트 전략 문서 및 Steering 규칙 등록
+    - E2E 테스트 환경 구성 (Playwright)
+    - 모노레포 구조 검증 테스트
   - _요구사항: 모든 요구사항이 적절한 프로젝트 구조에 의존_
 
 - [ ] 2. 데이터베이스 스키마 및 ORM 설정
@@ -228,6 +236,15 @@
   - Y.js CRDT 작업을 위한 속성 기반 테스트 추가
   - 부하 시나리오를 위한 Artillery 성능 테스트 설정
   - _요구사항: 모든 요구사항에 포괄적인 테스트 필요_
+
+## API 문서화 및 개발자 도구
+
+- [ ] 29.5. API 자동 문서화 시스템 구축
+  - JSDoc 주석 자동 생성 도구 및 템플릿 구현
+  - API 엔드포인트 데코레이터 및 메타데이터 수집 시스템 생성
+  - JSDoc에서 OpenAPI/Swagger 스펙 자동 생성 도구 구축
+  - API 문서 자동 업데이트 및 버전 관리 시스템 추가
+  - _요구사항: 22.1, 22.2, 22.3, 22.4_
 
 ## DevOps 및 배포
 

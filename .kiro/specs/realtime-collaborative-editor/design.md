@@ -274,6 +274,54 @@ interface User {
 }
 ```
 
+#### API Documentation System
+```typescript
+/**
+ * JSDoc 주석 자동 생성을 위한 데코레이터 및 유틸리티
+ */
+interface ApiDocumentationConfig {
+  autoGenerateJSDoc: boolean;
+  includeExamples: boolean;
+  generateOpenAPI: boolean;
+  outputPath: string;
+}
+
+/**
+ * API 엔드포인트 자동 문서화 데코레이터
+ */
+function ApiEndpoint(config: {
+  summary: string;
+  description: string;
+  tags: string[];
+}) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    // JSDoc 주석 자동 생성 로직
+  };
+}
+
+/**
+ * 표준화된 JSDoc 템플릿
+ */
+interface JSDocTemplate {
+  description: string;
+  params: Array<{
+    name: string;
+    type: string;
+    description: string;
+    required: boolean;
+  }>;
+  returns: {
+    type: string;
+    description: string;
+  };
+  throws: Array<{
+    type: string;
+    description: string;
+  }>;
+  example: string;
+}
+```
+
 ### 3. Real-time Collaboration
 
 #### Awareness System

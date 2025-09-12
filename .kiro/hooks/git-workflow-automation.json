@@ -1,0 +1,11 @@
+{
+  "name": "Git Workflow Automation", 
+  "description": "새로운 태스크 시작 시 자동으로 브랜치 생성, 이슈 등록, PR 준비를 수행합니다",
+  "trigger": {
+    "type": "manual",
+    "button_text": "🚀 새 태스크 시작"
+  },
+  "prompt": "새로운 태스크를 시작합니다. Git 워크플로우에 따라 다음 작업을 수행해주세요:\n\n**1. 태스크 선택**\n- .kiro/specs/realtime-collaborative-editor/tasks.md에서 다음 실행할 태스크 확인\n- 아직 시작되지 않은 태스크 중 우선순위가 높은 것 선택\n\n**2. 브랜치 생성**\n```bash\ngit checkout develop\ngit pull origin develop  \ngit checkout -b feature/task-{번호}-{간단한-설명}\ngit push -u origin feature/task-{번호}-{간단한-설명}\n```\n\n**3. GitHub 이슈 생성**\n```bash\ngh issue create --title \"태스크 {번호}: {제목}\" --body-file issue-template.md --label \"enhancement\" --assignee @me\n```\n\n**4. 태스크 상태 업데이트**\n- tasks.md에서 해당 태스크를 'in_progress'로 변경\n\n**5. 작업 환경 준비**\n- 필요한 의존성 설치\n- 개발 서버 실행 확인\n- 테스트 환경 준비\n\n**참고 문서:**\n- Git Workflow: .kiro/steering/git-workflow.md\n- Testing Strategy: .kiro/steering/testing-strategy.md\n\n작업 완료 후 생성된 브랜치명과 이슈 번호를 알려주세요.",
+  "auto_execute": false,
+  "enabled": true
+}
