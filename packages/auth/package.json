@@ -14,13 +14,14 @@
   },
   "dependencies": {
     "@editor/types": "workspace:*",
-    "next-auth": "^4.0.0",
-    "jsonwebtoken": "^9.0.0",
+    "next-auth": "^4.24.10",
+    "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.0",
-    "@types/bcryptjs": "^2.4.0",
-    "typescript": "^5.0.0"
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
   }
 }

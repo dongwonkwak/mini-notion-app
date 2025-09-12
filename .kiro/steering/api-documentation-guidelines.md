@@ -13,15 +13,30 @@
 
 ## 📝 JSDoc 주석 표준 템플릿
 
+### 🌍 단계적 국제화 전략
+
+#### Phase 1: 영어 우선 + 한국어 주석 (현재 단계)
+- **Swagger 스펙**: 영어로 작성 (국제 표준)
+- **코드 주석**: 한국어로 작성 (개발팀 이해도 향상)
+- **변수/함수명**: 영어 사용 (코드 표준)
+
+#### Phase 2: 서비스 성장 후 다국어 확장
+- **자동 번역 도구** 활용하여 필요한 언어 추가
+- **AI 번역 서비스** (OpenAI, Google Translate) 연동
+- **점진적 확장**: 사용자 요청에 따라 언어별 우선순위 결정
+
 ### REST API 엔드포인트
 
 ```typescript
 /**
+ * 새 워크스페이스를 생성합니다.
+ * Creates a new workspace and assigns owner permissions to the creator.
+ * 
  * @swagger
  * /api/workspaces:
  *   post:
- *     summary: 새 워크스페이스 생성
- *     description: 사용자가 새로운 워크스페이스를 생성합니다. 생성자는 자동으로 소유자 권한을 가집니다.
+ *     summary: Create new workspace
+ *     description: Creates a new workspace and assigns owner permissions to the creator
  *     tags:
  *       - Workspaces
  *     security:
@@ -37,35 +52,35 @@
  *             properties:
  *               name:
  *                 type: string
- *                 description: 워크스페이스 이름
- *                 example: "내 프로젝트"
+ *                 description: Workspace name
+ *                 example: "My Project"
  *               description:
  *                 type: string
- *                 description: 워크스페이스 설명
- *                 example: "팀 협업을 위한 워크스페이스"
+ *                 description: Workspace description
+ *                 example: "Team collaboration workspace"
  *     responses:
  *       201:
- *         description: 워크스페이스 생성 성공
+ *         description: Workspace created successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Workspace'
  *       400:
- *         description: 잘못된 요청 데이터
+ *         description: Invalid request data
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       401:
- *         description: 인증 실패
+ *         description: Authentication failed
  *       409:
- *         description: 워크스페이스 이름 중복
+ *         description: Workspace name already exists
  *     examples:
  *       success:
- *         summary: 성공적인 워크스페이스 생성
+ *         summary: Successful workspace creation
  *         value:
  *           id: "ws_123456789"
- *           name: "내 프로젝트"
+ *           name: "My Project"
  *           ownerId: "user_123"
  *           createdAt: "2024-01-15T10:30:00Z"
  */
@@ -79,13 +94,14 @@ export async function createWorkspace(req: Request, res: Response) {
 ```typescript
 /**
  * 사용자 권한을 검증합니다.
+ * Validates user permissions for workspace access.
  * 
- * @param {string} userId - 검증할 사용자 ID
- * @param {string} workspaceId - 워크스페이스 ID
- * @param {('read'|'write'|'admin')} permission - 필요한 권한 레벨
- * @returns {Promise<boolean>} 권한이 있으면 true, 없으면 false
- * @throws {AuthenticationError} 사용자가 인증되지 않은 경우
- * @throws {ValidationError} 잘못된 매개변수가 전달된 경우
+ * @param {string} userId - 검증할 사용자 ID / User ID to validate
+ * @param {string} workspaceId - 워크스페이스 ID / Workspace ID
+ * @param {('read'|'write'|'admin')} permission - 필요한 권한 레벨 / Required permission level
+ * @returns {Promise<boolean>} 권한이 있으면 true, 없으면 false / Returns true if user has permission
+ * @throws {AuthenticationError} 사용자가 인증되지 않은 경우 / When user is not authenticated
+ * @throws {ValidationError} 잘못된 매개변수가 전달된 경우 / When invalid parameters are provided
  * 
  * @example
  * ```typescript
@@ -95,7 +111,7 @@ export async function createWorkspace(req: Request, res: Response) {
  *   'write'
  * );
  * if (!hasPermission) {
- *   throw new ForbiddenError('쓰기 권한이 없습니다');
+ *   throw new ForbiddenError('Insufficient permissions');
  * }
  * ```
  */
@@ -190,41 +206,50 @@ const workspaceCreateSchema = {
 #### 1. **인증 관련 API**
 ```typescript
 /**
+ * 사용자 로그인을 처리합니다.
+ * Handles user login with email and password.
+ * 
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: 사용자 로그인
- *     description: 이메일과 비밀번호로 로그인하여 JWT 토큰을 발급받습니다
+ *     summary: User login
+ *     description: Authenticates user with email/password and returns JWT token
  *     tags: [Authentication]
- *     security: []  # 인증 불필요
+ *     security: []  # No authentication required
  */
 ```
 
 #### 2. **워크스페이스 관리 API**
 ```typescript
 /**
+ * 워크스페이스에 새 멤버를 초대합니다.
+ * Invites a new member to the workspace.
+ * 
  * @swagger
  * /api/workspaces/{workspaceId}/members:
  *   post:
- *     summary: 워크스페이스 멤버 초대
+ *     summary: Invite workspace member
  *     parameters:
  *       - name: workspaceId
  *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: 워크스페이스 ID
+ *         description: Workspace ID
  */
 ```
 
 #### 3. **문서 관리 API**
 ```typescript
 /**
+ * 실시간 협업을 위한 WebSocket 연결을 설정합니다.
+ * Establishes WebSocket connection for real-time collaboration.
+ * 
  * @swagger
  * /api/documents/{documentId}/collaborate:
  *   ws:
- *     summary: 실시간 협업 WebSocket 연결
- *     description: Y.js 기반 실시간 문서 편집을 위한 WebSocket 연결
+ *     summary: Real-time collaboration WebSocket
+ *     description: Y.js based real-time document editing WebSocket connection
  *     tags: [Collaboration]
  */
 ```
@@ -232,10 +257,13 @@ const workspaceCreateSchema = {
 #### 4. **파일 업로드 API**
 ```typescript
 /**
+ * 파일을 업로드하고 미디어 블록을 생성합니다.
+ * Uploads file and creates media block.
+ * 
  * @swagger
  * /api/files/upload:
  *   post:
- *     summary: 파일 업로드
+ *     summary: Upload file
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -258,9 +286,58 @@ const workspaceCreateSchema = {
   "scripts": {
     "docs:generate": "swagger-jsdoc -d swaggerDef.js -o docs/api.json src/**/*.ts",
     "docs:serve": "swagger-ui-serve docs/api.json",
-    "build": "tsc && npm run docs:generate"
+    "docs:translate": "node scripts/translate-docs.js",
+    "docs:build": "npm run docs:generate && npm run docs:translate",
+    "build": "tsc && npm run docs:build"
   }
 }
+```
+
+### 1.5. 다국어 문서 자동 번역 도구
+
+```javascript
+// scripts/translate-docs.js
+const fs = require('fs');
+const OpenAI = require('openai');
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+/**
+ * API 문서 자동 번역 도구
+ * Phase 2에서 활용할 다국어 지원 스크립트
+ */
+async function translateApiDocs() {
+  const apiSpec = JSON.parse(fs.readFileSync('docs/api.json', 'utf8'));
+  const targetLanguages = ['ko', 'ja', 'zh']; // 필요에 따라 확장
+  
+  for (const lang of targetLanguages) {
+    console.log(`🌍 Translating to ${lang}...`);
+    
+    // OpenAPI 스펙의 텍스트 부분 번역
+    const translatedSpec = await translateOpenAPISpec(apiSpec, lang);
+    
+    // 언어별 문서 파일 생성
+    fs.writeFileSync(
+      `docs/api.${lang}.json`, 
+      JSON.stringify(translatedSpec, null, 2)
+    );
+  }
+}
+
+async function translateOpenAPISpec(spec, targetLang) {
+  // 번역이 필요한 필드들 추출 및 번역
+  const fieldsToTranslate = ['summary', 'description'];
+  
+  // AI 번역 로직 구현
+  // (Phase 2에서 상세 구현)
+  
+  return spec;
+}
+
+// Phase 2에서 활성화
+// translateApiDocs().catch(console.error);
 ```
 
 ### 2. Git Hook 연동
@@ -333,22 +410,51 @@ npx openapi-response-validator docs/api.yaml
 
 ## 🎯 구현 우선순위
 
-### Phase 1: 핵심 API (필수)
+### Phase 1: 핵심 API + 영어 문서화 (현재 단계)
 - [ ] 인증 API (로그인, 회원가입, 토큰 갱신)
 - [ ] 워크스페이스 CRUD API
 - [ ] 문서 CRUD API
 - [ ] 실시간 협업 WebSocket API
+- **문서화 전략**: 영어 Swagger + 한국어 주석
 
-### Phase 2: 확장 API (중요)
+### Phase 2: 확장 API + 다국어 준비 (서비스 성장 후)
 - [ ] 파일 업로드/다운로드 API
 - [ ] 댓글 시스템 API
 - [ ] 알림 API
 - [ ] 검색 API
+- **문서화 전략**: 자동 번역 도구 도입 검토
 
-### Phase 3: 고급 API (선택)
+### Phase 3: 고급 API + 완전 다국어 지원 (글로벌 확장 시)
 - [ ] 문서 버전 관리 API
 - [ ] 공유 및 권한 API
 - [ ] 분석 및 모니터링 API
+- **문서화 전략**: AI 번역 + 네이티브 검토
+
+### 🌍 다국어 지원 로드맵
+
+#### 현재 (Phase 1): 영어 우선 전략
+```typescript
+// ✅ 현재 방식
+/**
+ * 워크스페이스를 생성합니다. (개발팀용 한국어 주석)
+ * 
+ * @swagger
+ * summary: Create workspace (국제 표준 영어)
+ */
+```
+
+#### 미래 (Phase 2-3): 점진적 다국어 확장
+```typescript
+// 🔮 미래 방식 (필요시 도입)
+/**
+ * @swagger
+ * summary: 
+ *   en: Create workspace
+ *   ko: 워크스페이스 생성
+ *   ja: ワークスペース作成
+ * x-i18n-auto: true  # 자동 번역 플래그
+ */
+```
 
 ## 📚 참고 자료
 

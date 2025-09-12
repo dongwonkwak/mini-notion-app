@@ -14,9 +14,10 @@
   },
   "dependencies": {
     "@editor/types": "workspace:*",
-    "openai": "^4.0.0"
+    "openai": "^4.76.1"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
   }
 }

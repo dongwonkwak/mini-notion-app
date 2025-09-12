@@ -106,17 +106,28 @@ test(collaboration): Y.js 실시간 동기화 테스트 추가
 다음 예정 태스크: 태스크 1 (모노레포 구조 및 개발 환경 초기화)
 
 ## GitHub 연동 방식
-**선택된 도구**: GitHub CLI (gh)
+**확정된 도구**: GitHub CLI (gh) ✅
+- **이슈 생성**: `issue-template.md` 파일 + 수동 실행 방식
+- **PR 생성**: GitHub CLI 명령어 + 수동 실행 방식
+- **이유**: Kiro 터미널 서식 깨짐 문제로 수동 방식 채택
 - MCP 대신 GitHub CLI 사용으로 결정
 - 더 안정적이고 널리 사용되는 도구
 - 명령어 기반으로 예측 가능한 동작
 
 ## GitHub CLI 워크플로우
 
-### 1. Issue 생성
+### 1. Issue 생성 (수동 방식)
+**프로세스**:
+1. Agent가 `issue-template.md` 파일에 이슈 내용 작성
+2. 사용자에게 GitHub CLI 명령어 제공
+3. 사용자가 수동으로 이슈 생성
+
+**명령어**:
 ```bash
 gh issue create --title "태스크 {번호}: {제목}" --body-file issue-template.md --label "enhancement" --assignee @me
 ```
+
+**이유**: Kiro 터미널에서 GitHub CLI 실행 시 서식 깨짐 문제로 인해 수동 방식 채택
 
 ### 2. 브랜치 생성 및 연동
 ```bash
@@ -124,10 +135,28 @@ git checkout -b feature/task-{번호}-{설명}
 git push -u origin feature/task-{번호}-{설명}
 ```
 
-### 3. PR 생성
+### 3. PR 생성 (수동 방식)
+**프로세스**:
+1. Agent가 GitHub CLI 명령어 제공
+2. 사용자가 수동으로 PR 생성
+
+**명령어**:
 ```bash
-gh pr create --title "feat: {태스크 제목}" --body "Closes #{issue번호}" --base develop --head feature/task-{번호}-{설명}
+gh pr create --title "feat: {태스크 제목}" --body "Closes #{issue번호}
+
+## 📋 완료된 작업
+- ✅ 주요 작업 1
+- ✅ 주요 작업 2
+
+## 🔄 연결 작업
+- 다음 태스크 연결 사항
+
+## 🧪 테스트 결과
+- ✅ 빌드 성공
+- ✅ 테스트 통과" --base main --head feature/task-{번호}-{설명}
 ```
+
+**이유**: Kiro 터미널에서 GitHub CLI 실행 시 서식 깨짐 문제로 인해 수동 방식 채택
 
 ### 4. PR 머지 및 정리
 ```bash
