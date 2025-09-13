@@ -7,7 +7,6 @@ module.exports = {
     '<rootDir>/packages/editor',
     '<rootDir>/packages/collaboration',
     '<rootDir>/packages/auth',
-    '<rootDir>/packages/ai',
     
     // Apps
     '<rootDir>/apps/web',

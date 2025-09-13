@@ -23,7 +23,6 @@
       "@editor/auth": ["../../packages/auth/src"],
       "@editor/database": ["../../packages/database/src"],
       "@editor/types": ["../../packages/types/src"],
-      "@editor/ai": ["../../packages/ai/src"],
       "@editor/config": ["../../packages/config/src"]
     }
   },
