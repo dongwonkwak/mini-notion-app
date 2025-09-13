@@ -20,7 +20,6 @@
     { "path": "./packages/editor" },
     { "path": "./packages/collaboration" },
     { "path": "./packages/auth" },
-    { "path": "./packages/ai" },
     { "path": "./apps/web" },
     { "path": "./apps/server" },
     { "path": "./apps/api" }
