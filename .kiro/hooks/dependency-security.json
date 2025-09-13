@@ -1,0 +1,35 @@
+{
+  "name": "🔒 의존성 보안 스캔",
+  "description": "package.json 변경 시 자동으로 보안 취약점을 스캔합니다",
+  "trigger": "file_save",
+  "conditions": {
+    "files": ["package.json", "pnpm-lock.yaml", "yarn.lock"]
+  },
+  "actions": [
+    {
+      "name": "npm audit 실행",
+      "command": "pnpm audit --audit-level moderate",
+      "description": "의존성 보안 취약점 스캔"
+    },
+    {
+      "name": "라이선스 검사",
+      "command": "pnpm license-checker --onlyAllow 'MIT;Apache-2.0;BSD-3-Clause;ISC'",
+      "description": "허용된 라이선스만 사용하는지 확인"
+    },
+    {
+      "name": "의존성 업데이트 확인",
+      "command": "pnpm outdated",
+      "description": "업데이트 가능한 패키지 확인"
+    },
+    {
+      "name": "보안 리포트 생성",
+      "script": "scripts/generate-security-report.js",
+      "description": "보안 스캔 결과 리포트 생성"
+    }
+  ],
+  "notifications": {
+    "criticalVulnerabilities": "🚨 Critical 보안 취약점 발견!",
+    "highVulnerabilities": "⚠️ High 보안 취약점 발견",
+    "licenseViolation": "📄 라이선스 정책 위반 발견"
+  }
+}

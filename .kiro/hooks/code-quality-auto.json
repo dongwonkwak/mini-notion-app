@@ -1,0 +1,35 @@
+{
+  "name": "🔍 코드 품질 자동 검사",
+  "description": "파일 저장 시 자동으로 코드 품질을 검사하고 개선합니다",
+  "trigger": "file_save",
+  "conditions": {
+    "fileTypes": [".ts", ".tsx", ".js", ".jsx"],
+    "excludePaths": ["node_modules", "dist", "build", ".next"]
+  },
+  "actions": [
+    {
+      "name": "ESLint 자동 수정",
+      "command": "pnpm eslint . --fix",
+      "description": "ESLint 규칙 위반 자동 수정 (직접 eslint 사용)"
+    },
+    {
+      "name": "Prettier 포맷팅",
+      "command": "pnpm format",
+      "description": "코드 스타일 자동 정리"
+    },
+    {
+      "name": "TypeScript 타입 체크",
+      "command": "pnpm type-check",
+      "description": "타입 오류 실시간 확인"
+    },
+    {
+      "name": "Import 정리",
+      "command": "pnpm lint:imports --fix",
+      "description": "사용하지 않는 import 제거 및 정렬"
+    }
+  ],
+  "notifications": {
+    "onSuccess": "✅ 코드 품질 검사 완료",
+    "onError": "❌ 코드 품질 문제 발견: {error}"
+  }
+}

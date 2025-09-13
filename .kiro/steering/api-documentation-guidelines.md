@@ -385,7 +385,8 @@ jobs:
 
 ```typescript
 /**
- * JSDoc 주석 완성도를 검사하는 린터 규칙
+ * JSDoc 주석 완성도를 검사하는 ESLint 규칙
+ * eslint.config.js에 추가하여 사용
  */
 const jsdocLintRules = {
   'jsdoc/require-description': 'error',
@@ -396,6 +397,19 @@ const jsdocLintRules = {
   'jsdoc/require-throws': 'error',
   'jsdoc/require-example': 'warn'
 };
+
+// ESLint 설정에 추가
+export default [
+  // ... 기존 설정
+  {
+    plugins: {
+      jsdoc: jsdocPlugin
+    },
+    rules: {
+      ...jsdocLintRules
+    }
+  }
+];
 ```
 
 ### 2. OpenAPI 스펙 검증

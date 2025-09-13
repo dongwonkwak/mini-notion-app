@@ -42,6 +42,7 @@ mini-notion-app/
 - **Package Manager**: pnpm
 - **Database**: SQLite (개발), PostgreSQL (운영)
 - **Container**: Docker Compose (Redis, MinIO, Mailhog)
+- **Code Quality**: ESLint (직접 실행), Prettier, TypeScript
 
 ## 현재 상태
 프로젝트 초기 설정 단계 - 요구사항, 설계, 구현 계획 완료

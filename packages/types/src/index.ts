@@ -5,6 +5,9 @@ export interface User {
   name: string;
   avatar?: string;
   provider: 'email' | 'google' | 'github';
+  emailVerified?: Date;
+  mfaEnabled: boolean;
+  mfaSecret?: string;
   createdAt: Date;
   lastActiveAt: Date;
 }
@@ -13,6 +16,99 @@ export interface AuthResult {
   user: User;
   token: string;
   refreshToken: string;
+}
+
+export interface CreateUserData {
+  email: string;
+  name: string;
+  password?: string;
+  provider: 'email' | 'google' | 'github';
+  providerId?: string;
+  avatar?: string;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+  mfaToken?: string;
+}
+
+export interface OAuthProvider {
+  id: 'google' | 'github';
+  name: string;
+  clientId: string;
+  clientSecret: string;
+}
+
+export interface JWTPayload {
+  userId: string;
+  email: string;
+  role?: string;
+  workspaceId?: string;
+  iat: number;
+  exp: number;
+}
+
+// 더 엄격한 JWT 페이로드 타입
+export interface StrictJWTPayload {
+  readonly userId: string;
+  readonly email: string;
+  readonly role: UserRole;
+  readonly workspaceId?: string;
+  readonly iat: number;
+  readonly exp: number;
+}
+
+export interface MFASetup {
+  secret: string;
+  qrCode: string;
+  backupCodes: string[];
+}
+
+export interface Session {
+  id: string;
+  userId: string;
+  token: string;
+  refreshToken: string;
+  expiresAt: Date;
+  createdAt: Date;
+  lastActiveAt: Date;
+  userAgent?: string;
+  ipAddress?: string;
+}
+
+export type UserRole = 'guest' | 'viewer' | 'editor' | 'admin' | 'owner';
+
+// 구체적인 에러 코드 정의
+export enum AuthErrorCode {
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  MFA_REQUIRED = 'MFA_REQUIRED',
+  INVALID_MFA_TOKEN = 'INVALID_MFA_TOKEN',
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  INVALID_PASSWORD = 'INVALID_PASSWORD',
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
+  INVALID_JWT = 'INVALID_JWT',
+  EXPIRED_JWT = 'EXPIRED_JWT',
+  INVALID_REFRESH_TOKEN = 'INVALID_REFRESH_TOKEN',
+  USER_ALREADY_EXISTS = 'USER_ALREADY_EXISTS',
+  MFA_SETUP_FAILED = 'MFA_SETUP_FAILED',
+  MFA_ENABLE_FAILED = 'MFA_ENABLE_FAILED',
+  INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
+  PASSWORD_RESET_FAILED = 'PASSWORD_RESET_FAILED',
+  PERMISSION_DENIED = 'PERMISSION_DENIED',
+  SESSION_EXPIRED = 'SESSION_EXPIRED'
+}
+
+// 더 구체적인 AuthError 클래스
+export class AuthError extends Error {
+  constructor(
+    public code: AuthErrorCode,
+    message: string,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'AuthError';
+  }
 }
 
 // Workspace and Page Types

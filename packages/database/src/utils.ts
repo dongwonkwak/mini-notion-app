@@ -83,6 +83,11 @@ async function cleanupIdleInstances(): Promise<void> {
  * 정기적인 인스턴스 정리 스케줄러 시작
  */
 function startCleanupScheduler(): void {
+  // Jest 환경에서는 cleanup scheduler를 시작하지 않음
+  if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) {
+    return;
+  }
+
   // 이미 스케줄러가 실행 중인지 확인
   if ((global as any).__prismaCleanupInterval) {
     return;
@@ -336,9 +341,9 @@ export class WorkspaceService {
   async hasAccess(userId: string, workspaceId: string): Promise<boolean> {
     const member = await this.prisma.workspaceMember.findUnique({
       where: {
-        workspaceId_userId: {
-          workspaceId,
+        userId_workspaceId: {
           userId,
+          workspaceId,
         },
       },
     });
@@ -352,9 +357,9 @@ export class WorkspaceService {
   async getUserRole(userId: string, workspaceId: string): Promise<string | null> {
     const member = await this.prisma.workspaceMember.findUnique({
       where: {
-        workspaceId_userId: {
-          workspaceId,
+        userId_workspaceId: {
           userId,
+          workspaceId,
         },
       },
     });

@@ -77,7 +77,7 @@ pnpm dev
 pnpm dev              # 모든 앱 개발 모드 시작
 pnpm build            # 모든 앱 빌드
 pnpm test             # 테스트 실행
-pnpm lint             # 린트 검사
+pnpm eslint .         # ESLint 검사 (직접 실행)
 pnpm type-check       # 타입 검사
 pnpm format           # 코드 포맷팅
 

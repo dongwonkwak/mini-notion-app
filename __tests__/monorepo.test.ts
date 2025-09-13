@@ -155,7 +155,7 @@ describe('Build System', () => {
 
   it('should be able to run linting', () => {
     expect(() => {
-      execSync('pnpm lint', { stdio: 'pipe' });
+      execSync('pnpm eslint .', { stdio: 'pipe' });
     }).not.toThrow();
   });
 

@@ -1,3 +1,4 @@
+/** @type {import('jest').Config} */
 module.exports = {
   projects: [
     // Packages
@@ -22,5 +23,8 @@ module.exports = {
     '!**/__mocks__/**'
   ],
   coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['text', 'lcov', 'html']
+  maxWorkers: '50%',
+  verbose: true,
+  detectOpenHandles: true,
+  forceExit: true
 };

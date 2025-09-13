@@ -51,11 +51,47 @@
     - 테스트 성능 최적화 (워커별 독립 실행)
   - _요구사항: 1.1, 1.2, 2.4, 8.1, 11.1, 13.1_
 
-- [ ] 3. NextAuth.js를 사용한 인증 시스템 설정
-  - 다중 프로바이더 인증 설정 (이메일/비밀번호, Google OAuth, GitHub OAuth)
-  - 자동 갱신 기능이 있는 JWT 토큰 관리 구현
-  - 5단계 권한 레벨을 가진 역할 기반 접근 제어(RBAC) 생성
-  - TOTP 지원 다중 인증(MFA) 추가
+- [x] 3. NextAuth.js를 사용한 인증 시스템 설정
+  - **✅ 완료된 작업:**
+    - NextAuth.js 다중 프로바이더 설정 (이메일/비밀번호, Google OAuth, GitHub OAuth)
+    - AuthService 클래스 구현 (사용자 인증, JWT 토큰 관리, MFA 지원)
+    - PermissionService 클래스 구현 (5단계 권한 레벨 RBAC 시스템)
+    - TOTP 기반 다중 인증(MFA) 시스템 구현
+    - 인증 관련 API 엔드포인트 구현 (/api/auth/signup, /api/auth/mfa/setup)
+    - Prisma 스키마 업데이트 (User 모델에 인증 관련 필드 추가)
+    - NextAuth.js 설정 파일 및 콜백 함수 구현
+    - JWT 토큰 자동 갱신 로직 구현
+    - 비밀번호 해싱 및 검증 (bcryptjs)
+    - OAuth 사용자 생성 및 업데이트 로직
+    - 사용자 권한 검증 및 관리 시스템
+    - MFA QR 코드 생성 및 TOTP 검증
+    - 세션 관리 및 사용자 활동 추적
+  - **✅ 추가 완료 작업:**
+    - 포괄적인 타입 정의 (User, AuthResult, JWTPayload, MFASetup 등)
+    - 권한 계층 구조 및 상속 시스템 구현
+    - 워크스페이스 멤버 초대 및 역할 관리 기능
+    - 사용자 정보 정제 및 보안 처리
+    - 비밀번호 재설정 토큰 생성 및 검증
+    - 환경 변수 설정 및 보안 구성
+    - NextAuth.js 타입 확장 및 커스텀 콜백
+    - 전체 프로젝트 빌드 성공 확인
+    - **포괄적인 인증 시스템 문서화:**
+      - 권한 시스템 가이드 (`docs/auth/permissions.md`) - 5단계 RBAC 상세 설명
+      - 인증 시스템 가이드 (`docs/auth/authentication.md`) - NextAuth.js 기반 다중 프로바이더
+      - 보안 정책 문서 (`docs/auth/security-policies.md`) - MFA, JWT, 비밀번호 정책
+      - API 인증 가이드 (`docs/auth/api-authentication.md`) - Bearer 토큰 및 권한 확인
+      - 시스템 아키텍처 개요 (`docs/architecture/system-overview.md`) - 전체 시스템 구조
+      - REST API 문서 (`docs/api/rest-api.md`) - 모든 API 엔드포인트 명세
+      - 문서 구조 가이드 (`docs/README.md`) - 프로젝트 문서화 전략
+    - **포괄적인 테스트 스위트 구현:**
+      - AuthService 단위 테스트 (사용자 생성, 인증, MFA 검증)
+      - PermissionService 단위 테스트 (권한 계층, 상속, 검증)
+      - 인증 통합 테스트 (API 엔드포인트, OAuth 플로우)
+      - 모든 테스트 통과 및 커버리지 70% 이상 달성
+    - **개발 도구 및 자동화:**
+      - Agent Hooks 설정 (보안 스캔, 환경 검증, 코드 품질)
+      - ESLint 가이드 및 규칙 설정 (`docs/development/eslint-guide.md`)
+      - 자동화 스크립트 (태스크 문서화, API 문서 생성, 설정 자동화)
   - _요구사항: 13.1, 13.2, 13.3, 13.4, 11.1, 11.2, 11.3, 11.4_
 
 ## UI/UX 설계 및 디자인 시스템

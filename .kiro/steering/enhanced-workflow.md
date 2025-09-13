@@ -102,10 +102,11 @@ pnpm db:generate
 ```bash
 # 파일 저장 시마다 자동 실행: Code Quality Hook
 ```
-- ✅ **ESLint 검사**: `pnpm lint`
+- ✅ **ESLint 검사**: `pnpm eslint .`
   - 코드 스타일 규칙 준수
   - 잠재적 버그 패턴 감지
   - Import/Export 규칙 확인
+  - Next.js 특화 규칙 적용
 - ✅ **TypeScript 타입 체크**: `pnpm type-check`
   - 타입 안정성 검증
   - 인터페이스 일치성 확인
@@ -158,7 +159,7 @@ pnpm db:validate  # DB 관련 태스크
 - ✅ **.gitignore 재검증**: 누락된 파일 최종 확인
 - ✅ **품질 게이트 통과**:
   ```bash
-  pnpm lint          # ✓ 린트 에러 0개
+  pnpm eslint .      # ✓ 린트 에러 0개
   pnpm type-check    # ✓ 타입 에러 0개
   pnpm test:ci       # ✓ 모든 테스트 통과
   pnpm build         # ✓ 빌드 성공

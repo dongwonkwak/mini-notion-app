@@ -17,6 +17,7 @@ describe('Type Definitions', () => {
       email: 'test@example.com',
       name: 'Test User',
       provider: 'email',
+      mfaEnabled: false,
       createdAt: new Date(),
       lastActiveAt: new Date()
     };
@@ -24,6 +25,7 @@ describe('Type Definitions', () => {
     expect(user.id).toBe('user-123');
     expect(user.email).toBe('test@example.com');
     expect(user.provider).toBe('email');
+    expect(user.mfaEnabled).toBe(false);
   });
 
   it('should define Workspace interface correctly', () => {
@@ -111,6 +113,7 @@ describe('Type Definitions', () => {
         email: 'test@example.com',
         name: 'Test User',
         provider: 'email',
+        mfaEnabled: false,
         createdAt: new Date(),
         lastActiveAt: new Date()
       }

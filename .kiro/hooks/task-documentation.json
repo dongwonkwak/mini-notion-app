@@ -1,38 +1,26 @@
 {
-  "name": "Task Documentation Auto-Update",
-  "description": "태스크 수행 중 추가 작업이 발생하면 자동으로 tasks.md 문서에 기입합니다",
-  "trigger": {
-    "type": "file_change",
-    "patterns": [
-      "**/*.ts",
-      "**/*.tsx",
-      "**/*.js",
-      "**/*.jsx",
-      "**/*.json",
-      "**/*.md",
-      "**/*.yml",
-      "**/*.yaml"
-    ],
-    "exclude_patterns": [
-      "node_modules/**",
-      "dist/**",
-      ".next/**",
-      "coverage/**",
-      ".kiro/specs/**/tasks.md"
-    ]
-  },
-  "conditions": [
+  "name": "📝 Task 문서화 자동화",
+  "description": "Task 완료 시 관련 문서를 자동으로 생성하고 업데이트합니다",
+  "trigger": "manual",
+  "actions": [
     {
-      "type": "file_exists",
-      "path": ".kiro/specs/realtime-collaborative-editor/tasks.md"
+      "name": "Task 분석 및 문서 생성",
+      "description": "완료된 Task의 내용을 분석하여 필요한 문서를 자동 생성",
+      "script": "scripts/auto-document-task.js"
     },
     {
-      "type": "content_contains",
-      "path": ".kiro/specs/realtime-collaborative-editor/tasks.md",
-      "pattern": "\\[x\\].*진행.*중|in_progress"
+      "name": "docs/README.md 업데이트",
+      "description": "새로 생성된 문서를 README에 자동 추가",
+      "script": "scripts/update-docs-readme.js"
+    },
+    {
+      "name": "API 문서 자동 생성",
+      "description": "JSDoc에서 OpenAPI 스펙 자동 생성",
+      "script": "scripts/generate-api-docs.js"
     }
   ],
-  "prompt": "파일 변경이 감지되었습니다: {{changed_files}}\n\n현재 진행 중인 태스크와 관련하여 다음을 확인해주세요:\n\n**1. 변경 사항 분석**\n- 변경된 파일들이 현재 진행 중인 태스크의 범위를 벗어나는 추가 작업인지 확인\n- 새로운 테스트 파일, 설정 파일, 문서, 스크립트 등이 생성되었는지 확인\n\n**2. Tasks.md 업데이트 필요성 판단**\n다음 중 하나에 해당하면 tasks.md를 업데이트해야 합니다:\n- 원래 태스크 계획에 없던 새로운 기능이나 도구가 추가됨\n- 테스트 프레임워크나 검증 스크립트가 새로 생성됨\n- 문서화나 설정 파일이 대폭 추가됨\n- Agent Hooks, Steering 규칙 등 개발 워크플로우 개선사항이 추가됨\n\n**3. 자동 문서 업데이트**\n업데이트가 필요하다면:\n- 현재 진행 중인 태스크의 \"추가 완료 작업\" 섹션에 새로운 작업 내용 추가\n- 간결하고 명확한 설명으로 작성\n- 관련 파일명이나 도구명 포함\n\n**4. 변경 사항 요약**\n- 어떤 추가 작업이 수행되었는지 요약\n- tasks.md에 업데이트한 내용 설명\n\n**참고 문서:**\n- Tasks: .kiro/specs/realtime-collaborative-editor/tasks.md\n- Testing Strategy: .kiro/steering/testing-strategy.md\n\n변경사항이 단순한 코드 수정이나 기존 계획 범위 내의 작업이라면 문서 업데이트 없이 \"추가 문서화 불필요\"라고 응답해주세요.",
-  "auto_execute": true,
-  "enabled": true
+  "conditions": {
+    "taskCompleted": true,
+    "hasNewFeatures": true
+  }
 }
