@@ -74,6 +74,19 @@ export default [
           ],
           'newlines-between': 'always',
           alphabetize: { order: 'asc', caseInsensitive: true },
+          pathGroups: [
+            {
+              pattern: '@editor/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '@/**',
+              group: 'internal',
+              position: 'before',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
         },
       ],
 
@@ -93,7 +106,18 @@ export default [
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
+          project: [
+            './tsconfig.json',
+            './apps/*/tsconfig.json',
+            './packages/*/tsconfig.json',
+          ],
         },
+        node: {
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        },
+      },
+      'import/parsers': {
+        '@typescript-eslint/parser': ['.ts', '.tsx'],
       },
     },
   },

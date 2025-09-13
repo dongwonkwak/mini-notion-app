@@ -4,13 +4,11 @@
  */
 
 import bcrypt from 'bcryptjs';
-import { getPrisma } from '@editor/database';
+import { getPrisma, Prisma } from '@editor/database';
 import { TokenService } from './TokenService';
 import { MFAService } from './MFAService';
 import { SessionCacheService } from './SessionCacheService';
 import { AuthEventLogger } from './AuthEventLogger';
-
-const prisma = getPrisma();
 import type {
   User,
   CreateUserData,
@@ -18,6 +16,26 @@ import type {
   AuthResult,
   UserRole,
 } from '@editor/types';
+
+// Password 필드를 포함한 User 타입 (Prisma 타입 사용)
+type UserWithPassword = Prisma.UserGetPayload<{
+  select: {
+    id: true;
+    email: true;
+    name: true;
+    avatarUrl: true;
+    password: true;
+    provider: true;
+    providerId: true;
+    emailVerified: true;
+    mfaEnabled: true;
+    mfaSecret: true;
+    mfaBackupCodes: true;
+    createdAt: true;
+    updatedAt: true;
+    lastActiveAt: true;
+  };
+}>;
 import { AuthErrorCode, AuthError } from '@editor/types';
 
 export class AuthService {
@@ -43,7 +61,7 @@ export class AuthService {
   ): Promise<AuthResult> {
     try {
       // 캐시에서 사용자 정보 확인 (이메일로 캐시 키 생성)
-      let user = await this.cacheService.getCachedUser(credentials.email);
+      let user: UserWithPassword | null = await this.cacheService.getCachedUserByEmail(credentials.email);
 
       if (!user) {
         // DB에서 사용자 조회
@@ -66,8 +84,11 @@ export class AuthService {
           );
         }
 
-        // 캐시에 저장
-        await this.cacheService.cacheUser(user.id, this.sanitizeUser(user));
+        // 캐시에 저장 (이메일 기반 캐시와 ID 기반 캐시 모두)
+        await Promise.all([
+          this.cacheService.cacheUserByEmail(credentials.email, user),
+          this.cacheService.cacheUser(user.id, this.sanitizeUser(user))
+        ]);
       }
 
       // 의심스러운 활동 감지
@@ -83,6 +104,13 @@ export class AuthService {
       }
 
       // 비밀번호 검증
+      if (!user.password) {
+        throw new AuthError(
+          AuthErrorCode.INVALID_CREDENTIALS,
+          '비밀번호가 설정되지 않은 계정입니다.'
+        );
+      }
+      
       const isValidPassword = await this.verifyPassword(
         credentials.password,
         user.password
@@ -154,6 +182,7 @@ export class AuthService {
       });
 
       return {
+        success: true,
         user: sanitizedUser,
         token,
         refreshToken,
@@ -191,7 +220,7 @@ export class AuthService {
         ? await this.hashPassword(userData.password)
         : null;
 
-      const user = await prisma.user.create({
+      const user = await getPrisma().user.create({
         data: {
           email: userData.email,
           name: userData.name,
@@ -201,7 +230,7 @@ export class AuthService {
           avatarUrl: userData.avatar,
           mfaEnabled: false,
           emailVerified: userData.provider !== 'email' ? new Date() : null,
-        },
+        } as any,
       });
 
       return this.sanitizeUser(user);
@@ -230,20 +259,20 @@ export class AuthService {
 
       if (existingUser) {
         // 기존 사용자 정보 업데이트
-        const updatedUser = await prisma.user.update({
+        const updatedUser = await getPrisma().user.update({
           where: { id: existingUser.id },
           data: {
             name: userData.name,
             avatarUrl: userData.avatar,
             lastActiveAt: new Date(),
             emailVerified: new Date(),
-          },
+          } as any,
         });
         return this.sanitizeUser(updatedUser);
       }
 
       // 새 OAuth 사용자 생성
-      const user = await prisma.user.create({
+      const user = await getPrisma().user.create({
         data: {
           email: userData.email,
           name: userData.name,
@@ -252,7 +281,7 @@ export class AuthService {
           avatarUrl: userData.avatar,
           mfaEnabled: false,
           emailVerified: new Date(),
-        },
+        } as any,
       });
 
       return this.sanitizeUser(user);
@@ -373,18 +402,49 @@ export class AuthService {
   /**
    * 이메일로 사용자 찾기
    */
-  async findUserByEmail(email: string): Promise<any> {
-    return prisma.user.findUnique({
+  async findUserByEmail(email: string): Promise<UserWithPassword | null> {
+    return getPrisma().user.findUnique({
       where: { email },
-    });
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        password: true,
+        provider: true,
+        providerId: true,
+        emailVerified: true,
+        mfaEnabled: true,
+        mfaSecret: true,
+        mfaBackupCodes: true,
+        createdAt: true,
+        updatedAt: true,
+        lastActiveAt: true,
+      } as any,
+    }) as Promise<UserWithPassword | null>;
   }
 
   /**
    * ID로 사용자 찾기
    */
   async getUserById(id: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({
+    const user = await getPrisma().user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        provider: true,
+        providerId: true,
+        emailVerified: true,
+        mfaEnabled: true,
+        mfaSecret: true,
+        mfaBackupCodes: true,
+        createdAt: true,
+        updatedAt: true,
+        lastActiveAt: true,
+      } as any,
     });
 
     return user ? this.sanitizeUser(user) : null;
@@ -394,7 +454,7 @@ export class AuthService {
    * 사용자 마지막 활동 시간 업데이트
    */
   async updateUserLastActive(userId: string): Promise<void> {
-    await prisma.user.update({
+    await getPrisma().user.update({
       where: { id: userId },
       data: { lastActiveAt: new Date() },
     });
@@ -458,13 +518,18 @@ export class AuthService {
 
       const hashedPassword = await this.hashPassword(newPassword);
 
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
-        data: { password: hashedPassword },
+        data: { password: hashedPassword } as any,
       });
 
-      // 사용자 캐시 무효화
-      await this.cacheService.invalidateUser(userId);
+      // 사용자 캐시 무효화 (이메일 정보가 필요한 경우)
+      const user = await this.getUserById(userId);
+      if (user) {
+        await this.cacheService.invalidateUserCache(userId, user.email);
+      } else {
+        await this.cacheService.invalidateUser(userId);
+      }
 
       return true;
     } catch (error) {

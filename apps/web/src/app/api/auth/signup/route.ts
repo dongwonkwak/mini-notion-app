@@ -3,9 +3,10 @@
  * 이메일/비밀번호 기반 사용자 등록을 처리합니다.
  */
 
+import { NextRequest, NextResponse } from 'next/server';
+
 import { AuthService } from '@editor/auth';
 import type { CreateUserData } from '@editor/types';
-import { NextRequest, NextResponse } from 'next/server';
 
 const authService = new AuthService();
 

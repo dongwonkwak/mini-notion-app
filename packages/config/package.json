@@ -4,10 +4,22 @@
   "type": "module",
   "private": true,
   "description": "공통 설정 (TypeScript, ESLint, Prettier)",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
   "files": [
     "eslint",
     "prettier",
-    "tsconfig"
-  ]
+    "tsconfig",
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
 }

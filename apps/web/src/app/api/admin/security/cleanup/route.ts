@@ -3,10 +3,11 @@
  * 오래된 보안 로그를 정리합니다.
  */
 
-import { AuthEventLogger } from '@editor/auth';
-import { getPrisma } from '@editor/database';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
+import { AuthEventLogger } from '@editor/auth';
+import { getPrisma } from '@editor/database';
 
 import { authOptions } from '@/lib/auth';
 

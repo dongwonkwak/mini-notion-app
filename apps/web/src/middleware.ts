@@ -3,14 +3,20 @@
  * 보안 헤더, CORS, 인증 등을 처리합니다.
  */
 
-import { config } from '@editor/config/environment';
 import { NextRequest, NextResponse } from 'next/server';
+
+import { config } from '@editor/config';
+
+// Global 타입 확장
+declare global {
+  var rateLimitStore: Map<string, number[]> | undefined;
+}
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // 보안 헤더 설정
-  setSecurityHeaders(response);
+  setSecurityHeaders(request, response);
 
   // CORS 설정
   setCorsHeaders(request, response);
@@ -26,7 +32,7 @@ export function middleware(request: NextRequest) {
 /**
  * 보안 헤더 설정
  */
-function setSecurityHeaders(response: NextResponse) {
+function setSecurityHeaders(request: NextRequest, response: NextResponse) {
   // XSS Protection
   response.headers.set('X-XSS-Protection', '1; mode=block');
 
@@ -107,7 +113,7 @@ function checkRateLimit(request: NextRequest): boolean {
   // 실제 구현에서는 Redis나 다른 저장소를 사용해야 합니다
   // 여기서는 간단한 메모리 기반 구현을 제공합니다
 
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
   const now = Date.now();
 
   // 메모리에 저장된 요청 기록 (실제로는 Redis 사용 권장)

@@ -3,8 +3,9 @@
  * 모든 API 엔드포인트의 통합 테스트를 포함합니다.
  */
 
-import { AuthService } from '@editor/auth';
 import { NextRequest } from 'next/server';
+
+import { AuthService } from '@editor/auth';
 
 import {
   POST as mfaSetupHandler,
@@ -31,7 +32,11 @@ describe('API Endpoints Integration Tests', () => {
           id: 'user-1',
           email: 'test@example.com',
           name: 'Test User',
-          avatar: null,
+          avatar: undefined,
+          provider: 'email' as const,
+          mfaEnabled: false,
+          createdAt: new Date(),
+          lastActiveAt: new Date(),
         };
 
         mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -242,7 +247,11 @@ describe('API Endpoints Integration Tests', () => {
           id: 'user-1',
           email: 'test@example.com',
           name: 'Test User',
-          avatar: null,
+          avatar: undefined,
+          provider: 'email' as const,
+          mfaEnabled: false,
+          createdAt: new Date(),
+          lastActiveAt: new Date(),
         };
 
         mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -683,7 +692,11 @@ describe('API Endpoints Integration Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);

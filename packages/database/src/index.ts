@@ -4,7 +4,7 @@
  */
 
 // Prisma client
-export { PrismaClient } from '@prisma/client';
+export { PrismaClient, Prisma } from '@prisma/client';
 export {
   getPrisma as prisma,
   initPrisma,

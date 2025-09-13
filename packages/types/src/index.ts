@@ -13,6 +13,7 @@ export interface User {
 }
 
 export interface AuthResult {
+  success: boolean;
   user: User;
   token: string;
   refreshToken: string;
@@ -93,6 +94,7 @@ export enum AuthErrorCode {
   USER_ALREADY_EXISTS = 'USER_ALREADY_EXISTS',
   MFA_SETUP_FAILED = 'MFA_SETUP_FAILED',
   MFA_ENABLE_FAILED = 'MFA_ENABLE_FAILED',
+  MFA_DISABLE_FAILED = 'MFA_DISABLE_FAILED',
   INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
   PASSWORD_RESET_FAILED = 'PASSWORD_RESET_FAILED',
   PERMISSION_DENIED = 'PERMISSION_DENIED',

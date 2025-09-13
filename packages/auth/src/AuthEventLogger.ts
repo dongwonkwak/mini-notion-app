@@ -45,12 +45,11 @@ export class AuthEventLogger {
       if (this.prisma.authEvent) {
         await this.prisma.authEvent.create({
           data: {
-            type: event.type,
+            eventType: event.type,
             userId: event.userId,
-            timestamp: new Date(),
-            ip: event.ip,
+            ipAddress: event.ip,
             userAgent: event.userAgent,
-            metadata: event.metadata || {},
+            details: event.metadata || {},
           },
         });
       } else {
@@ -215,35 +214,35 @@ export class AuthEventLogger {
       }
 
       if (filter.type) {
-        where.type = filter.type;
+        where.eventType = filter.type;
       }
 
       if (filter.startDate || filter.endDate) {
-        where.timestamp = {};
+        where.createdAt = {};
         if (filter.startDate) {
-          where.timestamp.gte = filter.startDate;
+          where.createdAt.gte = filter.startDate;
         }
         if (filter.endDate) {
-          where.timestamp.lte = filter.endDate;
+          where.createdAt.lte = filter.endDate;
         }
       }
 
       const events = await this.prisma.authEvent.findMany({
         where,
         orderBy: {
-          timestamp: 'desc',
+          createdAt: 'desc',
         },
         take: filter.limit || 100,
         skip: filter.offset || 0,
       });
 
       return events.map(event => ({
-        type: event.type as AuthEvent['type'],
-        userId: event.userId,
-        timestamp: event.timestamp,
-        ip: event.ip || undefined,
+        type: event.eventType as AuthEvent['type'],
+        userId: event.userId || '',
+        timestamp: event.createdAt,
+        ip: event.ipAddress || undefined,
         userAgent: event.userAgent || undefined,
-        metadata: (event.metadata as Record<string, any>) || undefined,
+        metadata: (event.details as Record<string, any>) || undefined,
       }));
     } catch (error) {
       console.error('Failed to get auth events:', error);
@@ -398,7 +397,7 @@ export class AuthEventLogger {
 
     const result = await this.prisma.authEvent.deleteMany({
       where: {
-        timestamp: {
+        createdAt: {
           lt: cutoffDate,
         },
       },

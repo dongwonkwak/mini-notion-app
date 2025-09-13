@@ -3,9 +3,10 @@
  * TOTP 기반 다중 인증 설정을 처리합니다.
  */
 
-import { AuthService } from '@editor/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
+import { AuthService } from '@editor/auth';
 
 import { authOptions } from '@/lib/auth';
 
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // 클라이언트 정보 추출
     const ip =
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+      request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const mfaSetup = await authService.setupMFA(session.user.id, ip, userAgent);
@@ -187,7 +188,7 @@ export async function PUT(request: NextRequest) {
 
     // 클라이언트 정보 추출
     const ip =
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+      request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     await authService.enableMFA(session.user.id, token, ip, userAgent);

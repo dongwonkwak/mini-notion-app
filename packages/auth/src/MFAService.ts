@@ -5,11 +5,9 @@
 
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
-import { getPrisma } from '@editor/database';
+import { getPrisma, Prisma } from '@editor/database';
 import type { MFASetup } from '@editor/types';
 import { AuthErrorCode, AuthError } from '@editor/types';
-
-const prisma = getPrisma();
 
 export class MFAService {
   private readonly MFA_WINDOW = 2; // TOTP 시간 윈도우
@@ -42,7 +40,7 @@ export class MFAService {
       const backupCodes = this.generateBackupCodes();
 
       // 데이터베이스에 MFA 시크릿 저장 (아직 활성화하지 않음)
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
         data: {
           mfaSecret: secret.base32,
@@ -74,7 +72,7 @@ export class MFAService {
    */
   async enableMFA(userId: string, token: string): Promise<boolean> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await getPrisma().user.findUnique({
         where: { id: userId },
       });
 
@@ -95,7 +93,7 @@ export class MFAService {
       }
 
       // MFA 활성화
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
         data: { mfaEnabled: true },
       });
@@ -120,12 +118,12 @@ export class MFAService {
    */
   async disableMFA(userId: string): Promise<boolean> {
     try {
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
         data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: null,
+          mfaBackupCodes: Prisma.JsonNull,
         },
       });
 
@@ -133,7 +131,7 @@ export class MFAService {
     } catch (error) {
       console.error('MFA disable error:', error);
       throw new AuthError(
-        AuthErrorCode.MFA_ENABLE_FAILED,
+        AuthErrorCode.MFA_DISABLE_FAILED,
         'MFA 비활성화에 실패했습니다.',
         error
       );
@@ -162,19 +160,19 @@ export class MFAService {
    */
   async verifyBackupCode(userId: string, backupCode: string): Promise<boolean> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await getPrisma().user.findUnique({
         where: { id: userId },
         select: { mfaBackupCodes: true },
       });
 
-      if (!user || !user.mfaBackupCodes) {
+      if (!user || !user.mfaBackupCodes || !Array.isArray(user.mfaBackupCodes)) {
         return false;
       }
 
       // 백업 코드 목록에서 검색 (대소문자 무시)
       const normalizedCode = backupCode.toUpperCase();
       const codeIndex = user.mfaBackupCodes.findIndex(
-        code => code.toUpperCase() === normalizedCode
+        (code: any) => typeof code === 'string' && code.toUpperCase() === normalizedCode
       );
 
       if (codeIndex === -1) {
@@ -183,9 +181,9 @@ export class MFAService {
 
       // 사용된 백업 코드 제거
       const updatedCodes = user.mfaBackupCodes.filter(
-        (_, index) => index !== codeIndex
+        (_: any, index: number) => index !== codeIndex
       );
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
         data: { mfaBackupCodes: updatedCodes },
       });
@@ -212,7 +210,7 @@ export class MFAService {
 
       const newBackupCodes = this.generateBackupCodes();
 
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
         data: { mfaBackupCodes: newBackupCodes },
       });
@@ -241,7 +239,7 @@ export class MFAService {
     backupCodesCount: number;
   }> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await getPrisma().user.findUnique({
         where: { id: userId },
         select: {
           mfaEnabled: true,
@@ -258,8 +256,8 @@ export class MFAService {
 
       return {
         enabled: user.mfaEnabled,
-        hasBackupCodes: !!user.mfaBackupCodes && user.mfaBackupCodes.length > 0,
-        backupCodesCount: user.mfaBackupCodes?.length || 0,
+        hasBackupCodes: !!user.mfaBackupCodes && Array.isArray(user.mfaBackupCodes) && user.mfaBackupCodes.length > 0,
+        backupCodesCount: Array.isArray(user.mfaBackupCodes) ? user.mfaBackupCodes.length : 0,
       };
     } catch (error) {
       if (error instanceof AuthError) {
@@ -288,7 +286,7 @@ export class MFAService {
    * 사용자 정보 조회
    */
   private async getUserById(id: string) {
-    return prisma.user.findUnique({
+    return getPrisma().user.findUnique({
       where: { id },
     });
   }

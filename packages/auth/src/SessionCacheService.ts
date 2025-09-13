@@ -5,6 +5,27 @@
 
 import { getRedis } from '@editor/database';
 import type { User } from '@editor/types';
+import { Prisma } from '@editor/database';
+
+// Password 필드를 포함한 User 타입 (Prisma 타입 사용)
+type UserWithPassword = Prisma.UserGetPayload<{
+  select: {
+    id: true;
+    email: true;
+    name: true;
+    avatarUrl: true;
+    password: true;
+    provider: true;
+    providerId: true;
+    emailVerified: true;
+    mfaEnabled: true;
+    mfaSecret: true;
+    mfaBackupCodes: true;
+    createdAt: true;
+    updatedAt: true;
+    lastActiveAt: true;
+  };
+}>;
 
 interface CachedSession {
   user: User;
@@ -22,6 +43,7 @@ export class SessionCacheService {
   private readonly SESSION_PREFIX = 'session:';
   private readonly JWT_PREFIX = 'jwt:';
   private readonly USER_PREFIX = 'user:';
+  private readonly USER_EMAIL_PREFIX = 'user_email:';
   private readonly SESSION_TTL = 30 * 24 * 60 * 60; // 30일 (초)
   private readonly JWT_TTL = 60 * 60; // 1시간 (초)
   private readonly USER_TTL = 15 * 60; // 15분 (초)
@@ -153,6 +175,34 @@ export class SessionCacheService {
   }
 
   /**
+   * 이메일로 사용자 정보 캐시 저장 (password 포함)
+   */
+  async cacheUserByEmail(email: string, user: UserWithPassword, ttl?: number): Promise<void> {
+    try {
+      await this.redis.setex(
+        `${this.USER_EMAIL_PREFIX}${email}`,
+        ttl || this.USER_TTL,
+        JSON.stringify(user)
+      );
+    } catch (error) {
+      console.error('User email cache error:', error);
+    }
+  }
+
+  /**
+   * 이메일로 사용자 정보 캐시 조회 (password 포함)
+   */
+  async getCachedUserByEmail(email: string): Promise<UserWithPassword | null> {
+    try {
+      const cached = await this.redis.get(`${this.USER_EMAIL_PREFIX}${email}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error('User email cache retrieval error:', error);
+      return null;
+    }
+  }
+
+  /**
    * 세션 무효화
    */
   async invalidateSession(userId: string): Promise<void> {
@@ -186,14 +236,31 @@ export class SessionCacheService {
   }
 
   /**
+   * 이메일로 사용자 정보 캐시 무효화
+   */
+  async invalidateUserByEmail(email: string): Promise<void> {
+    try {
+      await this.redis.del(`${this.USER_EMAIL_PREFIX}${email}`);
+    } catch (error) {
+      console.error('User email cache invalidation error:', error);
+    }
+  }
+
+  /**
    * 사용자 관련 모든 캐시 무효화
    */
-  async invalidateUserCache(userId: string): Promise<void> {
+  async invalidateUserCache(userId: string, email?: string): Promise<void> {
     try {
-      await Promise.all([
+      const promises = [
         this.invalidateSession(userId),
         this.invalidateUser(userId),
-      ]);
+      ];
+      
+      if (email) {
+        promises.push(this.invalidateUserByEmail(email));
+      }
+      
+      await Promise.all(promises);
     } catch (error) {
       console.error('User cache invalidation error:', error);
     }
@@ -238,18 +305,21 @@ export class SessionCacheService {
     sessionCount: number;
     jwtCount: number;
     userCount: number;
+    userEmailCount: number;
   }> {
     try {
-      const [sessionKeys, jwtKeys, userKeys] = await Promise.all([
+      const [sessionKeys, jwtKeys, userKeys, userEmailKeys] = await Promise.all([
         this.redis.keys(`${this.SESSION_PREFIX}*`),
         this.redis.keys(`${this.JWT_PREFIX}*`),
         this.redis.keys(`${this.USER_PREFIX}*`),
+        this.redis.keys(`${this.USER_EMAIL_PREFIX}*`),
       ]);
 
       return {
         sessionCount: sessionKeys.length,
         jwtCount: jwtKeys.length,
         userCount: userKeys.length,
+        userEmailCount: userEmailKeys.length,
       };
     } catch (error) {
       console.error('Cache stats error:', error);
@@ -257,6 +327,7 @@ export class SessionCacheService {
         sessionCount: 0,
         jwtCount: 0,
         userCount: 0,
+        userEmailCount: 0,
       };
     }
   }

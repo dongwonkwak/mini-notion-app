@@ -3,13 +3,14 @@
  * 다중 프로바이더 인증 및 JWT 토큰 관리를 구현합니다.
  */
 
-import { AuthService } from '@editor/auth';
-import { getPrisma } from '@editor/database';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
+
+import { AuthService } from '@editor/auth';
+import { getPrisma } from '@editor/database';
 
 const authService = new AuthService();
 

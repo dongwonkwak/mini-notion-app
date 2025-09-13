@@ -3,8 +3,9 @@
  * API 엔드포인트의 성능과 동시성 처리를 테스트합니다.
  */
 
-import { AuthService } from '@editor/auth';
 import { NextRequest } from 'next/server';
+
+import { AuthService } from '@editor/auth';
 
 import { POST as mfaSetupHandler } from '../app/api/auth/mfa/setup/route';
 import { POST as signupHandler } from '../app/api/auth/signup/route';
@@ -27,7 +28,11 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -113,7 +118,11 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -173,7 +182,11 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -221,7 +234,11 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       // First call fails, second succeeds
@@ -288,7 +305,11 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -340,7 +361,11 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       // Simulate slow database operation

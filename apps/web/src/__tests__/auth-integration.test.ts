@@ -3,8 +3,9 @@
  * NextAuth.js와 API 엔드포인트 통합 테스트
  */
 
-import { AuthService } from '@editor/auth';
 import { NextRequest } from 'next/server';
+
+import { AuthService } from '@editor/auth';
 
 import {
   POST as mfaSetupHandler,
@@ -30,7 +31,11 @@ describe('Authentication Integration Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null,
+        avatar: undefined,
+        provider: 'email' as const,
+        mfaEnabled: false,
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -353,6 +358,7 @@ describe('Authentication Integration Tests', () => {
       const payload = {
         userId: 'user-1',
         email: 'test@example.com',
+        role: 'editor' as const,
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
       };

@@ -7,27 +7,32 @@ import { MFAService } from '../MFAService';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { AuthError } from '@editor/types';
+import { Prisma } from '@editor/database';
 
 // 모킹
-jest.mock('@editor/database', () => {
-  const mockPrismaClient = {
-    user: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
-    },
-  };
+const mockPrismaClient = {
+  user: {
+    findUnique: jest.fn(),
+    update: jest.fn(),
+  },
+};
 
-  return {
-    getPrisma: jest.fn(() => mockPrismaClient),
-  };
-});
+jest.mock('@editor/database', () => ({
+  getPrisma: jest.fn(() => mockPrismaClient),
+  Prisma: {
+    JsonNull: Symbol('JsonNull'),
+  },
+}));
 
 jest.mock('speakeasy');
 jest.mock('qrcode');
 
-const { getPrisma } = require('@editor/database');
-const mockPrisma = getPrisma();
-const mockSpeakeasy = speakeasy as jest.Mocked<typeof speakeasy>;
+const mockPrisma = mockPrismaClient;
+const mockSpeakeasy = speakeasy as jest.Mocked<typeof speakeasy> & {
+  totp: {
+    verify: jest.MockedFunction<typeof speakeasy.totp.verify>;
+  };
+};
 const _mockQRCode = QRCode as jest.Mocked<typeof QRCode>;
 
 describe('MFAService', () => {
@@ -179,9 +184,20 @@ describe('MFAService', () => {
         data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: null,
+          mfaBackupCodes: Prisma.JsonNull,
         },
       });
+    });
+
+    it('should handle disableMFA error', async () => {
+      // Arrange
+      const userId = 'user-1';
+      const testError = new Error('Database connection failed');
+      mockPrisma.user.update.mockRejectedValue(testError);
+
+      // Act & Assert
+      await expect(mfaService.disableMFA(userId)).rejects.toThrow(AuthError);
+      await expect(mfaService.disableMFA(userId)).rejects.toThrow('MFA 비활성화에 실패했습니다.');
     });
   });
 
