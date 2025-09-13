@@ -21,7 +21,6 @@ export type {
   MFASetup,
   Session,
   UserRole,
-  AuthError
 } from '@editor/types';
 
 export type { AuthEvent, AuthEventFilter } from './AuthEventLogger';

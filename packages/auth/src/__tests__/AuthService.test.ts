@@ -16,8 +16,8 @@ jest.mock('@editor/database', () => {
     user: {
       create: jest.fn(),
       findUnique: jest.fn(),
-      update: jest.fn()
-    }
+      update: jest.fn(),
+    },
   };
 
   return {
@@ -27,8 +27,8 @@ jest.mock('@editor/database', () => {
       get: jest.fn(),
       del: jest.fn(),
       keys: jest.fn(),
-      ping: jest.fn()
-    }))
+      ping: jest.fn(),
+    })),
   };
 });
 
@@ -44,8 +44,12 @@ const mockPrisma = getPrisma();
 const mockBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
 const MockTokenService = TokenService as jest.MockedClass<typeof TokenService>;
 const MockMFAService = MFAService as jest.MockedClass<typeof MFAService>;
-const MockSessionCacheService = SessionCacheService as jest.MockedClass<typeof SessionCacheService>;
-const MockAuthEventLogger = AuthEventLogger as jest.MockedClass<typeof AuthEventLogger>;
+const MockSessionCacheService = SessionCacheService as jest.MockedClass<
+  typeof SessionCacheService
+>;
+const MockAuthEventLogger = AuthEventLogger as jest.MockedClass<
+  typeof AuthEventLogger
+>;
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -61,7 +65,7 @@ describe('AuthService', () => {
       verifyJWT: jest.fn(),
       generateRefreshToken: jest.fn(),
       generatePasswordResetToken: jest.fn(),
-      verifyPasswordResetToken: jest.fn()
+      verifyPasswordResetToken: jest.fn(),
     } as any;
 
     mockMFAService = {
@@ -69,7 +73,7 @@ describe('AuthService', () => {
       enableMFA: jest.fn(),
       disableMFA: jest.fn(),
       verifyMFA: jest.fn(),
-      getMFAStatus: jest.fn()
+      getMFAStatus: jest.fn(),
     } as any;
 
     mockCacheService = {
@@ -77,7 +81,7 @@ describe('AuthService', () => {
       getCachedSession: jest.fn(),
       cacheUser: jest.fn(),
       getCachedUser: jest.fn(),
-      invalidateUser: jest.fn().mockResolvedValue(undefined)
+      invalidateUser: jest.fn().mockResolvedValue(undefined),
     } as any;
 
     mockEventLogger = {
@@ -92,7 +96,7 @@ describe('AuthService', () => {
       getRecentLogins: jest.fn(),
       detectSuspiciousActivity: jest.fn().mockResolvedValue(false),
       getSecurityStats: jest.fn(),
-      cleanupOldLogs: jest.fn()
+      cleanupOldLogs: jest.fn(),
     } as any;
 
     // Mock 클래스가 인스턴스를 반환하도록 설정
@@ -116,7 +120,7 @@ describe('AuthService', () => {
         mfaEnabled: false,
         provider: 'email',
         createdAt: new Date(),
-        lastActiveAt: new Date()
+        lastActiveAt: new Date(),
       };
 
       // 캐시에서 사용자를 찾지 못하므로 DB에서 조회
@@ -130,7 +134,7 @@ describe('AuthService', () => {
       // Act
       const result = await authService.authenticateCredentials({
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
       });
 
       // Assert
@@ -147,7 +151,7 @@ describe('AuthService', () => {
         id: 'user-1',
         email: 'test@example.com',
         password: 'hashedPassword',
-        mfaEnabled: false
+        mfaEnabled: false,
       };
 
       mockCacheService.getCachedUser.mockResolvedValue(null);
@@ -155,10 +159,12 @@ describe('AuthService', () => {
       mockBcrypt.compare.mockResolvedValue(false as never);
 
       // Act & Assert
-      await expect(authService.authenticateCredentials({
-        email: 'test@example.com',
-        password: 'wrongpassword'
-      })).rejects.toThrow();
+      await expect(
+        authService.authenticateCredentials({
+          email: 'test@example.com',
+          password: 'wrongpassword',
+        })
+      ).rejects.toThrow();
     });
 
     it('should require MFA token when MFA is enabled', async () => {
@@ -168,7 +174,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'hashedPassword',
         mfaEnabled: true,
-        mfaSecret: 'secret'
+        mfaSecret: 'secret',
       };
 
       mockCacheService.getCachedUser.mockResolvedValue(null);
@@ -176,10 +182,12 @@ describe('AuthService', () => {
       mockBcrypt.compare.mockResolvedValue(true as never);
 
       // Act & Assert
-      await expect(authService.authenticateCredentials({
-        email: 'test@example.com',
-        password: 'password123'
-      })).rejects.toThrow();
+      await expect(
+        authService.authenticateCredentials({
+          email: 'test@example.com',
+          password: 'password123',
+        })
+      ).rejects.toThrow();
     });
 
     it('should fail authentication for non-existent user', async () => {
@@ -188,10 +196,12 @@ describe('AuthService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(authService.authenticateCredentials({
-        email: 'nonexistent@example.com',
-        password: 'password123'
-      })).rejects.toThrow();
+      await expect(
+        authService.authenticateCredentials({
+          email: 'nonexistent@example.com',
+          password: 'password123',
+        })
+      ).rejects.toThrow();
     });
   });
 
@@ -202,7 +212,7 @@ describe('AuthService', () => {
         email: 'newuser@example.com',
         name: 'New User',
         password: 'password123',
-        provider: 'email' as const
+        provider: 'email' as const,
       };
 
       const mockCreatedUser = {
@@ -218,7 +228,7 @@ describe('AuthService', () => {
         mfaBackupCodes: null,
         emailVerified: null,
         createdAt: new Date(),
-        lastActiveAt: new Date()
+        lastActiveAt: new Date(),
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(null); // No existing user
@@ -240,8 +250,8 @@ describe('AuthService', () => {
           providerId: undefined,
           avatarUrl: undefined,
           mfaEnabled: false,
-          emailVerified: null
-        }
+          emailVerified: null,
+        },
       });
     });
 
@@ -251,12 +261,12 @@ describe('AuthService', () => {
         email: 'existing@example.com',
         name: 'Existing User',
         password: 'password123',
-        provider: 'email' as const
+        provider: 'email' as const,
       };
 
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'existing-user',
-        email: 'existing@example.com'
+        email: 'existing@example.com',
       });
 
       // Act & Assert
@@ -271,7 +281,7 @@ describe('AuthService', () => {
         userId: 'user-1',
         email: 'test@example.com',
         role: 'editor' as const,
-        workspaceId: 'workspace-1'
+        workspaceId: 'workspace-1',
       };
 
       mockTokenService.generateJWT.mockResolvedValue('mock-jwt-token');
@@ -293,7 +303,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         role: 'editor' as const,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
       };
 
       mockTokenService.verifyJWT.mockResolvedValue(mockPayload);
@@ -315,7 +325,7 @@ describe('AuthService', () => {
         name: 'OAuth User',
         provider: 'google' as const,
         providerId: 'google-123',
-        avatar: 'https://example.com/avatar.jpg'
+        avatar: 'https://example.com/avatar.jpg',
       };
 
       const mockCreatedUser = {
@@ -331,7 +341,7 @@ describe('AuthService', () => {
         mfaBackupCodes: null,
         emailVerified: new Date(),
         createdAt: new Date(),
-        lastActiveAt: new Date()
+        lastActiveAt: new Date(),
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(null);
@@ -351,8 +361,8 @@ describe('AuthService', () => {
           providerId: 'google-123',
           avatarUrl: 'https://example.com/avatar.jpg',
           mfaEnabled: false,
-          emailVerified: expect.any(Date)
-        }
+          emailVerified: expect.any(Date),
+        },
       });
     });
 
@@ -363,7 +373,7 @@ describe('AuthService', () => {
         name: 'Updated OAuth User',
         provider: 'google' as const,
         providerId: 'google-123',
-        avatar: 'https://example.com/new-avatar.jpg'
+        avatar: 'https://example.com/new-avatar.jpg',
       };
 
       const existingUser = {
@@ -379,14 +389,14 @@ describe('AuthService', () => {
         mfaBackupCodes: null,
         emailVerified: new Date(),
         createdAt: new Date(),
-        lastActiveAt: new Date()
+        lastActiveAt: new Date(),
       };
 
       const updatedUser = {
         ...existingUser,
         name: 'Updated OAuth User',
         avatarUrl: 'https://example.com/new-avatar.jpg',
-        lastActiveAt: new Date()
+        lastActiveAt: new Date(),
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(existingUser);
@@ -403,8 +413,8 @@ describe('AuthService', () => {
           name: 'Updated OAuth User',
           avatarUrl: 'https://example.com/new-avatar.jpg',
           lastActiveAt: expect.any(Date),
-          emailVerified: expect.any(Date)
-        }
+          emailVerified: expect.any(Date),
+        },
       });
     });
   });
@@ -414,20 +424,25 @@ describe('AuthService', () => {
       // Arrange
       mockTokenService.verifyPasswordResetToken.mockResolvedValue({
         userId: 'user-1',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
       mockBcrypt.hash.mockResolvedValue('newHashedPassword' as never);
       mockPrisma.user.update.mockResolvedValue({} as any);
 
       // Act
-      const result = await authService.resetPassword('valid-reset-token', 'newPassword123');
+      const result = await authService.resetPassword(
+        'valid-reset-token',
+        'newPassword123'
+      );
 
       // Assert
       expect(result).toBe(true);
-      expect(mockTokenService.verifyPasswordResetToken).toHaveBeenCalledWith('valid-reset-token');
+      expect(mockTokenService.verifyPasswordResetToken).toHaveBeenCalledWith(
+        'valid-reset-token'
+      );
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },
-        data: { password: 'newHashedPassword' }
+        data: { password: 'newHashedPassword' },
       });
       expect(mockCacheService.invalidateUser).toHaveBeenCalledWith('user-1');
     });

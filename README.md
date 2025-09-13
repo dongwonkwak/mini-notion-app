@@ -18,7 +18,7 @@
 mini-notion-app/
 ├── apps/
 │   ├── web/          # Next.js 클라이언트
-│   ├── server/       # Hocuspocus 서버  
+│   ├── server/       # Hocuspocus 서버
 │   └── api/          # REST API 서버
 ├── packages/
 │   ├── ui/           # 공통 UI 컴포넌트
@@ -93,12 +93,15 @@ pnpm clean            # 빌드 파일 정리
 ## 🗄️ 데이터베이스
 
 ### 개발 환경
+
 - **SQLite**: 로컬 개발용 (`./packages/database/prisma/dev.db`)
 - **Redis**: 캐싱 및 세션 관리
 - **MinIO**: 파일 저장 (S3 호환)
 
 ### 테스트 데이터
+
 시딩 스크립트로 다음 데이터가 생성됩니다:
+
 - 사용자 5명 (관리자 1명, 에디터 2명, 뷰어 2명)
 - 워크스페이스 1개
 - 페이지 10개 (계층 구조 포함)
@@ -107,6 +110,7 @@ pnpm clean            # 빌드 파일 정리
 ## 🔧 개발 도구
 
 ### Docker 서비스
+
 ```bash
 # 서비스 시작
 docker-compose up -d
@@ -122,6 +126,7 @@ docker-compose down
 ```
 
 ### 접속 정보
+
 - **Redis**: `localhost:6379`
 - **MinIO Console**: `http://localhost:9001` (minioadmin/minioadmin)
 - **MailHog UI**: `http://localhost:8025`

@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
-        mfaToken: { label: 'MFA Token', type: 'text', optional: true }
+        mfaToken: { label: 'MFA Token', type: 'text', optional: true },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
           const result = await authService.authenticateCredentials({
             email: credentials.email,
             password: credentials.password,
-            mfaToken: credentials.mfaToken
+            mfaToken: credentials.mfaToken,
           });
 
           if (result.success && result.user) {
@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
               email: result.user.email,
               name: result.user.name,
               image: result.user.avatar,
-              provider: result.user.provider
+              provider: result.user.provider,
             };
           }
 
@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
           console.error('Authentication error:', error);
           throw new Error('인증에 실패했습니다.');
         }
-      }
+      },
     }),
 
     // Google OAuth
@@ -69,26 +69,26 @@ export const authOptions: NextAuthOptions = {
         params: {
           prompt: 'consent',
           access_type: 'offline',
-          response_type: 'code'
-        }
-      }
+          response_type: 'code',
+        },
+      },
     }),
 
     // GitHub OAuth
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!
-    })
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
   ],
 
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30일
-    updateAge: 24 * 60 * 60 // 24시간마다 업데이트
+    updateAge: 24 * 60 * 60, // 24시간마다 업데이트
   },
 
   jwt: {
-    maxAge: 30 * 24 * 60 * 60 // 30일
+    maxAge: 30 * 24 * 60 * 60, // 30일
   },
 
   callbacks: {
@@ -107,7 +107,9 @@ export const authOptions: NextAuthOptions = {
 
       // 토큰 갱신 시 사용자 정보 업데이트
       if (trigger === 'update' && token.userId) {
-        const updatedUser = await authService.getUserById(token.userId as string);
+        const updatedUser = await authService.getUserById(
+          token.userId as string
+        );
         if (updatedUser) {
           token.name = updatedUser.name;
           token.picture = updatedUser.avatar;
@@ -127,7 +129,7 @@ export const authOptions: NextAuthOptions = {
           id: token.userId as string,
           email: token.email as string,
           name: token.name as string,
-          image: token.picture as string
+          image: token.picture as string,
         };
         session.accessToken = token.accessToken as string;
       }
@@ -143,7 +145,7 @@ export const authOptions: NextAuthOptions = {
         // OAuth 로그인 시 사용자 생성 또는 업데이트
         if (account?.provider !== 'credentials' && account) {
           const existingUser = await authService.findUserByEmail(user.email!);
-          
+
           if (!existingUser) {
             // 새 사용자 생성
             await authService.createOAuthUser({
@@ -151,7 +153,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name!,
               provider: account.provider as 'google' | 'github',
               providerId: account.providerAccountId,
-              avatar: user.image
+              avatar: user.image,
             });
           } else {
             // 기존 사용자 정보 업데이트
@@ -174,32 +176,32 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith('/')) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
-    }
+    },
   },
 
   pages: {
     signIn: '/auth/signin',
     error: '/auth/error',
     verifyRequest: '/auth/verify-request',
-    newUser: '/auth/new-user'
+    newUser: '/auth/new-user',
   },
 
   events: {
     async signIn({ user, account, isNewUser }) {
       console.log(`User ${user.email} signed in with ${account?.provider}`);
-      
+
       // 로그인 이벤트 로깅
       if (user.id) {
         await authService.logUserActivity(user.id, 'signin', {
           provider: account?.provider,
-          isNewUser
+          isNewUser,
         });
       }
     },
 
     async signOut({ token }) {
       console.log(`User ${token?.email} signed out`);
-      
+
       // 로그아웃 이벤트 로깅
       if (token?.userId) {
         await authService.logUserActivity(token.userId as string, 'signout');
@@ -223,36 +225,36 @@ export const authOptions: NextAuthOptions = {
       if (token?.userId) {
         await authService.updateUserLastActive(token.userId as string);
       }
-    }
+    },
   },
 
   debug: process.env.NODE_ENV === 'development',
-  
+
   secret: process.env.NEXTAUTH_SECRET,
-  
+
   // CSRF 보호 설정
   useSecureCookies: process.env.NODE_ENV === 'production',
-  
+
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === 'production' 
-        ? '__Secure-next-auth.session-token' 
-        : 'next-auth.session-token',
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-next-auth.session-token'
+          : 'next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production'
-      }
-    }
-  }
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
 };
 
 /**
  * NextAuth.js 타입 확장
  */
 declare module 'next-auth' {
-   
   interface Session {
     user: {
       id: string;
@@ -263,7 +265,6 @@ declare module 'next-auth' {
     accessToken?: string;
   }
 
-   
   interface User {
     id: string;
     email: string;
@@ -274,7 +275,6 @@ declare module 'next-auth' {
 }
 
 declare module 'next-auth/jwt' {
-   
   interface JWT {
     userId?: string;
     provider?: string;

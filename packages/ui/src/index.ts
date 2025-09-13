@@ -16,7 +16,9 @@ export const Button: React.FC<ButtonProps> = (/* { children, onClick } */) => {
   return null; // Placeholder
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = (/* { children } */) => {
+export const ThemeProvider: React.FC<{
+  children: React.ReactNode;
+}> = (/* { children } */) => {
   return null; // Placeholder
 };
 

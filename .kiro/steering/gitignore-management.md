@@ -18,6 +18,7 @@ inclusion: always
 ## 📋 자동 .gitignore 추가 대상
 
 ### 🧪 테스트 관련 파일
+
 ```gitignore
 # 테스트 결과 및 커버리지
 coverage/
@@ -32,6 +33,7 @@ test-output/
 **이유**: 테스트 실행 시마다 생성되는 결과 파일들은 로컬 환경에 따라 달라지며, CI/CD에서 별도로 생성됨
 
 ### 🏗️ 빌드 및 컴파일 결과물
+
 ```gitignore
 # 빌드 결과물
 dist/
@@ -45,6 +47,7 @@ out/
 **이유**: 소스 코드에서 자동 생성되는 파일들로, 저장소에 포함할 필요 없음
 
 ### 🗄️ 데이터베이스 파일
+
 ```gitignore
 # 개발용 데이터베이스
 *.db
@@ -58,6 +61,7 @@ test.db
 **이유**: 개발 환경의 로컬 데이터베이스는 개인별로 다르며, 시딩 스크립트로 재생성 가능
 
 ### 📝 로그 및 디버그 파일
+
 ```gitignore
 # 로그 파일
 *.log
@@ -72,6 +76,7 @@ pnpm-debug.log*
 **이유**: 실행 시점과 환경에 따라 달라지는 로그는 디버깅 후 삭제되어야 함
 
 ### ⚙️ 환경 설정 파일
+
 ```gitignore
 # 로컬 환경 변수
 .env.local
@@ -84,6 +89,7 @@ config.local.json
 **이유**: 개인별 개발 환경 설정이나 민감한 정보가 포함될 수 있음
 
 ### 🔧 IDE 및 에디터 파일
+
 ```gitignore
 # IDE 개인 설정
 .vscode/settings.json
@@ -97,6 +103,7 @@ Thumbs.db
 **이유**: 개발자 개인의 IDE 설정은 다른 팀원에게 영향을 주지 않아야 함
 
 ### 📊 성능 및 프로파일링 파일
+
 ```gitignore
 # 프로파일링 결과
 *.cpuprofile
@@ -109,6 +116,7 @@ benchmark-results/
 **이유**: 성능 분석 결과는 일시적이며, 분석 후 삭제되는 것이 일반적
 
 ### 🔐 보안 관련 파일
+
 ```gitignore
 # 보안 파일
 *.pem
@@ -149,6 +157,7 @@ auth-config.local.json
 ## 📝 .gitignore 관리 원칙
 
 ### 1. **그룹별 정리**
+
 ```gitignore
 # Dependencies
 node_modules/
@@ -165,14 +174,17 @@ build/
 ```
 
 ### 2. **주석 활용**
+
 - 각 그룹의 목적을 명확히 설명
 - 특별한 이유가 있는 패턴에 대한 설명 추가
 
 ### 3. **패턴 우선순위**
+
 - 구체적인 파일명 → 일반적인 패턴 순서
 - 자주 사용되는 패턴을 상단에 배치
 
 ### 4. **정기적인 검토**
+
 - 새로운 도구 도입 시 관련 파일 패턴 추가
 - 사용하지 않는 패턴 정리
 - 팀 컨벤션에 맞게 조정
@@ -180,6 +192,7 @@ build/
 ## ⚠️ 주의사항
 
 ### 이미 추적 중인 파일 처리
+
 ```bash
 # 이미 Git에 추가된 파일을 .gitignore에 추가한 경우
 git rm --cached filename
@@ -190,10 +203,12 @@ git commit -m "Remove tracked files that should be ignored"
 ```
 
 ### 글로벌 vs 프로젝트 .gitignore
+
 - **글로벌**: OS나 IDE 관련 파일 (`.DS_Store`, `.idea/`)
 - **프로젝트**: 프로젝트 특화 파일 (`dist/`, `coverage/`)
 
 ### 민감한 정보 처리
+
 ```bash
 # 실수로 커밋된 민감한 정보 제거
 git filter-branch --force --index-filter \
@@ -204,6 +219,7 @@ git filter-branch --force --index-filter \
 ## 🔍 검증 방법
 
 ### 정기적인 .gitignore 검증
+
 ```bash
 # 추적되지 않는 파일 확인
 git status --ignored
@@ -216,6 +232,7 @@ git count-objects -vH
 ```
 
 ### 자동화된 검증
+
 - CI/CD에서 불필요한 파일이 포함되지 않았는지 확인
 - 대용량 파일이나 민감한 정보 패턴 검사
 - .gitignore 패턴의 유효성 검증
@@ -223,12 +240,14 @@ git count-objects -vH
 ## 📊 모니터링 지표
 
 ### 추적해야 할 메트릭
+
 - **저장소 크기**: 불필요한 파일로 인한 크기 증가 모니터링
 - **커밋 품질**: 빌드 결과물이나 로그 파일 커밋 빈도
 - **충돌 빈도**: 개인 설정 파일로 인한 머지 충돌
 - **보안 이슈**: 민감한 정보 실수 커밋 발생률
 
 ### 개선 지표
+
 - .gitignore 자동 업데이트 정확도
 - 수동 개입이 필요한 케이스 감소
 - 팀원들의 .gitignore 관련 문의 감소

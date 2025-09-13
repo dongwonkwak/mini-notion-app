@@ -5,7 +5,7 @@
     "type": "file_change",
     "patterns": [
       ".kiro/specs/**/requirements.md",
-      ".kiro/specs/**/design.md", 
+      ".kiro/specs/**/design.md",
       ".kiro/specs/**/tasks.md"
     ]
   },
@@ -15,7 +15,7 @@
       "path": ".kiro/specs/realtime-collaborative-editor/requirements.md"
     },
     {
-      "type": "file_exists", 
+      "type": "file_exists",
       "path": ".kiro/specs/realtime-collaborative-editor/design.md"
     },
     {

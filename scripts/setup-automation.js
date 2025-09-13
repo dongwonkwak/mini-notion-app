@@ -2,7 +2,7 @@
 
 /**
  * 자동화 스크립트 설정 도구
- * 
+ *
  * 기능:
  * 1. package.json에 자동화 스크립트 추가
  * 2. Git hooks 설정
@@ -16,47 +16,42 @@ const { execSync } = require('child_process');
 // 추가할 스크립트들
 const AUTOMATION_SCRIPTS = {
   // 문서화 자동화
-  "docs:auto": "node scripts/auto-document-task.js",
-  "docs:api": "node scripts/generate-api-docs.js",
-  "docs:update": "node scripts/update-docs-readme.js",
-  
+  'docs:auto': 'node scripts/auto-document-task.js',
+  'docs:api': 'node scripts/generate-api-docs.js',
+  'docs:update': 'node scripts/update-docs-readme.js',
+
   // 코드 품질
-  "quality:check": "pnpm eslint . && pnpm type-check && pnpm test:ci",
-  "quality:fix": "pnpm eslint . --fix && pnpm format",
-  
+  'quality:check': 'pnpm eslint . && pnpm type-check && pnpm test:ci',
+  'quality:fix': 'pnpm eslint . --fix && pnpm format',
+
   // 보안
-  "security:scan": "pnpm audit && node scripts/generate-security-report.js",
-  "security:fix": "pnpm audit --fix",
-  
+  'security:scan': 'pnpm audit && node scripts/generate-security-report.js',
+  'security:fix': 'pnpm audit --fix',
+
   // 성능
-  "perf:analyze": "pnpm analyze && node scripts/generate-performance-report.js",
-  "perf:test": "node scripts/measure-test-performance.js",
-  
+  'perf:analyze': 'pnpm analyze && node scripts/generate-performance-report.js',
+  'perf:test': 'node scripts/measure-test-performance.js',
+
   // 통합 자동화
-  "auto:task-complete": "pnpm docs:auto && pnpm docs:api && pnpm quality:check",
-  "auto:pre-commit": "pnpm quality:fix && pnpm security:scan",
-  "auto:pre-push": "pnpm quality:check && pnpm test:ci"
+  'auto:task-complete': 'pnpm docs:auto && pnpm docs:api && pnpm quality:check',
+  'auto:pre-commit': 'pnpm quality:fix && pnpm security:scan',
+  'auto:pre-push': 'pnpm quality:check && pnpm test:ci',
 };
 
 // 필요한 개발 의존성
-const DEV_DEPENDENCIES = [
-  'glob',
-  'js-yaml',
-  'license-checker',
-  '@types/glob'
-];
+const DEV_DEPENDENCIES = ['glob', 'js-yaml', 'license-checker', '@types/glob'];
 
 function updatePackageJson() {
   console.log('📦 package.json 업데이트 중...');
-  
+
   const packagePath = 'package.json';
   const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-  
+
   // scripts 섹션에 자동화 스크립트 추가
   if (!packageJson.scripts) {
     packageJson.scripts = {};
   }
-  
+
   let addedCount = 0;
   for (const [name, command] of Object.entries(AUTOMATION_SCRIPTS)) {
     if (!packageJson.scripts[name]) {
@@ -65,16 +60,16 @@ function updatePackageJson() {
       console.log(`✅ 스크립트 추가: ${name}`);
     }
   }
-  
+
   // 파일 저장
   fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
-  
+
   console.log(`📝 ${addedCount}개 스크립트가 추가되었습니다.`);
 }
 
 function installDependencies() {
   console.log('📥 필요한 의존성 설치 중...');
-  
+
   try {
     const command = `pnpm add -D ${DEV_DEPENDENCIES.join(' ')}`;
     execSync(command, { stdio: 'inherit' });
@@ -86,14 +81,14 @@ function installDependencies() {
 
 function setupGitHooks() {
   console.log('🪝 Git hooks 설정 중...');
-  
+
   const hooksDir = '.git/hooks';
-  
+
   if (!fs.existsSync(hooksDir)) {
     console.log('⚠️ Git 저장소가 아닙니다. Git hooks를 건너뜁니다.');
     return;
   }
-  
+
   // pre-commit hook
   const preCommitHook = `#!/bin/sh
 # 자동 코드 품질 검사
@@ -125,7 +120,7 @@ echo "✅ 모든 테스트 통과"
   // Hook 파일 생성
   fs.writeFileSync(path.join(hooksDir, 'pre-commit'), preCommitHook);
   fs.writeFileSync(path.join(hooksDir, 'pre-push'), prePushHook);
-  
+
   // 실행 권한 부여
   try {
     execSync('chmod +x .git/hooks/pre-commit');
@@ -138,7 +133,7 @@ echo "✅ 모든 테스트 통과"
 
 function createAutomationGuide() {
   console.log('📚 자동화 가이드 생성 중...');
-  
+
   const guideContent = `# 자동화 가이드
 
 ## 🤖 사용 가능한 자동화 스크립트
@@ -235,20 +230,20 @@ pnpm auto:pre-push
 // 메인 실행 함수
 async function main() {
   console.log('🚀 자동화 시스템 설정 시작');
-  
+
   try {
     // 1. package.json 업데이트
     updatePackageJson();
-    
+
     // 2. 필요한 의존성 설치
     installDependencies();
-    
+
     // 3. Git hooks 설정
     setupGitHooks();
-    
+
     // 4. 자동화 가이드 생성
     createAutomationGuide();
-    
+
     console.log('✅ 자동화 시스템 설정 완료!');
     console.log('');
     console.log('🎯 다음 단계:');
@@ -257,7 +252,6 @@ async function main() {
     console.log('3. pnpm quality:check - 코드 품질 검사 테스트');
     console.log('');
     console.log('📚 자세한 사용법: docs/automation-guide.md');
-    
   } catch (error) {
     console.error('❌ 자동화 설정 중 오류:', error);
     process.exit(1);
@@ -272,5 +266,5 @@ module.exports = {
   updatePackageJson,
   installDependencies,
   setupGitHooks,
-  createAutomationGuide
+  createAutomationGuide,
 };

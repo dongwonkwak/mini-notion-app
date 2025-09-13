@@ -6,7 +6,10 @@
 import { AuthService } from '@editor/auth';
 import { NextRequest } from 'next/server';
 
-import { POST as mfaSetupHandler, PUT as mfaEnableHandler } from '../app/api/auth/mfa/setup/route';
+import {
+  POST as mfaSetupHandler,
+  PUT as mfaEnableHandler,
+} from '../app/api/auth/mfa/setup/route';
 import { POST as signupHandler } from '../app/api/auth/signup/route';
 
 // 모킹
@@ -27,7 +30,7 @@ describe('Authentication Integration Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -37,11 +40,11 @@ describe('Authentication Integration Tests', () => {
         body: JSON.stringify({
           email: 'test@example.com',
           name: 'Test User',
-          password: 'password123'
+          password: 'password123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -56,7 +59,7 @@ describe('Authentication Integration Tests', () => {
         email: 'test@example.com',
         name: 'Test User',
         password: 'password123',
-        provider: 'email'
+        provider: 'email',
       });
     });
 
@@ -67,11 +70,11 @@ describe('Authentication Integration Tests', () => {
         body: JSON.stringify({
           email: 'invalid-email',
           name: 'Test User',
-          password: 'password123'
+          password: 'password123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -91,11 +94,11 @@ describe('Authentication Integration Tests', () => {
         body: JSON.stringify({
           email: 'test@example.com',
           name: 'Test User',
-          password: '123' // Too short
+          password: '123', // Too short
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -119,11 +122,11 @@ describe('Authentication Integration Tests', () => {
         body: JSON.stringify({
           email: 'existing@example.com',
           name: 'Test User',
-          password: 'password123'
+          password: 'password123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -145,8 +148,8 @@ describe('Authentication Integration Tests', () => {
           // Missing name and password
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -166,7 +169,7 @@ describe('Authentication Integration Tests', () => {
       const mockMfaSetup = {
         secret: 'JBSWY3DPEHPK3PXP',
         qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
-        backupCodes: ['ABC12345', 'DEF67890']
+        backupCodes: ['ABC12345', 'DEF67890'],
       };
 
       mockAuthService.prototype.setupMFA.mockResolvedValue(mockMfaSetup);
@@ -174,15 +177,18 @@ describe('Authentication Integration Tests', () => {
       // Mock getServerSession
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { id: 'user-1', email: 'test@example.com', }
+        user: { id: 'user-1', email: 'test@example.com' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/auth/mfa/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const request = new NextRequest(
+        'http://localhost:3000/api/auth/mfa/setup',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       // Act
       const response = await mfaSetupHandler(request);
@@ -193,7 +199,11 @@ describe('Authentication Integration Tests', () => {
       expect(data.success).toBe(true);
       expect(data.data.qrCode).toBeDefined();
       expect(data.data.backupCodes).toHaveLength(2);
-      expect(mockAuthService.prototype.setupMFA).toHaveBeenCalledWith('user-1', 'unknown', 'unknown');
+      expect(mockAuthService.prototype.setupMFA).toHaveBeenCalledWith(
+        'user-1',
+        'unknown',
+        'unknown'
+      );
     });
 
     it('should require authentication for MFA setup', async () => {
@@ -201,12 +211,15 @@ describe('Authentication Integration Tests', () => {
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/auth/mfa/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const request = new NextRequest(
+        'http://localhost:3000/api/auth/mfa/setup',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       // Act
       const response = await mfaSetupHandler(request);
@@ -224,18 +237,21 @@ describe('Authentication Integration Tests', () => {
 
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { id: 'user-1', email: 'test@example.com', }
+        user: { id: 'user-1', email: 'test@example.com' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/auth/mfa/setup', {
-        method: 'PUT',
-        body: JSON.stringify({
-          token: '123456'
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+      const request = new NextRequest(
+        'http://localhost:3000/api/auth/mfa/setup',
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            token: '123456',
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       // Act
       const response = await mfaEnableHandler(request);
@@ -245,7 +261,12 @@ describe('Authentication Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.message).toBe('MFA가 활성화되었습니다.');
-      expect(mockAuthService.prototype.enableMFA).toHaveBeenCalledWith('user-1', '123456', 'unknown', 'unknown');
+      expect(mockAuthService.prototype.enableMFA).toHaveBeenCalledWith(
+        'user-1',
+        '123456',
+        'unknown',
+        'unknown'
+      );
     });
 
     it('should reject invalid MFA token', async () => {
@@ -256,18 +277,21 @@ describe('Authentication Integration Tests', () => {
 
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { id: 'user-1', email: 'test@example.com', }
+        user: { id: 'user-1', email: 'test@example.com' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/auth/mfa/setup', {
-        method: 'PUT',
-        body: JSON.stringify({
-          token: '000000'
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+      const request = new NextRequest(
+        'http://localhost:3000/api/auth/mfa/setup',
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            token: '000000',
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       // Act
       const response = await mfaEnableHandler(request);
@@ -283,16 +307,19 @@ describe('Authentication Integration Tests', () => {
       // Arrange
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { id: 'user-1', email: 'test@example.com', }
+        user: { id: 'user-1', email: 'test@example.com' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/auth/mfa/setup', {
-        method: 'PUT',
-        body: JSON.stringify({}), // No token
-        headers: {
-          'Content-Type': 'application/json'
+      const request = new NextRequest(
+        'http://localhost:3000/api/auth/mfa/setup',
+        {
+          method: 'PUT',
+          body: JSON.stringify({}), // No token
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
       // Act
       const response = await mfaEnableHandler(request);
@@ -327,7 +354,7 @@ describe('Authentication Integration Tests', () => {
         userId: 'user-1',
         email: 'test@example.com',
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
       };
 
       // Mock the actual implementation
@@ -346,15 +373,19 @@ describe('Authentication Integration Tests', () => {
     it('should handle token refresh', async () => {
       // Arrange
       const authService = new AuthService();
-      
-      mockAuthService.prototype.generateRefreshToken.mockResolvedValue('refresh-token');
+
+      mockAuthService.prototype.generateRefreshToken.mockResolvedValue(
+        'refresh-token'
+      );
 
       // Act
       const refreshToken = await authService.generateRefreshToken('user-1');
 
       // Assert
       expect(refreshToken).toBe('refresh-token');
-      expect(mockAuthService.prototype.generateRefreshToken).toHaveBeenCalledWith('user-1');
+      expect(
+        mockAuthService.prototype.generateRefreshToken
+      ).toHaveBeenCalledWith('user-1');
     });
   });
 });

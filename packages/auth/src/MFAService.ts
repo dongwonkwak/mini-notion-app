@@ -6,9 +6,7 @@
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { getPrisma } from '@editor/database';
-import type { 
-  MFASetup
-} from '@editor/types';
+import type { MFASetup } from '@editor/types';
 import { AuthErrorCode, AuthError } from '@editor/types';
 
 const prisma = getPrisma();
@@ -34,7 +32,7 @@ export class MFAService {
       const secret = speakeasy.generateSecret({
         name: `Collaborative Editor (${user.email})`,
         issuer: 'Collaborative Editor',
-        length: 32
+        length: 32,
       });
 
       // QR 코드 생성
@@ -48,20 +46,20 @@ export class MFAService {
         where: { id: userId },
         data: {
           mfaSecret: secret.base32,
-          mfaBackupCodes: backupCodes
-        }
+          mfaBackupCodes: backupCodes,
+        },
       });
 
       return {
         secret: secret.base32!,
         qrCode,
-        backupCodes
+        backupCodes,
       };
     } catch (error) {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('MFA setup error:', error);
       throw new AuthError(
         AuthErrorCode.MFA_SETUP_FAILED,
@@ -77,7 +75,7 @@ export class MFAService {
   async enableMFA(userId: string, token: string): Promise<boolean> {
     try {
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId },
       });
 
       if (!user || !user.mfaSecret) {
@@ -99,7 +97,7 @@ export class MFAService {
       // MFA 활성화
       await prisma.user.update({
         where: { id: userId },
-        data: { mfaEnabled: true }
+        data: { mfaEnabled: true },
       });
 
       return true;
@@ -107,7 +105,7 @@ export class MFAService {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('MFA enable error:', error);
       throw new AuthError(
         AuthErrorCode.MFA_ENABLE_FAILED,
@@ -124,11 +122,11 @@ export class MFAService {
     try {
       await prisma.user.update({
         where: { id: userId },
-        data: { 
+        data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: null
-        }
+          mfaBackupCodes: null,
+        },
       });
 
       return true;
@@ -151,7 +149,7 @@ export class MFAService {
         secret,
         encoding: 'base32',
         token,
-        window: this.MFA_WINDOW
+        window: this.MFA_WINDOW,
       });
     } catch (error) {
       console.error('MFA verification error:', error);
@@ -166,7 +164,7 @@ export class MFAService {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { mfaBackupCodes: true }
+        select: { mfaBackupCodes: true },
       });
 
       if (!user || !user.mfaBackupCodes) {
@@ -184,10 +182,12 @@ export class MFAService {
       }
 
       // 사용된 백업 코드 제거
-      const updatedCodes = user.mfaBackupCodes.filter((_, index) => index !== codeIndex);
+      const updatedCodes = user.mfaBackupCodes.filter(
+        (_, index) => index !== codeIndex
+      );
       await prisma.user.update({
         where: { id: userId },
-        data: { mfaBackupCodes: updatedCodes }
+        data: { mfaBackupCodes: updatedCodes },
       });
 
       return true;
@@ -214,7 +214,7 @@ export class MFAService {
 
       await prisma.user.update({
         where: { id: userId },
-        data: { mfaBackupCodes: newBackupCodes }
+        data: { mfaBackupCodes: newBackupCodes },
       });
 
       return newBackupCodes;
@@ -222,7 +222,7 @@ export class MFAService {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('Backup codes regeneration error:', error);
       throw new AuthError(
         AuthErrorCode.MFA_SETUP_FAILED,
@@ -243,10 +243,10 @@ export class MFAService {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { 
-          mfaEnabled: true, 
-          mfaBackupCodes: true 
-        }
+        select: {
+          mfaEnabled: true,
+          mfaBackupCodes: true,
+        },
       });
 
       if (!user) {
@@ -259,13 +259,13 @@ export class MFAService {
       return {
         enabled: user.mfaEnabled,
         hasBackupCodes: !!user.mfaBackupCodes && user.mfaBackupCodes.length > 0,
-        backupCodesCount: user.mfaBackupCodes?.length || 0
+        backupCodesCount: user.mfaBackupCodes?.length || 0,
       };
     } catch (error) {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('MFA status check error:', error);
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
@@ -279,7 +279,7 @@ export class MFAService {
    * 백업 코드 생성
    */
   private generateBackupCodes(): string[] {
-    return Array.from({ length: this.BACKUP_CODES_COUNT }, () => 
+    return Array.from({ length: this.BACKUP_CODES_COUNT }, () =>
       Math.random().toString(36).substring(2, 10).toUpperCase()
     );
   }
@@ -289,7 +289,7 @@ export class MFAService {
    */
   private async getUserById(id: string) {
     return prisma.user.findUnique({
-      where: { id }
+      where: { id },
     });
   }
 
@@ -299,7 +299,7 @@ export class MFAService {
   generateTestToken(secret: string): string {
     return speakeasy.totp({
       secret,
-      encoding: 'base32'
+      encoding: 'base32',
     });
   }
 }

@@ -26,11 +26,11 @@ jest.mock('next/server', () => ({
       this.headers = new Map(Object.entries(init.headers || {}));
       this._body = init.body;
     }
-    
+
     async json() {
       return JSON.parse(this._body || '{}');
     }
-    
+
     async text() {
       return this._body || '';
     }

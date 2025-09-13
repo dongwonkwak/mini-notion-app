@@ -4,11 +4,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import type { 
-  JWTPayload, 
-  StrictJWTPayload, 
-  UserRole
-} from '@editor/types';
+import type { JWTPayload, StrictJWTPayload, UserRole } from '@editor/types';
 import { AuthErrorCode, AuthError } from '@editor/types';
 
 export class TokenService {
@@ -18,7 +14,8 @@ export class TokenService {
   private readonly PASSWORD_RESET_EXPIRES_IN = '1h';
 
   constructor(jwtSecret?: string) {
-    this.JWT_SECRET = jwtSecret || process.env.NEXTAUTH_SECRET || 'fallback-secret';
+    this.JWT_SECRET =
+      jwtSecret || process.env.NEXTAUTH_SECRET || 'fallback-secret';
   }
 
   /**
@@ -36,13 +33,13 @@ export class TokenService {
           userId: payload.userId,
           email: payload.email,
           role: payload.role,
-          workspaceId: payload.workspaceId
+          workspaceId: payload.workspaceId,
         },
         this.JWT_SECRET,
         {
           expiresIn: this.JWT_EXPIRES_IN,
           issuer: 'collaborative-editor',
-          audience: 'collaborative-editor-users'
+          audience: 'collaborative-editor-users',
         }
       );
     } catch (error) {
@@ -61,7 +58,7 @@ export class TokenService {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET, {
         issuer: 'collaborative-editor',
-        audience: 'collaborative-editor-users'
+        audience: 'collaborative-editor-users',
       }) as StrictJWTPayload;
 
       return decoded;
@@ -79,7 +76,7 @@ export class TokenService {
           error
         );
       }
-      
+
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
         'JWT 토큰 검증에 실패했습니다.',
@@ -96,11 +93,11 @@ export class TokenService {
       const payload = {
         userId,
         type: 'refresh',
-        iat: Math.floor(Date.now() / 1000)
+        iat: Math.floor(Date.now() / 1000),
       };
 
       return jwt.sign(payload, this.JWT_SECRET, {
-        expiresIn: this.REFRESH_TOKEN_EXPIRES_IN
+        expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
       });
     } catch (error) {
       throw new AuthError(
@@ -114,10 +111,12 @@ export class TokenService {
   /**
    * 리프레시 토큰 검증
    */
-  async verifyRefreshToken(token: string): Promise<{ userId: string; type: string }> {
+  async verifyRefreshToken(
+    token: string
+  ): Promise<{ userId: string; type: string }> {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as any;
-      
+
       if (decoded.type !== 'refresh') {
         throw new AuthError(
           AuthErrorCode.INVALID_REFRESH_TOKEN,
@@ -127,7 +126,7 @@ export class TokenService {
 
       return {
         userId: decoded.userId,
-        type: decoded.type
+        type: decoded.type,
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
@@ -139,7 +138,7 @@ export class TokenService {
       } else if (error instanceof AuthError) {
         throw error;
       }
-      
+
       throw new AuthError(
         AuthErrorCode.INVALID_REFRESH_TOKEN,
         '리프레시 토큰 검증에 실패했습니다.',
@@ -151,17 +150,20 @@ export class TokenService {
   /**
    * 비밀번호 재설정 토큰 생성
    */
-  async generatePasswordResetToken(userId: string, email: string): Promise<string> {
+  async generatePasswordResetToken(
+    userId: string,
+    email: string
+  ): Promise<string> {
     try {
       return jwt.sign(
-        { 
-          userId, 
-          email, 
-          type: 'password-reset' 
+        {
+          userId,
+          email,
+          type: 'password-reset',
         },
         this.JWT_SECRET,
-        { 
-          expiresIn: this.PASSWORD_RESET_EXPIRES_IN 
+        {
+          expiresIn: this.PASSWORD_RESET_EXPIRES_IN,
         }
       );
     } catch (error) {
@@ -176,10 +178,12 @@ export class TokenService {
   /**
    * 비밀번호 재설정 토큰 검증
    */
-  async verifyPasswordResetToken(token: string): Promise<{ userId: string; email: string }> {
+  async verifyPasswordResetToken(
+    token: string
+  ): Promise<{ userId: string; email: string }> {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as any;
-      
+
       if (decoded.type !== 'password-reset') {
         throw new AuthError(
           AuthErrorCode.INVALID_RESET_TOKEN,
@@ -189,7 +193,7 @@ export class TokenService {
 
       return {
         userId: decoded.userId,
-        email: decoded.email
+        email: decoded.email,
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
@@ -201,7 +205,7 @@ export class TokenService {
       } else if (error instanceof AuthError) {
         throw error;
       }
-      
+
       throw new AuthError(
         AuthErrorCode.INVALID_RESET_TOKEN,
         '재설정 토큰 검증에 실패했습니다.',
@@ -228,7 +232,7 @@ export class TokenService {
     try {
       const decoded = jwt.decode(token) as JWTPayload;
       if (!decoded || !decoded.exp) return true;
-      
+
       return Date.now() >= decoded.exp * 1000;
     } catch {
       return true;
@@ -242,7 +246,7 @@ export class TokenService {
     try {
       const decoded = jwt.decode(token) as JWTPayload;
       if (!decoded || !decoded.exp) return 0;
-      
+
       const remaining = decoded.exp * 1000 - Date.now();
       return Math.max(0, Math.floor(remaining / 1000));
     } catch {

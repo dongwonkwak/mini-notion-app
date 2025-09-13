@@ -15,7 +15,7 @@ const eventLogger = new AuthEventLogger(prisma);
 
 /**
  * 오래된 보안 로그 정리
- * 
+ *
  * @swagger
  * /api/admin/security/cleanup:
  *   post:
@@ -65,13 +65,13 @@ const eventLogger = new AuthEventLogger(prisma);
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         {
           success: false,
           error: 'AUTHENTICATION_REQUIRED',
-          message: '로그인이 필요합니다.'
+          message: '로그인이 필요합니다.',
         },
         { status: 401 }
       );
@@ -102,10 +102,9 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         deletedCount,
-        daysToKeep: validDaysToKeep
-      }
+        daysToKeep: validDaysToKeep,
+      },
     });
-
   } catch (error: unknown) {
     console.error('Log cleanup error:', error);
 
@@ -113,7 +112,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: 'LOG_CLEANUP_FAILED',
-        message: '로그 정리 중 오류가 발생했습니다.'
+        message: '로그 정리 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );

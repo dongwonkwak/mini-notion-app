@@ -11,7 +11,7 @@ const authService = new AuthService();
 
 /**
  * 사용자 회원가입
- * 
+ *
  * @swagger
  * /api/auth/signup:
  *   post:
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, name, password } = body;
-    
+
     // 클라이언트 정보 추출 (현재 사용되지 않지만 향후 로깅에 사용 예정)
     // const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     // const userAgent = request.headers.get('user-agent') || 'unknown';
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'EMAIL_NAME_PASSWORD_REQUIRED',
-          message: '이메일, 이름, 비밀번호를 모두 입력해주세요.'
+          message: '이메일, 이름, 비밀번호를 모두 입력해주세요.',
         },
         { status: 400 }
       );
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'INVALID_EMAIL_FORMAT',
-          message: '올바른 이메일 형식을 입력해주세요.'
+          message: '올바른 이메일 형식을 입력해주세요.',
         },
         { status: 400 }
       );
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'PASSWORD_TOO_SHORT',
-          message: '비밀번호는 최소 8자 이상이어야 합니다.'
+          message: '비밀번호는 최소 8자 이상이어야 합니다.',
         },
         { status: 400 }
       );
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       name: name.trim(),
       password,
-      provider: 'email'
+      provider: 'email',
     };
 
     const user = await authService.createUser(userData);
@@ -137,12 +137,11 @@ export async function POST(request: NextRequest) {
           id: user.id,
           email: user.email,
           name: user.name,
-          avatar: user.avatar
-        }
+          avatar: user.avatar,
+        },
       },
       { status: 201 }
     );
-
   } catch (error: unknown) {
     console.error('Signup error:', error);
 
@@ -152,7 +151,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'EMAIL_ALREADY_EXISTS',
-          message: '이미 사용 중인 이메일입니다.'
+          message: '이미 사용 중인 이메일입니다.',
         },
         { status: 409 }
       );
@@ -162,7 +161,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: 'SIGNUP_FAILED',
-        message: '회원가입 중 오류가 발생했습니다.'
+        message: '회원가입 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );

@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { WorkspaceService, DocumentService, UserService, cleanDatabase, prisma } from '../index';
+import {
+  WorkspaceService,
+  DocumentService,
+  UserService,
+  cleanDatabase,
+  prisma,
+} from '../index';
 
 describe('Database Utilities', () => {
   beforeEach(async () => {
@@ -38,17 +44,19 @@ describe('Database Utilities', () => {
       });
 
       const originalActivity = user.lastActiveAt;
-      
+
       // Wait a bit to ensure timestamp difference
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       await userService.updateLastActivity(user.id);
 
       const updatedUser = await prisma().user.findUnique({
         where: { id: user.id },
       });
 
-      expect(updatedUser?.lastActiveAt.getTime()).toBeGreaterThan(originalActivity.getTime());
+      expect(updatedUser?.lastActiveAt.getTime()).toBeGreaterThan(
+        originalActivity.getTime()
+      );
     });
 
     it('should get user workspaces', async () => {
@@ -71,7 +79,7 @@ describe('Database Utilities', () => {
       });
 
       const workspaces = await userService.getUserWorkspaces(user.id);
-      
+
       expect(workspaces).toHaveLength(1);
       expect(workspaces[0].id).toBe(workspace.id);
       expect(workspaces[0].name).toBe('Test Workspace');
@@ -109,7 +117,10 @@ describe('Database Utilities', () => {
       const hasAccess = await workspaceService.hasAccess(user.id, workspace.id);
       expect(hasAccess).toBe(true);
 
-      const noAccess = await workspaceService.hasAccess('non-existent-user', workspace.id);
+      const noAccess = await workspaceService.hasAccess(
+        'non-existent-user',
+        workspace.id
+      );
       expect(noAccess).toBe(false);
     });
 
@@ -143,7 +154,10 @@ describe('Database Utilities', () => {
       const role = await workspaceService.getUserRole(user.id, workspace.id);
       expect(role).toBe('admin');
 
-      const noRole = await workspaceService.getUserRole('non-existent-user', workspace.id);
+      const noRole = await workspaceService.getUserRole(
+        'non-existent-user',
+        workspace.id
+      );
       expect(noRole).toBeNull();
     });
 
@@ -174,13 +188,25 @@ describe('Database Utilities', () => {
         },
       });
 
-      const canRead = await workspaceService.canPerformAction(user.id, workspace.id, 'read');
+      const canRead = await workspaceService.canPerformAction(
+        user.id,
+        workspace.id,
+        'read'
+      );
       expect(canRead).toBe(true);
 
-      const canWrite = await workspaceService.canPerformAction(user.id, workspace.id, 'write');
+      const canWrite = await workspaceService.canPerformAction(
+        user.id,
+        workspace.id,
+        'write'
+      );
       expect(canWrite).toBe(true);
 
-      const canAdmin = await workspaceService.canPerformAction(user.id, workspace.id, 'admin');
+      const canAdmin = await workspaceService.canPerformAction(
+        user.id,
+        workspace.id,
+        'admin'
+      );
       expect(canAdmin).toBe(false);
     });
   });
@@ -224,8 +250,10 @@ describe('Database Utilities', () => {
         },
       });
 
-      const docWithPage = await documentService.getDocumentWithPage(document.id);
-      
+      const docWithPage = await documentService.getDocumentWithPage(
+        document.id
+      );
+
       expect(docWithPage).toBeDefined();
       expect(docWithPage?.id).toBe(document.id);
       expect(docWithPage?.page.title).toBe('Doc Page');
@@ -273,7 +301,11 @@ describe('Database Utilities', () => {
       const newState = Buffer.from('new state');
       const newVersion = 2;
 
-      await documentService.updateDocumentState(document.id, newState, newVersion);
+      await documentService.updateDocumentState(
+        document.id,
+        newState,
+        newVersion
+      );
 
       const updatedDoc = await prisma().document.findUnique({
         where: { id: document.id },

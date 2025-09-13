@@ -27,7 +27,7 @@ export class PermissionService {
     admin: 1,
     editor: 2,
     viewer: 3,
-    guest: 4
+    guest: 4,
   };
 
   // 역할별 권한 정의
@@ -38,8 +38,8 @@ export class PermissionService {
         { resource: '*', action: '*' }, // 모든 권한
         { resource: 'workspace', action: 'delete' },
         { resource: 'workspace', action: 'transfer-ownership' },
-        { resource: 'workspace', action: 'manage-billing' }
-      ]
+        { resource: 'workspace', action: 'manage-billing' },
+      ],
     },
     {
       role: 'admin',
@@ -51,9 +51,9 @@ export class PermissionService {
         { resource: 'page', action: '*' },
         { resource: 'document', action: '*' },
         { resource: 'comment', action: '*' },
-        { resource: 'file', action: '*' }
+        { resource: 'file', action: '*' },
       ],
-      inherits: ['editor']
+      inherits: ['editor'],
     },
     {
       role: 'editor',
@@ -66,16 +66,28 @@ export class PermissionService {
         { resource: 'document', action: 'create' },
         { resource: 'document', action: 'read' },
         { resource: 'document', action: 'update' },
-        { resource: 'document', action: 'delete', conditions: { isOwner: true } },
+        {
+          resource: 'document',
+          action: 'delete',
+          conditions: { isOwner: true },
+        },
         { resource: 'comment', action: 'create' },
         { resource: 'comment', action: 'read' },
-        { resource: 'comment', action: 'update', conditions: { isOwner: true } },
-        { resource: 'comment', action: 'delete', conditions: { isOwner: true } },
+        {
+          resource: 'comment',
+          action: 'update',
+          conditions: { isOwner: true },
+        },
+        {
+          resource: 'comment',
+          action: 'delete',
+          conditions: { isOwner: true },
+        },
         { resource: 'file', action: 'upload' },
         { resource: 'file', action: 'read' },
-        { resource: 'file', action: 'delete', conditions: { isOwner: true } }
+        { resource: 'file', action: 'delete', conditions: { isOwner: true } },
       ],
-      inherits: ['viewer']
+      inherits: ['viewer'],
     },
     {
       role: 'viewer',
@@ -84,17 +96,21 @@ export class PermissionService {
         { resource: 'page', action: 'read' },
         { resource: 'document', action: 'read' },
         { resource: 'comment', action: 'read' },
-        { resource: 'file', action: 'read' }
+        { resource: 'file', action: 'read' },
       ],
-      inherits: ['guest']
+      inherits: ['guest'],
     },
     {
       role: 'guest',
       permissions: [
         { resource: 'page', action: 'read', conditions: { isPublic: true } },
-        { resource: 'document', action: 'read', conditions: { isPublic: true } }
-      ]
-    }
+        {
+          resource: 'document',
+          action: 'read',
+          conditions: { isPublic: true },
+        },
+      ],
+    },
   ];
 
   /**
@@ -109,13 +125,21 @@ export class PermissionService {
   ): Promise<boolean> {
     try {
       // 사용자의 워크스페이스 멤버십 확인
-      const membership = await this.getUserWorkspaceMembership(userId, workspaceId);
+      const membership = await this.getUserWorkspaceMembership(
+        userId,
+        workspaceId
+      );
       if (!membership) {
         // 게스트 권한으로 확인
         return this.hasPermission('guest', resource, action, context);
       }
 
-      return this.hasPermission(membership.role as UserRole, resource, action, context);
+      return this.hasPermission(
+        membership.role as UserRole,
+        resource,
+        action,
+        context
+      );
     } catch (error) {
       console.error('Permission check error:', error);
       return false;
@@ -137,11 +161,11 @@ export class PermissionService {
           workspace: {
             include: {
               members: {
-                where: { userId }
-              }
-            }
-          }
-        }
+                where: { userId },
+              },
+            },
+          },
+        },
       });
 
       if (!page) return false;
@@ -149,15 +173,17 @@ export class PermissionService {
       const membership = page.workspace.members[0];
       if (!membership) {
         // 페이지가 공개인지 확인
-        return this.hasPermission('guest', 'page', action, { isPublic: page.isPublic });
+        return this.hasPermission('guest', 'page', action, {
+          isPublic: page.isPublic,
+        });
       }
 
       // 페이지 소유자인지 확인
       const isPageOwner = page.createdBy === userId;
-      
-      return this.hasPermission(membership.role as UserRole, 'page', action, { 
+
+      return this.hasPermission(membership.role as UserRole, 'page', action, {
         isOwner: isPageOwner,
-        isPublic: page.isPublic 
+        isPublic: page.isPublic,
       });
     } catch (error) {
       console.error('Page permission check error:', error);
@@ -180,26 +206,33 @@ export class PermissionService {
           workspace: {
             include: {
               members: {
-                where: { userId }
-              }
-            }
-          }
-        }
+                where: { userId },
+              },
+            },
+          },
+        },
       });
 
       if (!page) return false;
 
       const membership = page.workspace.members[0];
       if (!membership) {
-        return this.hasPermission('guest', 'document', action, { isPublic: page.isPublic });
+        return this.hasPermission('guest', 'document', action, {
+          isPublic: page.isPublic,
+        });
       }
 
       const isDocumentOwner = page.createdBy === userId;
-      
-      return this.hasPermission(membership.role as UserRole, 'document', action, { 
-        isOwner: isDocumentOwner,
-        isPublic: page.isPublic 
-      });
+
+      return this.hasPermission(
+        membership.role as UserRole,
+        'document',
+        action,
+        {
+          isOwner: isDocumentOwner,
+          isPublic: page.isPublic,
+        }
+      );
     } catch (error) {
       console.error('Document permission check error:', error);
       return false;
@@ -216,7 +249,7 @@ export class PermissionService {
     context?: Record<string, any>
   ): boolean {
     const rolePermissions = this.getRolePermissions(role);
-    
+
     for (const permission of rolePermissions) {
       // 와일드카드 권한 확인
       if (permission.resource === '*' && permission.action === '*') {
@@ -249,7 +282,9 @@ export class PermissionService {
     // 상속된 권한 추가
     if (roleConfig.inherits) {
       for (const inheritedRole of roleConfig.inherits) {
-        permissions = permissions.concat(this.getRolePermissions(inheritedRole));
+        permissions = permissions.concat(
+          this.getRolePermissions(inheritedRole)
+        );
       }
     }
 
@@ -278,12 +313,15 @@ export class PermissionService {
   /**
    * 사용자의 워크스페이스 멤버십 정보 가져오기
    */
-  private async getUserWorkspaceMembership(userId: string, workspaceId: string) {
+  private async getUserWorkspaceMembership(
+    userId: string,
+    workspaceId: string
+  ) {
     return prisma.workspaceMember.findFirst({
       where: {
         userId,
-        workspaceId
-      }
+        workspaceId,
+      },
     });
   }
 
@@ -311,7 +349,7 @@ export class PermissionService {
 
       // 초대할 사용자 찾기
       const user = await prisma.user.findUnique({
-        where: { email }
+        where: { email },
       });
 
       if (!user) {
@@ -319,7 +357,10 @@ export class PermissionService {
       }
 
       // 이미 멤버인지 확인
-      const existingMember = await this.getUserWorkspaceMembership(user.id, workspaceId);
+      const existingMember = await this.getUserWorkspaceMembership(
+        user.id,
+        workspaceId
+      );
       if (existingMember) {
         throw new Error('이미 워크스페이스 멤버입니다.');
       }
@@ -329,8 +370,8 @@ export class PermissionService {
         data: {
           userId: user.id,
           workspaceId,
-          role
-        }
+          role,
+        },
       });
 
       return true;
@@ -364,7 +405,10 @@ export class PermissionService {
 
       // 자신의 역할은 변경할 수 없음 (소유자 제외)
       if (updaterId === targetUserId) {
-        const updaterMembership = await this.getUserWorkspaceMembership(updaterId, workspaceId);
+        const updaterMembership = await this.getUserWorkspaceMembership(
+          updaterId,
+          workspaceId
+        );
         if (updaterMembership?.role !== 'owner') {
           throw new Error('자신의 역할은 변경할 수 없습니다.');
         }
@@ -372,7 +416,10 @@ export class PermissionService {
 
       // 소유자 역할은 소유자만 부여 가능
       if (newRole === 'owner') {
-        const updaterMembership = await this.getUserWorkspaceMembership(updaterId, workspaceId);
+        const updaterMembership = await this.getUserWorkspaceMembership(
+          updaterId,
+          workspaceId
+        );
         if (updaterMembership?.role !== 'owner') {
           throw new Error('소유자 권한은 소유자만 부여할 수 있습니다.');
         }
@@ -382,9 +429,9 @@ export class PermissionService {
       await prisma.workspaceMember.updateMany({
         where: {
           userId: targetUserId,
-          workspaceId
+          workspaceId,
         },
-        data: { role: newRole }
+        data: { role: newRole },
       });
 
       return true;
@@ -416,7 +463,10 @@ export class PermissionService {
       }
 
       // 소유자는 제거할 수 없음
-      const targetMembership = await this.getUserWorkspaceMembership(targetUserId, workspaceId);
+      const targetMembership = await this.getUserWorkspaceMembership(
+        targetUserId,
+        workspaceId
+      );
       if (targetMembership?.role === 'owner') {
         throw new Error('소유자는 제거할 수 없습니다.');
       }
@@ -425,8 +475,8 @@ export class PermissionService {
       await prisma.workspaceMember.deleteMany({
         where: {
           userId: targetUserId,
-          workspaceId
-        }
+          workspaceId,
+        },
       });
 
       return true;
@@ -439,25 +489,27 @@ export class PermissionService {
   /**
    * 사용자의 모든 워크스페이스 권한 가져오기
    */
-  async getUserWorkspacePermissions(userId: string): Promise<Array<{
-    workspaceId: string;
-    workspaceName: string;
-    role: UserRole;
-    permissions: Permission[];
-  }>> {
+  async getUserWorkspacePermissions(userId: string): Promise<
+    Array<{
+      workspaceId: string;
+      workspaceName: string;
+      role: UserRole;
+      permissions: Permission[];
+    }>
+  > {
     try {
       const memberships = await prisma.workspaceMember.findMany({
         where: { userId },
         include: {
-          workspace: true
-        }
+          workspace: true,
+        },
       });
 
       return memberships.map(membership => ({
         workspaceId: membership.workspaceId,
         workspaceName: membership.workspace.name,
         role: membership.role as UserRole,
-        permissions: this.getRolePermissions(membership.role as UserRole)
+        permissions: this.getRolePermissions(membership.role as UserRole),
       }));
     } catch (error) {
       console.error('Get user permissions error:', error);

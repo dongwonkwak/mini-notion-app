@@ -11,20 +11,23 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        node: true
-      }
+        node: true,
+      },
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      '@typescript-eslint': tseslint,
     },
     rules: {
       'no-undef': 'off', // Turn off no-undef as TypeScript handles this
       'no-unused-vars': 'off', // Turn off base rule to use TypeScript version
-      '@typescript-eslint/no-unused-vars': ['error', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_'
-      }]
-    }
-  }
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
 ];

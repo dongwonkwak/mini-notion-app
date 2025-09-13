@@ -5,9 +5,7 @@ import path from 'path';
 
 describe('Monorepo Structure', () => {
   it('should have correct package.json structure', () => {
-    const rootPackageJson = JSON.parse(
-      readFileSync('package.json', 'utf-8')
-    );
+    const rootPackageJson = JSON.parse(readFileSync('package.json', 'utf-8'));
 
     expect(rootPackageJson.name).toBe('mini-notion-app');
     expect(rootPackageJson.private).toBe(true);
@@ -19,7 +17,7 @@ describe('Monorepo Structure', () => {
 
   it('should have pnpm workspace configuration', () => {
     expect(existsSync('pnpm-workspace.yaml')).toBe(true);
-    
+
     const workspaceConfig = readFileSync('pnpm-workspace.yaml', 'utf-8');
     expect(workspaceConfig).toContain('apps/*');
     expect(workspaceConfig).toContain('packages/*');
@@ -27,10 +25,8 @@ describe('Monorepo Structure', () => {
 
   it('should have turbo configuration', () => {
     expect(existsSync('turbo.json')).toBe(true);
-    
-    const turboConfig = JSON.parse(
-      readFileSync('turbo.json', 'utf-8')
-    );
+
+    const turboConfig = JSON.parse(readFileSync('turbo.json', 'utf-8'));
 
     expect(turboConfig.pipeline).toBeDefined();
     expect(turboConfig.pipeline.build).toBeDefined();
@@ -41,7 +37,7 @@ describe('Monorepo Structure', () => {
 
   it('should have all required apps directories', () => {
     const requiredApps = ['web', 'server', 'api'];
-    
+
     requiredApps.forEach(app => {
       const appPath = path.join('apps', app);
       expect(existsSync(appPath)).toBe(true);
@@ -52,10 +48,16 @@ describe('Monorepo Structure', () => {
 
   it('should have all required packages directories', () => {
     const requiredPackages = [
-      'ui', 'editor', 'collaboration', 'auth', 
-      'database', 'types', 'ai', 'config'
+      'ui',
+      'editor',
+      'collaboration',
+      'auth',
+      'database',
+      'types',
+      'ai',
+      'config',
     ];
-    
+
     requiredPackages.forEach(pkg => {
       const pkgPath = path.join('packages', pkg);
       expect(existsSync(pkgPath)).toBe(true);
@@ -65,15 +67,20 @@ describe('Monorepo Structure', () => {
 
   it('should have correct package naming convention', () => {
     const packages = [
-      'ui', 'editor', 'collaboration', 'auth', 
-      'database', 'types', 'ai'
+      'ui',
+      'editor',
+      'collaboration',
+      'auth',
+      'database',
+      'types',
+      'ai',
     ];
-    
+
     packages.forEach(pkg => {
       const packageJson = JSON.parse(
         readFileSync(path.join('packages', pkg, 'package.json'), 'utf-8')
       );
-      
+
       expect(packageJson.name).toBe(`@editor/${pkg}`);
       expect(packageJson.private).toBe(true);
     });
@@ -86,10 +93,8 @@ describe('Monorepo Structure', () => {
     expect(existsSync('packages/config/tsconfig/node.json')).toBe(true);
 
     // Root tsconfig should reference all projects
-    const rootTsConfig = JSON.parse(
-      readFileSync('tsconfig.json', 'utf-8')
-    );
-    
+    const rootTsConfig = JSON.parse(readFileSync('tsconfig.json', 'utf-8'));
+
     expect(rootTsConfig.references).toBeDefined();
     expect(rootTsConfig.references.length).toBeGreaterThan(5);
   });
@@ -104,7 +109,7 @@ describe('Monorepo Structure', () => {
 
   it('should have setup script', () => {
     expect(existsSync('scripts/setup.sh')).toBe(true);
-    
+
     // Check if script is executable
     const stats = require('fs').statSync('scripts/setup.sh');
     expect(stats.mode & parseInt('111', 8)).toBeGreaterThan(0);
@@ -119,26 +124,33 @@ describe('Package Dependencies', () => {
 
     expect(webPackageJson.dependencies['@editor/ui']).toBe('workspace:*');
     expect(webPackageJson.dependencies['@editor/editor']).toBe('workspace:*');
-    expect(webPackageJson.dependencies['@editor/collaboration']).toBe('workspace:*');
+    expect(webPackageJson.dependencies['@editor/collaboration']).toBe(
+      'workspace:*'
+    );
   });
 
   it('should not have circular dependencies', () => {
     // This is a simplified check - in a real scenario, you'd use a tool like madge
     const packages = [
-      'ui', 'editor', 'collaboration', 'auth', 
-      'database', 'types', 'ai'
+      'ui',
+      'editor',
+      'collaboration',
+      'auth',
+      'database',
+      'types',
+      'ai',
     ];
-    
+
     packages.forEach(pkg => {
       const packageJson = JSON.parse(
         readFileSync(path.join('packages', pkg, 'package.json'), 'utf-8')
       );
-      
+
       // Types package should not depend on other packages (except config)
       if (pkg === 'types') {
         const deps = packageJson.dependencies || {};
-        const workspaceDeps = Object.keys(deps).filter(dep => 
-          dep.startsWith('@editor/') && dep !== '@editor/config'
+        const workspaceDeps = Object.keys(deps).filter(
+          dep => dep.startsWith('@editor/') && dep !== '@editor/config'
         );
         expect(workspaceDeps).toHaveLength(0);
       }

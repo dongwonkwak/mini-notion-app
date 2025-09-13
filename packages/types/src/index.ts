@@ -96,7 +96,8 @@ export enum AuthErrorCode {
   INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
   PASSWORD_RESET_FAILED = 'PASSWORD_RESET_FAILED',
   PERMISSION_DENIED = 'PERMISSION_DENIED',
-  SESSION_EXPIRED = 'SESSION_EXPIRED'
+  SESSION_EXPIRED = 'SESSION_EXPIRED',
+  ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
 }
 
 // 더 구체적인 AuthError 클래스
@@ -163,13 +164,13 @@ export interface Block {
   metadata: BlockMetadata;
 }
 
-export type BlockType = 
-  | 'paragraph' 
-  | 'heading' 
-  | 'list' 
-  | 'code' 
-  | 'image' 
-  | 'table' 
+export type BlockType =
+  | 'paragraph'
+  | 'heading'
+  | 'list'
+  | 'code'
+  | 'image'
+  | 'table'
   | 'quote'
   | 'divider'
   | 'file';

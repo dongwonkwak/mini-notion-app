@@ -27,7 +27,7 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -38,11 +38,11 @@ describe('API Performance Tests', () => {
           body: JSON.stringify({
             email: `test${i}@example.com`,
             name: `Test User ${i}`,
-            password: 'password123'
+            password: 'password123',
           }),
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
       });
 
@@ -55,7 +55,7 @@ describe('API Performance Tests', () => {
 
       // Assert
       expect(responses).toHaveLength(10);
-      responses.forEach((response) => {
+      responses.forEach(response => {
         expect(response.status).toBe(201);
       });
 
@@ -69,22 +69,22 @@ describe('API Performance Tests', () => {
       const mockMfaSetup = {
         secret: 'JBSWY3DPEHPK3PXP',
         qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
-        backupCodes: ['ABC12345', 'DEF67890']
+        backupCodes: ['ABC12345', 'DEF67890'],
       };
 
       mockAuthService.prototype.setupMFA.mockResolvedValue(mockMfaSetup);
 
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
-        user: { id: 'user-1', email: 'test@example.com' }
+        user: { id: 'user-1', email: 'test@example.com' },
       });
 
       const requests = Array.from({ length: 5 }, () => {
         return new NextRequest('http://localhost:3000/api/auth/mfa/setup', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
       });
 
@@ -113,7 +113,7 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -123,11 +123,11 @@ describe('API Performance Tests', () => {
         body: JSON.stringify({
           email: 'test@example.com',
           name: 'Test User',
-          password: 'password123'
+          password: 'password123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -147,11 +147,11 @@ describe('API Performance Tests', () => {
         body: JSON.stringify({
           email: 'invalid-email',
           name: 'Test User',
-          password: '123'
+          password: '123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act
@@ -173,7 +173,7 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -182,17 +182,20 @@ describe('API Performance Tests', () => {
 
       // Act - Make many requests
       for (let i = 0; i < 100; i++) {
-        const request = new NextRequest('http://localhost:3000/api/auth/signup', {
-          method: 'POST',
-          body: JSON.stringify({
-            email: `test${i}@example.com`,
-            name: `Test User ${i}`,
-            password: 'password123'
-          }),
-          headers: {
-            'Content-Type': 'application/json'
+        const request = new NextRequest(
+          'http://localhost:3000/api/auth/signup',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              email: `test${i}@example.com`,
+              name: `Test User ${i}`,
+              password: 'password123',
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
           }
-        });
+        );
 
         const response = await signupHandler(request);
         expect(response.status).toBe(201);
@@ -218,7 +221,7 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       // First call fails, second succeeds
@@ -231,11 +234,11 @@ describe('API Performance Tests', () => {
         body: JSON.stringify({
           email: 'test@example.com',
           name: 'Test User',
-          password: 'password123'
+          password: 'password123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act - First request fails
@@ -250,18 +253,18 @@ describe('API Performance Tests', () => {
     it('should handle rate limiting gracefully', async () => {
       // This test would be implemented with actual rate limiting middleware
       // For now, we'll test that the API can handle rapid requests
-      
+
       const requests = Array.from({ length: 100 }, (_, i) => {
         return new NextRequest('http://localhost:3000/api/auth/signup', {
           method: 'POST',
           body: JSON.stringify({
             email: `test${i}@example.com`,
             name: `Test User ${i}`,
-            password: 'password123'
+            password: 'password123',
           }),
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
       });
 
@@ -285,7 +288,7 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
@@ -297,11 +300,11 @@ describe('API Performance Tests', () => {
           body: JSON.stringify({
             email: 'duplicate@example.com',
             name: 'Test User',
-            password: 'password123'
+            password: 'password123',
           }),
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
       });
 
@@ -337,12 +340,12 @@ describe('API Performance Tests', () => {
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
-        avatar: null
+        avatar: null,
       };
 
       // Simulate slow database operation
       mockAuthService.prototype.createUser.mockImplementation(() => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           setTimeout(() => resolve(mockUser), 2000); // 2 second delay
         });
       });
@@ -352,11 +355,11 @@ describe('API Performance Tests', () => {
         body: JSON.stringify({
           email: 'test@example.com',
           name: 'Test User',
-          password: 'password123'
+          password: 'password123',
         }),
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Act

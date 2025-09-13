@@ -16,7 +16,7 @@ export function initRedis(): Redis {
   }
 
   const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-  
+
   redis = new Redis(redisUrl, {
     maxRetriesPerRequest: 3,
     lazyConnect: true,
@@ -29,7 +29,7 @@ export function initRedis(): Redis {
     console.log('✅ Redis connected successfully');
   });
 
-  redis.on('error', (error) => {
+  redis.on('error', error => {
     console.error('❌ Redis connection error:', error);
   });
 
@@ -74,7 +74,11 @@ export class DocumentCache {
   /**
    * Cache document state
    */
-  async setDocument(documentId: string, state: Buffer, version: number): Promise<void> {
+  async setDocument(
+    documentId: string,
+    state: Buffer,
+    version: number
+  ): Promise<void> {
     const key = `doc:${documentId}`;
     const data = {
       state: state.toString('base64'),
@@ -89,7 +93,9 @@ export class DocumentCache {
   /**
    * Get cached document state
    */
-  async getDocument(documentId: string): Promise<{ state: Buffer; version: number; lastModified: Date } | null> {
+  async getDocument(
+    documentId: string
+  ): Promise<{ state: Buffer; version: number; lastModified: Date } | null> {
     const key = `doc:${documentId}`;
     const cached = await this.redis.get(key);
 
@@ -220,7 +226,12 @@ export class RateLimiter {
   /**
    * Check rate limit for user action
    */
-  async checkLimit(userId: string, action: string, maxRequests: number = 100, windowMs: number = 60000): Promise<boolean> {
+  async checkLimit(
+    userId: string,
+    action: string,
+    maxRequests: number = 100,
+    windowMs: number = 60000
+  ): Promise<boolean> {
     const key = `rate:${userId}:${action}`;
     const current = await this.redis.incr(key);
 

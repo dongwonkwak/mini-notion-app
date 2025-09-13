@@ -13,7 +13,7 @@ const authService = new AuthService();
 
 /**
  * MFA 설정 시작
- * 
+ *
  * @swagger
  * /api/auth/mfa/setup:
  *   post:
@@ -63,20 +63,21 @@ const authService = new AuthService();
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         {
           success: false,
           error: 'AUTHENTICATION_REQUIRED',
-          message: '로그인이 필요합니다.'
+          message: '로그인이 필요합니다.',
         },
         { status: 401 }
       );
     }
 
     // 클라이언트 정보 추출
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip =
+      request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const mfaSetup = await authService.setupMFA(session.user.id, ip, userAgent);
@@ -85,10 +86,9 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         qrCode: mfaSetup.qrCode,
-        backupCodes: mfaSetup.backupCodes
-      }
+        backupCodes: mfaSetup.backupCodes,
+      },
     });
-
   } catch (error: unknown) {
     console.error('MFA setup error:', error);
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: 'MFA_SETUP_FAILED',
-        message: (error as Error).message || 'MFA 설정 중 오류가 발생했습니다.'
+        message: (error as Error).message || 'MFA 설정 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * MFA 활성화
- * 
+ *
  * @swagger
  * /api/auth/mfa/setup:
  *   put:
@@ -159,13 +159,13 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         {
           success: false,
           error: 'AUTHENTICATION_REQUIRED',
-          message: '로그인이 필요합니다.'
+          message: '로그인이 필요합니다.',
         },
         { status: 401 }
       );
@@ -179,23 +179,23 @@ export async function PUT(request: NextRequest) {
         {
           success: false,
           error: 'TOKEN_REQUIRED',
-          message: 'MFA 토큰을 입력해주세요.'
+          message: 'MFA 토큰을 입력해주세요.',
         },
         { status: 400 }
       );
     }
 
     // 클라이언트 정보 추출
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip =
+      request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     await authService.enableMFA(session.user.id, token, ip, userAgent);
 
     return NextResponse.json({
       success: true,
-      message: 'MFA가 활성화되었습니다.'
+      message: 'MFA가 활성화되었습니다.',
     });
-
   } catch (error: unknown) {
     console.error('MFA enable error:', error);
 
@@ -204,7 +204,7 @@ export async function PUT(request: NextRequest) {
         {
           success: false,
           error: 'INVALID_MFA_TOKEN',
-          message: 'MFA 토큰이 올바르지 않습니다.'
+          message: 'MFA 토큰이 올바르지 않습니다.',
         },
         { status: 400 }
       );
@@ -214,7 +214,7 @@ export async function PUT(request: NextRequest) {
       {
         success: false,
         error: 'MFA_ENABLE_FAILED',
-        message: 'MFA 활성화 중 오류가 발생했습니다.'
+        message: 'MFA 활성화 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );

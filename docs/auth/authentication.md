@@ -7,40 +7,47 @@
 ## 🔐 지원하는 인증 방법
 
 ### 1. 이메일/비밀번호 인증
+
 ```typescript
-provider: 'email'
+provider: 'email';
 ```
 
 **특징:**
+
 - ✅ bcryptjs를 사용한 안전한 비밀번호 해싱
 - ✅ 이메일 인증 필수
 - ✅ 비밀번호 재설정 지원
 - ✅ MFA 지원
 
 **비밀번호 정책:**
+
 - 최소 8자 이상
 - 대소문자, 숫자, 특수문자 포함 권장
 - 일반적인 비밀번호 패턴 차단
 
 ### 2. Google OAuth
+
 ```typescript
-provider: 'google'
-providerId: 'google_user_id'
+provider: 'google';
+providerId: 'google_user_id';
 ```
 
 **특징:**
+
 - ✅ Google 계정으로 빠른 로그인
 - ✅ 프로필 정보 자동 동기화
 - ✅ 이메일 인증 자동 완료
 - ✅ MFA는 Google 계정 설정 따름
 
 ### 3. GitHub OAuth
+
 ```typescript
-provider: 'github'
-providerId: 'github_user_id'
+provider: 'github';
+providerId: 'github_user_id';
 ```
 
 **특징:**
+
 - ✅ GitHub 계정으로 개발자 친화적 로그인
 - ✅ 프로필 정보 자동 동기화
 - ✅ 이메일 인증 자동 완료
@@ -49,6 +56,7 @@ providerId: 'github_user_id'
 ## 🛡️ 다중 인증 (MFA) 시스템
 
 ### TOTP (Time-based One-Time Password)
+
 ```typescript
 mfaEnabled: true
 mfaSecret: 'encrypted_secret'
@@ -56,12 +64,14 @@ mfaBackupCodes: ['code1', 'code2', ...] // 암호화된 백업 코드
 ```
 
 **지원 앱:**
+
 - Google Authenticator
 - Authy
 - 1Password
 - Bitwarden
 
 **설정 과정:**
+
 1. 사용자가 MFA 활성화 요청
 2. 서버에서 TOTP 시크릿 생성
 3. QR 코드 생성 및 표시
@@ -70,16 +80,18 @@ mfaBackupCodes: ['code1', 'code2', ...] // 암호화된 백업 코드
 6. 백업 코드 생성 및 제공
 
 ### 백업 코드 시스템
+
 ```typescript
 // 10개의 일회용 백업 코드 생성
 mfaBackupCodes: [
   'ABCD-EFGH-IJKL',
   'MNOP-QRST-UVWX',
   // ... 8개 더
-]
+];
 ```
 
 **특징:**
+
 - 각 코드는 1회만 사용 가능
 - 사용된 코드는 즉시 무효화
 - 모든 코드 사용 시 새로운 코드 세트 생성 권장
@@ -87,19 +99,21 @@ mfaBackupCodes: [
 ## 🔑 JWT 토큰 시스템
 
 ### 토큰 구조
+
 ```typescript
 interface JWTPayload {
-  sub: string;        // 사용자 ID
-  email: string;      // 사용자 이메일
-  name: string;       // 사용자 이름
-  provider: string;   // 인증 프로바이더
+  sub: string; // 사용자 ID
+  email: string; // 사용자 이메일
+  name: string; // 사용자 이름
+  provider: string; // 인증 프로바이더
   mfaVerified: boolean; // MFA 인증 여부
-  iat: number;        // 발급 시간
-  exp: number;        // 만료 시간
+  iat: number; // 발급 시간
+  exp: number; // 만료 시간
 }
 ```
 
 ### 토큰 관리
+
 - **Access Token**: 15분 만료
 - **Refresh Token**: 30일 만료
 - **자동 갱신**: Access Token 만료 5분 전 자동 갱신
@@ -108,13 +122,14 @@ interface JWTPayload {
 ## 🔄 인증 플로우
 
 ### 1. 이메일/비밀번호 회원가입
+
 ```mermaid
 sequenceDiagram
     participant U as User
     participant C as Client
     participant S as Server
     participant D as Database
-    
+
     U->>C: 회원가입 정보 입력
     C->>S: POST /api/auth/signup
     S->>S: 이메일 중복 확인
@@ -128,6 +143,7 @@ sequenceDiagram
 ```
 
 ### 2. OAuth 로그인
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -135,7 +151,7 @@ sequenceDiagram
     participant S as Server
     participant O as OAuth Provider
     participant D as Database
-    
+
     U->>C: OAuth 로그인 버튼 클릭
     C->>O: OAuth 인증 요청
     O->>U: 로그인 페이지 표시
@@ -149,13 +165,14 @@ sequenceDiagram
 ```
 
 ### 3. MFA 인증
+
 ```mermaid
 sequenceDiagram
     participant U as User
     participant C as Client
     participant S as Server
     participant A as Auth App
-    
+
     U->>C: 로그인 (1차 인증 완료)
     S->>C: MFA 코드 요청
     C->>U: MFA 코드 입력 화면
@@ -170,6 +187,7 @@ sequenceDiagram
 ## 🔧 API 엔드포인트
 
 ### 회원가입
+
 ```typescript
 POST /api/auth/signup
 Content-Type: application/json
@@ -194,6 +212,7 @@ Content-Type: application/json
 ```
 
 ### 로그인
+
 ```typescript
 POST /api/auth/signin
 Content-Type: application/json
@@ -218,6 +237,7 @@ Content-Type: application/json
 ```
 
 ### MFA 설정
+
 ```typescript
 POST /api/auth/mfa/setup
 Authorization: Bearer jwt_token
@@ -235,6 +255,7 @@ Authorization: Bearer jwt_token
 ```
 
 ### MFA 인증
+
 ```typescript
 POST /api/auth/mfa/verify
 Content-Type: application/json
@@ -255,6 +276,7 @@ Content-Type: application/json
 ## 🔒 보안 기능
 
 ### 세션 관리
+
 ```typescript
 // 세션 정보 저장
 interface Session {
@@ -267,12 +289,14 @@ interface Session {
 ```
 
 **특징:**
+
 - 데이터베이스에 세션 정보 저장
 - 로그아웃 시 세션 즉시 무효화
 - 만료된 세션 자동 정리
 - 동시 세션 수 제한 (선택적)
 
 ### 비밀번호 재설정
+
 ```typescript
 POST /api/auth/forgot-password
 {
@@ -284,6 +308,7 @@ POST /api/auth/forgot-password
 ```
 
 ### 계정 보안 이벤트
+
 - 로그인 성공/실패 로그
 - 비밀번호 변경 알림
 - MFA 설정 변경 알림
@@ -292,27 +317,29 @@ POST /api/auth/forgot-password
 ## 🛠️ 개발자 도구
 
 ### 인증 상태 확인
+
 ```typescript
 import { useSession } from 'next-auth/react';
 
 function MyComponent() {
   const { data: session, status } = useSession();
-  
+
   if (status === 'loading') return <p>Loading...</p>;
   if (status === 'unauthenticated') return <p>Access Denied</p>;
-  
+
   return <p>Signed in as {session.user.email}</p>;
 }
 ```
 
 ### 서버사이드 인증 확인
+
 ```typescript
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 export async function getServerSideProps(context) {
   const session = await getServerSession(context.req, context.res, authOptions);
-  
+
   if (!session) {
     return {
       redirect: {
@@ -321,7 +348,7 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  
+
   return {
     props: { session },
   };
@@ -329,16 +356,17 @@ export async function getServerSideProps(context) {
 ```
 
 ### API 라우트 보호
+
 ```typescript
 import { getServerSession } from 'next-auth/next';
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session) {
     return new Response('Unauthorized', { status: 401 });
   }
-  
+
   // 인증된 사용자만 접근 가능한 로직
 }
 ```
@@ -346,18 +374,17 @@ export async function POST(request: Request) {
 ## 🧪 테스트
 
 ### 인증 테스트
+
 ```typescript
 // 회원가입 테스트
 describe('Authentication', () => {
   it('should create new user with email/password', async () => {
-    const response = await request(app)
-      .post('/api/auth/signup')
-      .send({
-        email: 'test@example.com',
-        password: 'securePassword123!',
-        name: 'Test User'
-      });
-      
+    const response = await request(app).post('/api/auth/signup').send({
+      email: 'test@example.com',
+      password: 'securePassword123!',
+      name: 'Test User',
+    });
+
     expect(response.status).toBe(201);
     expect(response.body.user.email).toBe('test@example.com');
   });
@@ -365,13 +392,14 @@ describe('Authentication', () => {
 ```
 
 ### MFA 테스트
+
 ```typescript
 // MFA 설정 테스트
 it('should setup MFA for user', async () => {
   const response = await request(app)
     .post('/api/auth/mfa/setup')
     .set('Authorization', `Bearer ${userToken}`);
-    
+
   expect(response.status).toBe(200);
   expect(response.body.secret).toBeDefined();
   expect(response.body.qrCode).toBeDefined();
@@ -382,6 +410,7 @@ it('should setup MFA for user', async () => {
 ## 🔄 마이그레이션 및 업그레이드
 
 ### 기존 사용자 MFA 마이그레이션
+
 ```sql
 -- MFA 필드 추가 (이미 완료)
 ALTER TABLE users ADD COLUMN mfa_enabled BOOLEAN DEFAULT FALSE;
@@ -390,6 +419,7 @@ ALTER TABLE users ADD COLUMN mfa_backup_codes JSON;
 ```
 
 ### OAuth 프로바이더 추가
+
 1. 새 프로바이더 설정 추가
 2. 데이터베이스 스키마 확인
 3. 사용자 매핑 로직 구현

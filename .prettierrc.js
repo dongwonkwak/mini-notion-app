@@ -1,1 +1,2 @@
-module.exports = require("@editor/config/prettier");
+import config from './packages/config/prettier/index.js';
+export default config;

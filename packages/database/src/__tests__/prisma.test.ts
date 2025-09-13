@@ -21,11 +21,11 @@ describe('Prisma Database Connection', () => {
     const userData = {
       email: uniqueEmail,
       name: 'Test User',
-      provider: 'email'
+      provider: 'email',
     };
 
     const user = await prisma().user.create({
-      data: userData
+      data: userData,
     });
 
     expect(user.email).toBe(userData.email);
@@ -33,7 +33,7 @@ describe('Prisma Database Connection', () => {
     expect(user.createdAt).toBeDefined();
 
     const retrievedUser = await prisma().user.findUnique({
-      where: { id: user.id }
+      where: { id: user.id },
     });
 
     expect(retrievedUser).toBeTruthy();
@@ -45,14 +45,12 @@ describe('Prisma Database Connection', () => {
     const userData = {
       email: uniqueEmail,
       name: 'Test User',
-      provider: 'email'
+      provider: 'email',
     };
 
     await prisma().user.create({ data: userData });
 
-    await expect(
-      prisma().user.create({ data: userData })
-    ).rejects.toThrow();
+    await expect(prisma().user.create({ data: userData })).rejects.toThrow();
   });
 });
 
@@ -67,8 +65,8 @@ describe('Workspace and Page Relations', () => {
       data: {
         email: uniqueEmail,
         name: 'Workspace Test User',
-        provider: 'email'
-      }
+        provider: 'email',
+      },
     });
     userId = user.id;
   });
@@ -82,11 +80,11 @@ describe('Workspace and Page Relations', () => {
       data: {
         name: 'Test Workspace',
         ownerId: userId,
-        settings: {}
+        settings: {},
       },
       include: {
-        owner: true
-      }
+        owner: true,
+      },
     });
 
     // Create workspace member separately
@@ -94,8 +92,8 @@ describe('Workspace and Page Relations', () => {
       data: {
         workspaceId: workspace.id,
         userId: userId,
-        role: 'owner'
-      }
+        role: 'owner',
+      },
     });
 
     expect(workspace.name).toBe('Test Workspace');
@@ -109,12 +107,12 @@ describe('Workspace and Page Relations', () => {
       data: {
         name: 'Test Workspace',
         ownerId: userId,
-        settings: {}
-      }
+        settings: {},
+      },
     });
 
     const documentId = `test-doc-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    
+
     const page = await prisma().page.create({
       data: {
         workspaceId: workspace.id,
@@ -122,9 +120,9 @@ describe('Workspace and Page Relations', () => {
         documentId,
         permissions: {
           read: ['*'],
-          write: ['owner', 'editor']
-        }
-      }
+          write: ['owner', 'editor'],
+        },
+      },
     });
 
     const document = await prisma().document.create({
@@ -132,8 +130,8 @@ describe('Workspace and Page Relations', () => {
         id: page.documentId,
         state: Buffer.from([]),
         version: 0,
-        sizeBytes: 0
-      }
+        sizeBytes: 0,
+      },
     });
 
     expect(page.title).toBe('Test Page');
@@ -147,8 +145,8 @@ describe('Workspace and Page Relations', () => {
       data: {
         name: 'Test Workspace',
         ownerId: userId,
-        settings: {}
-      }
+        settings: {},
+      },
     });
 
     const parentDocId = `parent-doc-${Date.now()}-${Math.random().toString(36).substring(7)}`;
@@ -159,8 +157,8 @@ describe('Workspace and Page Relations', () => {
         workspaceId: workspace.id,
         title: 'Parent Page',
         documentId: parentDocId,
-        permissions: {}
-      }
+        permissions: {},
+      },
     });
 
     await prisma().document.create({
@@ -168,8 +166,8 @@ describe('Workspace and Page Relations', () => {
         id: parentPage.documentId,
         state: Buffer.from([]),
         version: 0,
-        sizeBytes: 0
-      }
+        sizeBytes: 0,
+      },
     });
 
     const childPage = await prisma().page.create({
@@ -178,8 +176,8 @@ describe('Workspace and Page Relations', () => {
         title: 'Child Page',
         documentId: childDocId,
         parentId: parentPage.id,
-        permissions: {}
-      }
+        permissions: {},
+      },
     });
 
     await prisma().document.create({
@@ -187,13 +185,13 @@ describe('Workspace and Page Relations', () => {
         id: childPage.documentId,
         state: Buffer.from([]),
         version: 0,
-        sizeBytes: 0
-      }
+        sizeBytes: 0,
+      },
     });
 
     const pageWithChildren = await prisma().page.findUnique({
       where: { id: parentPage.id },
-      include: { children: true }
+      include: { children: true },
     });
 
     expect(pageWithChildren).toBeTruthy();

@@ -11,12 +11,12 @@ import { SessionCacheService } from './SessionCacheService';
 import { AuthEventLogger } from './AuthEventLogger';
 
 const prisma = getPrisma();
-import type { 
-  User, 
-  CreateUserData, 
-  LoginCredentials, 
+import type {
+  User,
+  CreateUserData,
+  LoginCredentials,
   AuthResult,
-  UserRole
+  UserRole,
 } from '@editor/types';
 import { AuthErrorCode, AuthError } from '@editor/types';
 
@@ -36,7 +36,11 @@ export class AuthService {
   /**
    * 이메일/비밀번호로 사용자 인증 (캐시 활용)
    */
-  async authenticateCredentials(credentials: LoginCredentials, ip?: string, userAgent?: string): Promise<AuthResult> {
+  async authenticateCredentials(
+    credentials: LoginCredentials,
+    ip?: string,
+    userAgent?: string
+  ): Promise<AuthResult> {
     try {
       // 캐시에서 사용자 정보 확인 (이메일로 캐시 키 생성)
       let user = await this.cacheService.getCachedUser(credentials.email);
@@ -46,11 +50,16 @@ export class AuthService {
         user = await this.findUserByEmail(credentials.email);
         if (!user) {
           // 로그인 실패 로깅
-          await this.eventLogger.logSuspiciousActivity('unknown', ip, userAgent, {
-            reason: 'Login attempt with non-existent email',
-            email: credentials.email
-          });
-          
+          await this.eventLogger.logSuspiciousActivity(
+            'unknown',
+            ip,
+            userAgent,
+            {
+              reason: 'Login attempt with non-existent email',
+              email: credentials.email,
+            }
+          );
+
           throw new AuthError(
             AuthErrorCode.USER_NOT_FOUND,
             '사용자를 찾을 수 없습니다.'
@@ -62,7 +71,10 @@ export class AuthService {
       }
 
       // 의심스러운 활동 감지
-      const isSuspicious = await this.eventLogger.detectSuspiciousActivity(user.id, ip);
+      const isSuspicious = await this.eventLogger.detectSuspiciousActivity(
+        user.id,
+        ip
+      );
       if (isSuspicious) {
         throw new AuthError(
           AuthErrorCode.ACCOUNT_LOCKED,
@@ -71,14 +83,17 @@ export class AuthService {
       }
 
       // 비밀번호 검증
-      const isValidPassword = await this.verifyPassword(credentials.password, user.password);
+      const isValidPassword = await this.verifyPassword(
+        credentials.password,
+        user.password
+      );
       if (!isValidPassword) {
         // 잘못된 비밀번호 시도 로깅
         await this.eventLogger.logSuspiciousActivity(user.id, ip, userAgent, {
           reason: 'Invalid password attempt',
-          email: credentials.email
+          email: credentials.email,
         });
-        
+
         throw new AuthError(
           AuthErrorCode.INVALID_PASSWORD,
           '비밀번호가 올바르지 않습니다.'
@@ -94,14 +109,17 @@ export class AuthService {
           );
         }
 
-        const isMfaValid = this.mfaService.verifyMFA(user.mfaSecret!, credentials.mfaToken);
+        const isMfaValid = this.mfaService.verifyMFA(
+          user.mfaSecret!,
+          credentials.mfaToken
+        );
         if (!isMfaValid) {
           // 잘못된 MFA 토큰 시도 로깅
           await this.eventLogger.logSuspiciousActivity(user.id, ip, userAgent, {
             reason: 'Invalid MFA token attempt',
-            email: credentials.email
+            email: credentials.email,
           });
-          
+
           throw new AuthError(
             AuthErrorCode.INVALID_MFA_TOKEN,
             'MFA 토큰이 올바르지 않습니다.'
@@ -113,7 +131,7 @@ export class AuthService {
       await this.updateUserLastActive(user.id);
 
       const sanitizedUser = this.sanitizeUser(user);
-      
+
       // JWT 토큰 생성
       const token = await this.tokenService.generateJWT({
         userId: sanitizedUser.id,
@@ -121,7 +139,9 @@ export class AuthService {
         role: 'editor' as UserRole, // 기본 역할
       });
 
-      const refreshToken = await this.tokenService.generateRefreshToken(sanitizedUser.id);
+      const refreshToken = await this.tokenService.generateRefreshToken(
+        sanitizedUser.id
+      );
 
       // 세션 캐시 저장
       await this.cacheService.cacheSession(sanitizedUser.id, sanitizedUser);
@@ -130,19 +150,19 @@ export class AuthService {
       await this.eventLogger.logLogin(user.id, ip, userAgent, {
         email: credentials.email,
         mfaUsed: user.mfaEnabled,
-        loginMethod: 'email_password'
+        loginMethod: 'email_password',
       });
 
       return {
         user: sanitizedUser,
         token,
-        refreshToken
+        refreshToken,
       };
     } catch (error) {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('Authentication error:', error);
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
@@ -167,7 +187,7 @@ export class AuthService {
       }
 
       // 비밀번호 해싱
-      const hashedPassword = userData.password 
+      const hashedPassword = userData.password
         ? await this.hashPassword(userData.password)
         : null;
 
@@ -180,8 +200,8 @@ export class AuthService {
           providerId: userData.providerId,
           avatarUrl: userData.avatar,
           mfaEnabled: false,
-          emailVerified: userData.provider !== 'email' ? new Date() : null
-        }
+          emailVerified: userData.provider !== 'email' ? new Date() : null,
+        },
       });
 
       return this.sanitizeUser(user);
@@ -189,7 +209,7 @@ export class AuthService {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('User creation error:', error);
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
@@ -202,10 +222,12 @@ export class AuthService {
   /**
    * OAuth 사용자 생성 또는 업데이트
    */
-  async createOAuthUser(userData: Omit<CreateUserData, 'password'>): Promise<User> {
+  async createOAuthUser(
+    userData: Omit<CreateUserData, 'password'>
+  ): Promise<User> {
     try {
       const existingUser = await this.findUserByEmail(userData.email);
-      
+
       if (existingUser) {
         // 기존 사용자 정보 업데이트
         const updatedUser = await prisma.user.update({
@@ -214,8 +236,8 @@ export class AuthService {
             name: userData.name,
             avatarUrl: userData.avatar,
             lastActiveAt: new Date(),
-            emailVerified: new Date()
-          }
+            emailVerified: new Date(),
+          },
         });
         return this.sanitizeUser(updatedUser);
       }
@@ -229,8 +251,8 @@ export class AuthService {
           providerId: userData.providerId,
           avatarUrl: userData.avatar,
           mfaEnabled: false,
-          emailVerified: new Date()
-        }
+          emailVerified: new Date(),
+        },
       });
 
       return this.sanitizeUser(user);
@@ -273,30 +295,39 @@ export class AuthService {
   /**
    * MFA 설정 생성 (MFAService 위임)
    */
-  async setupMFA(userId: string, ip?: string, userAgent?: string): Promise<any> {
+  async setupMFA(
+    userId: string,
+    ip?: string,
+    userAgent?: string
+  ): Promise<any> {
     const result = await this.mfaService.setupMFA(userId);
-    
+
     // MFA 설정 시작 로깅
     await this.eventLogger.logMfaSetup(userId, ip, userAgent, {
-      action: 'setup_initiated'
+      action: 'setup_initiated',
     });
-    
+
     return result;
   }
 
   /**
    * MFA 활성화 (MFAService 위임)
    */
-  async enableMFA(userId: string, token: string, ip?: string, userAgent?: string): Promise<boolean> {
+  async enableMFA(
+    userId: string,
+    token: string,
+    ip?: string,
+    userAgent?: string
+  ): Promise<boolean> {
     const result = await this.mfaService.enableMFA(userId, token);
-    
+
     if (result) {
       // MFA 활성화 성공 로깅
       await this.eventLogger.logMfaSetup(userId, ip, userAgent, {
-        action: 'setup_completed'
+        action: 'setup_completed',
       });
     }
-    
+
     return result;
   }
 
@@ -332,7 +363,10 @@ export class AuthService {
   /**
    * 비밀번호 검증
    */
-  private async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  private async verifyPassword(
+    password: string,
+    hashedPassword: string
+  ): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
 
@@ -341,7 +375,7 @@ export class AuthService {
    */
   async findUserByEmail(email: string): Promise<any> {
     return prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
   }
 
@@ -350,7 +384,7 @@ export class AuthService {
    */
   async getUserById(id: string): Promise<User | null> {
     const user = await prisma.user.findUnique({
-      where: { id }
+      where: { id },
     });
 
     return user ? this.sanitizeUser(user) : null;
@@ -362,14 +396,18 @@ export class AuthService {
   async updateUserLastActive(userId: string): Promise<void> {
     await prisma.user.update({
       where: { id: userId },
-      data: { lastActiveAt: new Date() }
+      data: { lastActiveAt: new Date() },
     });
   }
 
   /**
    * 사용자 활동 로깅
    */
-  async logUserActivity(userId: string, activity: string, metadata?: any): Promise<void> {
+  async logUserActivity(
+    userId: string,
+    activity: string,
+    metadata?: any
+  ): Promise<void> {
     try {
       // 사용자 활동 로그 저장 (필요시 별도 테이블 생성)
       console.log(`User ${userId} activity: ${activity}`, metadata);
@@ -382,10 +420,16 @@ export class AuthService {
    * 사용자 정보 정제 (민감한 정보 제거)
    */
   private sanitizeUser(user: any): User {
-    const { password: _password, mfaSecret: _mfaSecret, mfaBackupCodes: _mfaBackupCodes, avatarUrl, ...sanitized } = user;
+    const {
+      password: _password,
+      mfaSecret: _mfaSecret,
+      mfaBackupCodes: _mfaBackupCodes,
+      avatarUrl,
+      ...sanitized
+    } = user;
     return {
       ...sanitized,
-      avatar: avatarUrl // avatarUrl을 avatar로 매핑
+      avatar: avatarUrl, // avatarUrl을 avatar로 매핑
     };
   }
 
@@ -409,13 +453,14 @@ export class AuthService {
    */
   async resetPassword(token: string, newPassword: string): Promise<boolean> {
     try {
-      const { userId } = await this.tokenService.verifyPasswordResetToken(token);
+      const { userId } =
+        await this.tokenService.verifyPasswordResetToken(token);
 
       const hashedPassword = await this.hashPassword(newPassword);
-      
+
       await prisma.user.update({
         where: { id: userId },
-        data: { password: hashedPassword }
+        data: { password: hashedPassword },
       });
 
       // 사용자 캐시 무효화
@@ -426,7 +471,7 @@ export class AuthService {
       if (error instanceof AuthError) {
         throw error;
       }
-      
+
       console.error('Password reset error:', error);
       throw new AuthError(
         AuthErrorCode.PASSWORD_RESET_FAILED,

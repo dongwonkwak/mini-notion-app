@@ -5,7 +5,13 @@
 
 // Prisma client
 export { PrismaClient } from '@prisma/client';
-export { getPrisma as prisma, initPrisma, closePrisma, checkDatabaseHealth, cleanDatabase } from './utils';
+export {
+  getPrisma as prisma,
+  initPrisma,
+  closePrisma,
+  checkDatabaseHealth,
+  cleanDatabase,
+} from './utils';
 
 // Redis utilities
 export {
@@ -34,4 +40,5 @@ export type {
   Comment,
   Session,
   FileUpload,
+  AuthEvent,
 } from '@prisma/client';

@@ -7,6 +7,7 @@
 ## 🔧 ESLint 설정 구조
 
 ### 루트 레벨 설정
+
 ```javascript
 // eslint.config.js (루트)
 import js from '@eslint/js';
@@ -28,48 +29,62 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: {
-          jsx: true
-        }
-      }
+          jsx: true,
+        },
+      },
     },
     plugins: {
       '@typescript-eslint': tseslint,
       '@next/next': nextPlugin,
-      'react': reactPlugin,
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
-      'import': importPlugin,
-      'jsx-a11y': jsxA11yPlugin
+      import: importPlugin,
+      'jsx-a11y': jsxA11yPlugin,
     },
     rules: {
       // TypeScript 관련 규칙
       'no-undef': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
-      
+
       // React 관련 규칙
       'react/react-in-jsx-scope': 'off', // Next.js에서는 불필요
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      
+
       // Next.js 관련 규칙
       '@next/next/no-html-link-for-pages': 'error',
       '@next/next/no-img-element': 'warn',
-      
+
       // Import 관련 규칙
-      'import/order': ['error', {
-        'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-        'newlines-between': 'always'
-      }],
-      
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
+          'newlines-between': 'always',
+        },
+      ],
+
       // 접근성 관련 규칙
       'jsx-a11y/alt-text': 'error',
-      'jsx-a11y/anchor-is-valid': 'error'
-    }
-  }
+      'jsx-a11y/anchor-is-valid': 'error',
+    },
+  },
 ];
 ```
 
 ### 패키지별 설정
+
 각 패키지는 자체 ESLint 설정을 가집니다:
 
 ```javascript
@@ -86,28 +101,32 @@ export default [
       parser: tsparser,
       parserOptions: {
         ecmaVersion: 'latest',
-        sourceType: 'module'
-      }
+        sourceType: 'module',
+      },
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      '@typescript-eslint': tseslint,
     },
     rules: {
       'no-undef': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_'
-      }],
-      '@typescript-eslint/no-explicit-any': 'warn'
-    }
-  }
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
 ];
 ```
 
 ## 🚀 사용법
 
 ### 기본 명령어
+
 ```bash
 # 전체 프로젝트 린트 검사
 pnpm eslint .
@@ -126,6 +145,7 @@ pnpm eslint . --ext .ts,.tsx
 ```
 
 ### 패키지별 실행
+
 ```bash
 # 특정 패키지에서 실행
 pnpm --filter @editor/auth eslint src
@@ -137,6 +157,7 @@ pnpm -r eslint src
 ## 📊 품질 게이트 통합
 
 ### 자동화 스크립트
+
 ```bash
 # 코드 품질 전체 검사
 pnpm quality:check  # eslint + type-check + test
@@ -146,12 +167,14 @@ pnpm quality:fix    # eslint --fix + format
 ```
 
 ### Git Hooks 통합
+
 ```bash
 # pre-commit hook에서 자동 실행
 pnpm eslint . --fix
 ```
 
 ### CI/CD 파이프라인
+
 ```yaml
 # GitHub Actions
 - name: ESLint Check
@@ -161,16 +184,19 @@ pnpm eslint . --fix
 ## 🔍 규칙 설명
 
 ### TypeScript 규칙
+
 - `@typescript-eslint/no-unused-vars`: 사용하지 않는 변수 감지
 - `@typescript-eslint/no-explicit-any`: any 타입 사용 경고
 - `no-undef`: TypeScript가 처리하므로 비활성화
 
 ### React/Next.js 규칙
+
 - `react/react-in-jsx-scope`: Next.js에서 불필요하므로 비활성화
 - `@next/next/no-html-link-for-pages`: Next.js Link 컴포넌트 사용 강제
 - `@next/next/no-img-element`: Next.js Image 컴포넌트 사용 권장
 
 ### Import 규칙
+
 - `import/order`: Import 순서 정리
   1. Node.js 내장 모듈
   2. 외부 라이브러리
@@ -178,12 +204,14 @@ pnpm eslint . --fix
   4. 상대 경로 import
 
 ### 접근성 규칙
+
 - `jsx-a11y/alt-text`: 이미지 alt 속성 필수
 - `jsx-a11y/anchor-is-valid`: 유효한 링크 구조 강제
 
 ## 🛠️ 커스터마이징
 
 ### 규칙 비활성화
+
 ```javascript
 // 특정 파일에서 규칙 비활성화
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -194,6 +222,7 @@ const data: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 ```
 
 ### 프로젝트별 규칙 추가
+
 ```javascript
 // eslint.config.js에 규칙 추가
 rules: {
@@ -209,6 +238,7 @@ rules: {
 ### 일반적인 문제들
 
 #### 1. 파싱 오류
+
 ```bash
 # TypeScript 파서 설정 확인
 languageOptions: {
@@ -220,12 +250,14 @@ languageOptions: {
 ```
 
 #### 2. 플러그인 충돌
+
 ```bash
 # 플러그인 버전 확인
 pnpm list eslint @typescript-eslint/eslint-plugin
 ```
 
 #### 3. 성능 문제
+
 ```bash
 # 캐시 사용
 pnpm eslint . --cache
@@ -237,11 +269,13 @@ pnpm eslint . --max-warnings 0 --cache --cache-location .eslintcache
 ## 📈 모니터링
 
 ### 메트릭 추적
+
 - ESLint 에러 수: 0개 유지
 - 경고 수: 최소화
 - 규칙 위반 패턴 분석
 
 ### 자동화된 리포트
+
 ```bash
 # ESLint 결과를 JSON으로 출력
 pnpm eslint . --format json > eslint-report.json
@@ -253,19 +287,23 @@ pnpm eslint . --format html > eslint-report.html
 ## 🎯 베스트 프랙티스
 
 ### 1. 점진적 적용
+
 - 새 코드부터 엄격한 규칙 적용
 - 기존 코드는 단계적으로 개선
 
 ### 2. 팀 컨벤션
+
 - 규칙 변경 시 팀 논의
 - 문서화된 예외 사항 관리
 
 ### 3. 성능 최적화
+
 - `.eslintignore` 파일 활용
 - 캐시 기능 사용
 - 필요한 파일만 검사
 
 ### 4. IDE 통합
+
 - VS Code ESLint 확장 설치
 - 저장 시 자동 수정 설정
 - 실시간 오류 표시

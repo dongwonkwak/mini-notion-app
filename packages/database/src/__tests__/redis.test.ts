@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { DocumentCache, SessionCache, RateLimiter, initRedis, closeRedis } from '../redis';
+import {
+  DocumentCache,
+  SessionCache,
+  RateLimiter,
+  initRedis,
+  closeRedis,
+} from '../redis';
 
 // Mock Redis for testing
 jest.mock('ioredis', () => {
@@ -54,18 +60,20 @@ describe('DocumentCache', () => {
     const version = 1;
 
     await documentCache.setDocument(documentId, state, version);
-    
+
     // Mock the get method to return our test data
     const mockGet = require('ioredis').Redis().get;
-    mockGet.mockResolvedValueOnce(JSON.stringify({
-      state: state.toString('base64'),
-      version,
-      lastModified: new Date().toISOString(),
-      activeUsers: []
-    }));
+    mockGet.mockResolvedValueOnce(
+      JSON.stringify({
+        state: state.toString('base64'),
+        version,
+        lastModified: new Date().toISOString(),
+        activeUsers: [],
+      })
+    );
 
     const cached = await documentCache.getDocument(documentId);
-    
+
     expect(cached).toBeDefined();
     expect(cached?.version).toBe(version);
     expect(cached?.state).toEqual(state);
@@ -73,7 +81,7 @@ describe('DocumentCache', () => {
 
   it('should handle cache miss gracefully', async () => {
     const documentId = 'non-existent-doc';
-    
+
     const cached = await documentCache.getDocument(documentId);
     expect(cached).toBeNull();
   });
@@ -84,7 +92,7 @@ describe('DocumentCache', () => {
 
     await documentCache.addActiveUser(documentId, userId);
     await documentCache.removeActiveUser(documentId, userId);
-    
+
     const activeUsers = await documentCache.getActiveUsers(documentId);
     expect(Array.isArray(activeUsers)).toBe(true);
   });
@@ -107,7 +115,7 @@ describe('SessionCache', () => {
     };
 
     await sessionCache.setSession(userId, sessionData);
-    
+
     // Mock the get method to return our test data with ISO string for date
     const mockGet = require('ioredis').Redis().get;
     const serializedData = {
@@ -117,7 +125,7 @@ describe('SessionCache', () => {
     mockGet.mockResolvedValueOnce(JSON.stringify(serializedData));
 
     const cached = await sessionCache.getSession(userId);
-    
+
     // Date 필드는 문자열로 반환되므로 이를 고려한 검증
     expect(cached).toBeDefined();
     expect(cached?.id).toBe(sessionData.id);
@@ -127,7 +135,7 @@ describe('SessionCache', () => {
 
   it('should handle session cache miss', async () => {
     const userId = 'non-existent-user';
-    
+
     const cached = await sessionCache.getSession(userId);
     expect(cached).toBeNull();
   });
@@ -136,7 +144,7 @@ describe('SessionCache', () => {
     const userId = 'user-123';
 
     await sessionCache.updateActivity(userId);
-    
+
     const isActive = await sessionCache.isUserActive(userId);
     expect(typeof isActive).toBe('boolean');
   });

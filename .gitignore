@@ -9,6 +9,10 @@ build/
 .next/
 out/
 
+# Package build outputs
+packages/*/dist/
+apps/*/dist/
+
 # Environment variables
 .env
 .env.local

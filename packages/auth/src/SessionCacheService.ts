@@ -3,10 +3,8 @@
  * Redis를 활용한 사용자 세션 및 JWT 토큰 캐싱을 담당합니다.
  */
 
-import { getRedisClient } from '@editor/database';
-import type { 
-  User
-} from '@editor/types';
+import { getRedis } from '@editor/database';
+import type { User } from '@editor/types';
 
 interface CachedSession {
   user: User;
@@ -20,7 +18,7 @@ interface CachedJWT {
 }
 
 export class SessionCacheService {
-  private readonly redis = getRedisClient();
+  private readonly redis = getRedis();
   private readonly SESSION_PREFIX = 'session:';
   private readonly JWT_PREFIX = 'jwt:';
   private readonly USER_PREFIX = 'user:';
@@ -36,7 +34,7 @@ export class SessionCacheService {
       const sessionData: CachedSession = {
         user,
         expires: new Date(Date.now() + (ttl || this.SESSION_TTL) * 1000),
-        lastActive: new Date()
+        lastActive: new Date(),
       };
 
       await this.redis.setex(
@@ -59,7 +57,7 @@ export class SessionCacheService {
       if (!cached) return null;
 
       const sessionData: CachedSession = JSON.parse(cached);
-      
+
       // 만료 확인
       if (new Date() > sessionData.expires) {
         await this.invalidateSession(userId);
@@ -88,7 +86,7 @@ export class SessionCacheService {
     try {
       const jwtData: CachedJWT = {
         payload,
-        expires: new Date(Date.now() + (ttl || this.JWT_TTL) * 1000)
+        expires: new Date(Date.now() + (ttl || this.JWT_TTL) * 1000),
       };
 
       await this.redis.setex(
@@ -106,11 +104,13 @@ export class SessionCacheService {
    */
   async getCachedJWT(token: string): Promise<any | null> {
     try {
-      const cached = await this.redis.get(`${this.JWT_PREFIX}${this.hashToken(token)}`);
+      const cached = await this.redis.get(
+        `${this.JWT_PREFIX}${this.hashToken(token)}`
+      );
       if (!cached) return null;
 
       const jwtData: CachedJWT = JSON.parse(cached);
-      
+
       // 만료 확인
       if (new Date() > jwtData.expires) {
         await this.invalidateJWT(token);
@@ -192,7 +192,7 @@ export class SessionCacheService {
     try {
       await Promise.all([
         this.invalidateSession(userId),
-        this.invalidateUser(userId)
+        this.invalidateUser(userId),
       ]);
     } catch (error) {
       console.error('User cache invalidation error:', error);
@@ -243,20 +243,20 @@ export class SessionCacheService {
       const [sessionKeys, jwtKeys, userKeys] = await Promise.all([
         this.redis.keys(`${this.SESSION_PREFIX}*`),
         this.redis.keys(`${this.JWT_PREFIX}*`),
-        this.redis.keys(`${this.USER_PREFIX}*`)
+        this.redis.keys(`${this.USER_PREFIX}*`),
       ]);
 
       return {
         sessionCount: sessionKeys.length,
         jwtCount: jwtKeys.length,
-        userCount: userKeys.length
+        userCount: userKeys.length,
       };
     } catch (error) {
       console.error('Cache stats error:', error);
       return {
         sessionCount: 0,
         jwtCount: 0,
-        userCount: 0
+        userCount: 0,
       };
     }
   }
@@ -269,7 +269,7 @@ export class SessionCacheService {
     let hash = 0;
     for (let i = 0; i < token.length; i++) {
       const char = token.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // 32비트 정수로 변환
     }
     return Math.abs(hash).toString(36);

@@ -13,12 +13,12 @@ jest.mock('@editor/database', () => {
   const mockPrismaClient = {
     user: {
       findUnique: jest.fn(),
-      update: jest.fn()
-    }
+      update: jest.fn(),
+    },
   };
 
   return {
-    getPrisma: jest.fn(() => mockPrismaClient)
+    getPrisma: jest.fn(() => mockPrismaClient),
   };
 });
 
@@ -45,12 +45,13 @@ describe('MFAService', () => {
       const mockUser = {
         id: userId,
         email: 'test@example.com',
-        name: 'Test User'
+        name: 'Test User',
       };
 
       const mockSecret = {
         base32: 'JBSWY3DPEHPK3PXP',
-        otpauth_url: 'otpauth://totp/Collaborative%20Editor%20(test@example.com)?secret=JBSWY3DPEHPK3PXP&issuer=Collaborative%20Editor'
+        otpauth_url:
+          'otpauth://totp/Collaborative%20Editor%20(test@example.com)?secret=JBSWY3DPEHPK3PXP&issuer=Collaborative%20Editor',
       };
 
       const mockQRCode = 'data:image/png;base64,mock-qr-code';
@@ -71,8 +72,8 @@ describe('MFAService', () => {
         where: { id: userId },
         data: {
           mfaSecret: 'JBSWY3DPEHPK3PXP',
-          mfaBackupCodes: expect.any(Array)
-        }
+          mfaBackupCodes: expect.any(Array),
+        },
       });
     });
 
@@ -83,7 +84,9 @@ describe('MFAService', () => {
 
       // Act & Assert
       await expect(mfaService.setupMFA(userId)).rejects.toThrow(AuthError);
-      await expect(mfaService.setupMFA(userId)).rejects.toThrow('사용자를 찾을 수 없습니다.');
+      await expect(mfaService.setupMFA(userId)).rejects.toThrow(
+        '사용자를 찾을 수 없습니다.'
+      );
     });
   });
 
@@ -94,7 +97,7 @@ describe('MFAService', () => {
       const token = '123456';
       const mockUser = {
         id: userId,
-        mfaSecret: 'JBSWY3DPEHPK3PXP'
+        mfaSecret: 'JBSWY3DPEHPK3PXP',
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -110,11 +113,11 @@ describe('MFAService', () => {
         secret: 'JBSWY3DPEHPK3PXP',
         encoding: 'base32',
         token,
-        window: 2
+        window: 2,
       });
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: userId },
-        data: { mfaEnabled: true }
+        data: { mfaEnabled: true },
       });
     });
 
@@ -124,14 +127,18 @@ describe('MFAService', () => {
       const token = '123456';
       const mockUser = {
         id: userId,
-        mfaSecret: null
+        mfaSecret: null,
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
 
       // Act & Assert
-      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow(AuthError);
-      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow('MFA 설정이 완료되지 않았습니다.');
+      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow(
+        AuthError
+      );
+      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow(
+        'MFA 설정이 완료되지 않았습니다.'
+      );
     });
 
     it('should throw AuthError for invalid token', async () => {
@@ -140,15 +147,19 @@ describe('MFAService', () => {
       const token = 'invalid';
       const mockUser = {
         id: userId,
-        mfaSecret: 'JBSWY3DPEHPK3PXP'
+        mfaSecret: 'JBSWY3DPEHPK3PXP',
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockSpeakeasy.totp.verify.mockReturnValue(false);
 
       // Act & Assert
-      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow(AuthError);
-      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow('MFA 토큰이 올바르지 않습니다.');
+      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow(
+        AuthError
+      );
+      await expect(mfaService.enableMFA(userId, token)).rejects.toThrow(
+        'MFA 토큰이 올바르지 않습니다.'
+      );
     });
   });
 
@@ -165,11 +176,11 @@ describe('MFAService', () => {
       expect(result).toBe(true);
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: userId },
-        data: { 
+        data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: null
-        }
+          mfaBackupCodes: null,
+        },
       });
     });
   });
@@ -190,7 +201,7 @@ describe('MFAService', () => {
         secret,
         encoding: 'base32',
         token,
-        window: 2
+        window: 2,
       });
     });
 
@@ -229,7 +240,7 @@ describe('MFAService', () => {
       const userId = 'user-1';
       const backupCode = 'ABC12345';
       const mockUser = {
-        mfaBackupCodes: ['ABC12345', 'DEF67890', 'GHI11111']
+        mfaBackupCodes: ['ABC12345', 'DEF67890', 'GHI11111'],
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -242,7 +253,7 @@ describe('MFAService', () => {
       expect(result).toBe(true);
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: userId },
-        data: { mfaBackupCodes: ['DEF67890', 'GHI11111'] }
+        data: { mfaBackupCodes: ['DEF67890', 'GHI11111'] },
       });
     });
 
@@ -251,7 +262,7 @@ describe('MFAService', () => {
       const userId = 'user-1';
       const backupCode = 'INVALID';
       const mockUser = {
-        mfaBackupCodes: ['ABC12345', 'DEF67890', 'GHI11111']
+        mfaBackupCodes: ['ABC12345', 'DEF67890', 'GHI11111'],
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -268,7 +279,7 @@ describe('MFAService', () => {
       const userId = 'user-1';
       const backupCode = 'ABC12345';
       const mockUser = {
-        mfaBackupCodes: null
+        mfaBackupCodes: null,
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -287,7 +298,7 @@ describe('MFAService', () => {
       const userId = 'user-1';
       const mockUser = {
         id: userId,
-        mfaEnabled: true
+        mfaEnabled: true,
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -300,7 +311,7 @@ describe('MFAService', () => {
       expect(result).toHaveLength(8);
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: userId },
-        data: { mfaBackupCodes: expect.any(Array) }
+        data: { mfaBackupCodes: expect.any(Array) },
       });
     });
 
@@ -309,14 +320,18 @@ describe('MFAService', () => {
       const userId = 'user-1';
       const mockUser = {
         id: userId,
-        mfaEnabled: false
+        mfaEnabled: false,
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
 
       // Act & Assert
-      await expect(mfaService.regenerateBackupCodes(userId)).rejects.toThrow(AuthError);
-      await expect(mfaService.regenerateBackupCodes(userId)).rejects.toThrow('MFA가 활성화되지 않았습니다.');
+      await expect(mfaService.regenerateBackupCodes(userId)).rejects.toThrow(
+        AuthError
+      );
+      await expect(mfaService.regenerateBackupCodes(userId)).rejects.toThrow(
+        'MFA가 활성화되지 않았습니다.'
+      );
     });
   });
 
@@ -326,7 +341,7 @@ describe('MFAService', () => {
       const userId = 'user-1';
       const mockUser = {
         mfaEnabled: true,
-        mfaBackupCodes: ['ABC12345', 'DEF67890']
+        mfaBackupCodes: ['ABC12345', 'DEF67890'],
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -338,7 +353,7 @@ describe('MFAService', () => {
       expect(result).toEqual({
         enabled: true,
         hasBackupCodes: true,
-        backupCodesCount: 2
+        backupCodesCount: 2,
       });
     });
 
@@ -349,7 +364,9 @@ describe('MFAService', () => {
 
       // Act & Assert
       await expect(mfaService.getMFAStatus(userId)).rejects.toThrow(AuthError);
-      await expect(mfaService.getMFAStatus(userId)).rejects.toThrow('사용자를 찾을 수 없습니다.');
+      await expect(mfaService.getMFAStatus(userId)).rejects.toThrow(
+        '사용자를 찾을 수 없습니다.'
+      );
     });
   });
 
@@ -367,7 +384,7 @@ describe('MFAService', () => {
       expect(result).toBe(mockToken);
       expect(mockSpeakeasy.totp).toHaveBeenCalledWith({
         secret,
-        encoding: 'base32'
+        encoding: 'base32',
       });
     });
   });

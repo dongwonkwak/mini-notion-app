@@ -27,7 +27,7 @@ describe('TokenService', () => {
         userId: 'user-1',
         email: 'test@example.com',
         role: 'editor' as const,
-        workspaceId: 'workspace-1'
+        workspaceId: 'workspace-1',
       };
 
       mockJwt.sign.mockReturnValue('mock-jwt-token' as never);
@@ -42,13 +42,13 @@ describe('TokenService', () => {
           userId: payload.userId,
           email: payload.email,
           role: payload.role,
-          workspaceId: payload.workspaceId
+          workspaceId: payload.workspaceId,
         },
         mockSecret,
         {
           expiresIn: '30d',
           issuer: 'collaborative-editor',
-          audience: 'collaborative-editor-users'
+          audience: 'collaborative-editor-users',
         }
       );
     });
@@ -58,7 +58,7 @@ describe('TokenService', () => {
       const payload = {
         userId: 'user-1',
         email: 'test@example.com',
-        role: 'editor' as const
+        role: 'editor' as const,
       };
 
       mockJwt.sign.mockImplementation(() => {
@@ -66,7 +66,9 @@ describe('TokenService', () => {
       });
 
       // Act & Assert
-      await expect(tokenService.generateJWT(payload)).rejects.toThrow(AuthError);
+      await expect(tokenService.generateJWT(payload)).rejects.toThrow(
+        AuthError
+      );
     });
   });
 
@@ -78,7 +80,7 @@ describe('TokenService', () => {
         email: 'test@example.com',
         role: 'editor' as const,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
       };
 
       mockJwt.verify.mockReturnValue(mockPayload as never);
@@ -88,26 +90,29 @@ describe('TokenService', () => {
 
       // Assert
       expect(result).toEqual(mockPayload);
-      expect(mockJwt.verify).toHaveBeenCalledWith(
-        'valid-token',
-        mockSecret,
-        {
-          issuer: 'collaborative-editor',
-          audience: 'collaborative-editor-users'
-        }
-      );
+      expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', mockSecret, {
+        issuer: 'collaborative-editor',
+        audience: 'collaborative-editor-users',
+      });
     });
 
     it('should throw AuthError for expired token', async () => {
       // Arrange
-      const expiredError = new jwt.TokenExpiredError('Token expired', new Date());
+      const expiredError = new jwt.TokenExpiredError(
+        'Token expired',
+        new Date()
+      );
       mockJwt.verify.mockImplementation(() => {
         throw expiredError;
       });
 
       // Act & Assert
-      await expect(tokenService.verifyJWT('expired-token')).rejects.toThrow(AuthError);
-      await expect(tokenService.verifyJWT('expired-token')).rejects.toThrow('JWT 토큰이 만료되었습니다.');
+      await expect(tokenService.verifyJWT('expired-token')).rejects.toThrow(
+        AuthError
+      );
+      await expect(tokenService.verifyJWT('expired-token')).rejects.toThrow(
+        'JWT 토큰이 만료되었습니다.'
+      );
     });
 
     it('should throw AuthError for invalid token', async () => {
@@ -118,8 +123,12 @@ describe('TokenService', () => {
       });
 
       // Act & Assert
-      await expect(tokenService.verifyJWT('invalid-token')).rejects.toThrow(AuthError);
-      await expect(tokenService.verifyJWT('invalid-token')).rejects.toThrow('유효하지 않은 JWT 토큰입니다.');
+      await expect(tokenService.verifyJWT('invalid-token')).rejects.toThrow(
+        AuthError
+      );
+      await expect(tokenService.verifyJWT('invalid-token')).rejects.toThrow(
+        '유효하지 않은 JWT 토큰입니다.'
+      );
     });
   });
 
@@ -138,11 +147,11 @@ describe('TokenService', () => {
         {
           userId,
           type: 'refresh',
-          iat: expect.any(Number)
+          iat: expect.any(Number),
         },
         mockSecret,
         {
-          expiresIn: '90d'
+          expiresIn: '90d',
         }
       );
     });
@@ -155,18 +164,20 @@ describe('TokenService', () => {
         userId: 'user-1',
         type: 'refresh',
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
       };
 
       mockJwt.verify.mockReturnValue(mockPayload as never);
 
       // Act
-      const result = await tokenService.verifyRefreshToken('valid-refresh-token');
+      const result = await tokenService.verifyRefreshToken(
+        'valid-refresh-token'
+      );
 
       // Assert
       expect(result).toEqual({
         userId: 'user-1',
-        type: 'refresh'
+        type: 'refresh',
       });
     });
 
@@ -176,14 +187,18 @@ describe('TokenService', () => {
         userId: 'user-1',
         type: 'access', // Wrong type
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
       };
 
       mockJwt.verify.mockReturnValue(mockPayload as never);
 
       // Act & Assert
-      await expect(tokenService.verifyRefreshToken('invalid-type-token')).rejects.toThrow(AuthError);
-      await expect(tokenService.verifyRefreshToken('invalid-type-token')).rejects.toThrow('유효하지 않은 리프레시 토큰입니다.');
+      await expect(
+        tokenService.verifyRefreshToken('invalid-type-token')
+      ).rejects.toThrow(AuthError);
+      await expect(
+        tokenService.verifyRefreshToken('invalid-type-token')
+      ).rejects.toThrow('유효하지 않은 리프레시 토큰입니다.');
     });
   });
 
@@ -195,7 +210,10 @@ describe('TokenService', () => {
       mockJwt.sign.mockReturnValue('reset-token' as never);
 
       // Act
-      const token = await tokenService.generatePasswordResetToken(userId, email);
+      const token = await tokenService.generatePasswordResetToken(
+        userId,
+        email
+      );
 
       // Assert
       expect(token).toBe('reset-token');
@@ -203,11 +221,11 @@ describe('TokenService', () => {
         {
           userId,
           email,
-          type: 'password-reset'
+          type: 'password-reset',
         },
         mockSecret,
         {
-          expiresIn: '1h'
+          expiresIn: '1h',
         }
       );
     });
@@ -221,18 +239,19 @@ describe('TokenService', () => {
         email: 'test@example.com',
         type: 'password-reset',
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 60 * 60,
       };
 
       mockJwt.verify.mockReturnValue(mockPayload as never);
 
       // Act
-      const result = await tokenService.verifyPasswordResetToken('valid-reset-token');
+      const result =
+        await tokenService.verifyPasswordResetToken('valid-reset-token');
 
       // Assert
       expect(result).toEqual({
         userId: 'user-1',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
     });
 
@@ -243,14 +262,18 @@ describe('TokenService', () => {
         email: 'test@example.com',
         type: 'access', // Wrong type
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 60 * 60
+        exp: Math.floor(Date.now() / 1000) + 60 * 60,
       };
 
       mockJwt.verify.mockReturnValue(mockPayload as never);
 
       // Act & Assert
-      await expect(tokenService.verifyPasswordResetToken('invalid-type-token')).rejects.toThrow(AuthError);
-      await expect(tokenService.verifyPasswordResetToken('invalid-type-token')).rejects.toThrow('유효하지 않은 재설정 토큰입니다.');
+      await expect(
+        tokenService.verifyPasswordResetToken('invalid-type-token')
+      ).rejects.toThrow(AuthError);
+      await expect(
+        tokenService.verifyPasswordResetToken('invalid-type-token')
+      ).rejects.toThrow('유효하지 않은 재설정 토큰입니다.');
     });
   });
 
@@ -262,7 +285,7 @@ describe('TokenService', () => {
           userId: 'user-1',
           email: 'test@example.com',
           iat: Math.floor(Date.now() / 1000),
-          exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+          exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
         };
 
         mockJwt.decode.mockReturnValue(mockPayload as never);
@@ -292,7 +315,7 @@ describe('TokenService', () => {
       it('should return true for expired token', () => {
         // Arrange
         const expiredPayload = {
-          exp: Math.floor(Date.now() / 1000) - 1000 // Expired 1000 seconds ago
+          exp: Math.floor(Date.now() / 1000) - 1000, // Expired 1000 seconds ago
         };
 
         mockJwt.decode.mockReturnValue(expiredPayload as never);
@@ -307,7 +330,7 @@ describe('TokenService', () => {
       it('should return false for valid token', () => {
         // Arrange
         const validPayload = {
-          exp: Math.floor(Date.now() / 1000) + 1000 // Valid for 1000 more seconds
+          exp: Math.floor(Date.now() / 1000) + 1000, // Valid for 1000 more seconds
         };
 
         mockJwt.decode.mockReturnValue(validPayload as never);
