@@ -18,7 +18,13 @@ export default [
       '@typescript-eslint': tseslint
     },
     rules: {
-      'no-undef': 'off' // Turn off no-undef as TypeScript handles this
+      'no-undef': 'off', // Turn off no-undef as TypeScript handles this
+      'no-unused-vars': 'off', // Turn off no-unused-vars as @typescript-eslint handles this
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+        'ignoreRestSiblings': true
+      }]
     }
   }
 ];

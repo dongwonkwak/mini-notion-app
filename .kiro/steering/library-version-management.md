@@ -223,6 +223,9 @@ jobs:
     
     // 코드 품질
     "eslint": "^9.17.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1", 
+    "@next/eslint-plugin-next": "^15.1.3",
     "prettier": "^3.4.2",
     
     // 유틸리티

@@ -164,6 +164,12 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  // Prisma cleanup interval 정리
+  if (global.__prismaCleanupInterval) {
+    clearInterval(global.__prismaCleanupInterval);
+    global.__prismaCleanupInterval = null;
+  }
+
   if (prisma) {
     try {
       await prisma.$disconnect();

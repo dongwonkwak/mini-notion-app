@@ -2,6 +2,7 @@
   "name": "@editor/ui",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "공통 UI 컴포넌트",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

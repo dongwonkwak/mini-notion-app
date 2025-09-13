@@ -1,5 +1,18 @@
 {
   "extends": "../../packages/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@editor/ui": ["../../packages/ui/src"],
+      "@editor/editor": ["../../packages/editor/src"],
+      "@editor/collaboration": ["../../packages/collaboration/src"],
+      "@editor/auth": ["../../packages/auth/src"],
+      "@editor/database": ["../../packages/database/src"],
+      "@editor/types": ["../../packages/types/src"],
+      "@editor/config": ["../../packages/config/src"]
+    }
+  },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

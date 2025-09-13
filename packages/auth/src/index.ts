@@ -1,34 +1,29 @@
-// Authentication utilities will be implemented in future tasks
+/**
+ * 인증 관련 유틸리티 패키지
+ * NextAuth.js 기반 다중 프로바이더 인증 및 RBAC 시스템
+ */
 
-// Placeholder exports for build compatibility
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+export { AuthService } from './AuthService';
+export { PermissionService } from './PermissionService';
+export { TokenService } from './TokenService';
+export { MFAService } from './MFAService';
+export { SessionCacheService } from './SessionCacheService';
+export { AuthEventLogger } from './AuthEventLogger';
 
-export interface AuthResult {
-  user: User;
-  token: string;
-}
+// 타입 재내보내기
+export type {
+  User,
+  CreateUserData,
+  LoginCredentials,
+  AuthResult,
+  JWTPayload,
+  StrictJWTPayload,
+  MFASetup,
+  Session,
+  UserRole,
+  AuthError
+} from '@editor/types';
 
-// TODO: Implement in Task 3 - NextAuth.js를 사용한 인증 시스템 설정
-export class AuthService {
-  async validateJWT(_token: string): Promise<User | null> {
-    return null; // Placeholder
-  }
-  
-  async createUser(_userData: any): Promise<User> {
-    throw new Error('Not implemented');
-  }
-}
+export type { AuthEvent, AuthEventFilter } from './AuthEventLogger';
 
-export const JWTUtils = {
-  sign: (_payload: any) => 'placeholder-token',
-  verify: (_token: string) => null,
-};
-
-export const OAuthProviders = {
-  google: {},
-  github: {},
-};
+export { AuthErrorCode, AuthError } from '@editor/types';

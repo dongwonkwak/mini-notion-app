@@ -350,7 +350,7 @@ jobs:
 ### 필수 조건 (모든 태스크)
 - [ ] Unit 테스트 커버리지 70% 이상
 - [ ] 모든 테스트 통과
-- [ ] 린트 에러 없음
+- [ ] ESLint 에러 없음 (`pnpm eslint .`)
 - [ ] 타입 체크 통과
 
 ### 추가 조건 (태스크별)
@@ -383,6 +383,11 @@ pnpm test --testNamePattern="performance|Performance"
 
 # 테스트 감시 모드
 pnpm test:watch
+
+# 코드 품질 검사
+pnpm eslint .              # ESLint 검사
+pnpm eslint . --fix        # 자동 수정
+pnpm type-check            # TypeScript 타입 체크
 
 # SQL 스키마 검증
 pnpm --filter @editor/database db:validate

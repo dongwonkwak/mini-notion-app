@@ -1,4 +1,4 @@
-const baseConfig = require('@editor/config/jest/base.config');
+const baseConfig = require('@editor/config/jest/base.config.cjs');
 
 module.exports = {
   ...baseConfig,
@@ -10,7 +10,6 @@ module.exports = {
   maxWorkers: '50%', // CPU 코어의 50% 사용 (안정성과 성능의 균형)
   
   // 테스트 격리 강화
-  testTimeout: 30000, // 30초 타임아웃 (DB 초기화 시간 고려)
   
   // 워커별 독립성 보장
   workerIdleMemoryLimit: '512MB', // 메모리 제한으로 워커 재시작 방지

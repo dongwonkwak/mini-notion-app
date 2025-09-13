@@ -2,6 +2,7 @@
   "name": "@editor/editor",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Tiptap 에디터 로직",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -56,10 +56,15 @@ test(collaboration): Y.js 실시간 동기화 테스트 추가
 ```
 
 ### 3. PR 및 머지 프로세스
-1. **커밋 전 .gitignore 검증**
+1. **커밋 전 코드 품질 검증**
    ```bash
    # 추적되지 않는 파일 확인
    git status --ignored
+   
+   # 코드 품질 검사
+   pnpm eslint . --fix
+   pnpm type-check
+   pnpm test:ci
    
    # 필요시 .gitignore 정리 Hook 실행
    # "🧹 .gitignore 정리" 버튼 클릭

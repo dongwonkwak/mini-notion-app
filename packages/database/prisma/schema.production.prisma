@@ -1,5 +1,5 @@
-// Production Prisma schema with PostgreSQL
-// This file can be used for production deployments
+// This is your Prisma schema file for production,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -11,15 +11,20 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String
-  avatarUrl    String?  @map("avatar_url")
-  provider     String
-  providerId   String?  @map("provider_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  lastActiveAt DateTime @default(now()) @map("last_active_at")
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String
+  avatarUrl      String?   @map("avatar_url")
+  password       String?   // For email/password authentication
+  provider       String
+  providerId     String?   @map("provider_id")
+  emailVerified  DateTime? @map("email_verified")
+  mfaEnabled     Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret      String?   @map("mfa_secret")
+  mfaBackupCodes Json?     @map("mfa_backup_codes")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  lastActiveAt   DateTime  @default(now()) @map("last_active_at")
 
   // Relations
   ownedWorkspaces Workspace[]       @relation("WorkspaceOwner")
@@ -62,14 +67,14 @@ model WorkspaceMember {
   id          String   @id @default(cuid())
   workspaceId String   @map("workspace_id")
   userId      String   @map("user_id")
-  role        String   // 'admin' | 'editor' | 'viewer'
+  role        String   // 'owner' | 'admin' | 'editor' | 'viewer' | 'guest'
   joinedAt    DateTime @default(now()) @map("joined_at")
 
   // Relations
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([workspaceId, userId])
+  @@unique([userId, workspaceId], name: "userId_workspaceId")
   @@map("workspace_members")
 }
 
@@ -81,6 +86,8 @@ model Page {
   documentId  String   @unique @map("document_id")
   position    Int      @default(0)
   permissions Json
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdBy   String?  @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -151,4 +158,19 @@ model FileUpload {
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("file_uploads")
+}
+
+// Production-specific indexes for performance
+model AuthEvent {
+  id        String   @id @default(cuid())
+  type      String   // 'LOGIN' | 'LOGOUT' | 'MFA_SETUP' | 'PASSWORD_RESET'
+  userId    String   @map("user_id")
+  timestamp DateTime @default(now())
+  ip        String?
+  userAgent String?  @map("user_agent")
+  metadata  Json?
+
+  @@index([userId, timestamp])
+  @@index([type, timestamp])
+  @@map("auth_events")
 }
