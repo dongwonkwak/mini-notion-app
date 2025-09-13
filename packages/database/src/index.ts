@@ -1,20 +1,37 @@
-import { PrismaClient } from '@prisma/client';
+/**
+ * Database package main exports
+ * Provides Prisma client, Redis utilities, and database operations
+ */
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma: PrismaClient | undefined;
-}
+// Prisma client
+export { PrismaClient } from '@prisma/client';
+export { getPrisma as prisma, initPrisma, closePrisma, checkDatabaseHealth, cleanDatabase } from './utils';
 
-export const prisma =
-  globalThis.__prisma ||
-  new PrismaClient({
-    log: ['query'],
-  });
+// Redis utilities
+export {
+  initRedis,
+  getRedis,
+  closeRedis,
+  DocumentCache,
+  SessionCache,
+  RateLimiter,
+  documentCache,
+  sessionCache,
+  rateLimiter,
+} from './redis';
 
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.__prisma = prisma;
-}
+// Database utilities
+export * from './utils';
 
-export * from '@prisma/client';
-export type { Comment, Document, Page, User, Workspace } from '@prisma/client';
-
+// Types
+export type {
+  User,
+  Workspace,
+  WorkspaceMember,
+  Page,
+  Document,
+  DocumentHistory,
+  Comment,
+  Session,
+  FileUpload,
+} from '@prisma/client';

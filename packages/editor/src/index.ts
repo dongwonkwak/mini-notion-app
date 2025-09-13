@@ -13,7 +13,7 @@ export interface BlockType {
 
 // TODO: Implement in Task 4 - Tiptap 기반 협업 에디터 기초 구축
 export class CollaborativeEditor {
-  constructor(config: EditorConfig) {}
+  constructor(/* config: EditorConfig */) {}
 }
 
 export const EditorCommands = {

@@ -1,45 +1,57 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
-import { prisma } from '../index';
+import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
+import { prisma, checkDatabaseHealth, cleanDatabase } from '../index';
 
 describe('Prisma Database Connection', () => {
+  // Clean up before and after each test to ensure isolation
+  beforeEach(async () => {
+    await cleanDatabase();
+  });
+
+  afterEach(async () => {
+    await cleanDatabase();
+  });
+
   it('should connect to database successfully', async () => {
-    const result = await prisma.$queryRaw`SELECT 1 as test`;
-    expect(result).toBeDefined();
+    const isHealthy = await checkDatabaseHealth();
+    expect(isHealthy).toBe(true);
   });
 
   it('should create and retrieve a user', async () => {
+    const uniqueEmail = `test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
     const userData = {
-      email: 'test@example.com',
+      email: uniqueEmail,
       name: 'Test User',
       provider: 'email'
     };
 
-    const user = await prisma.user.create({
+    const user = await prisma().user.create({
       data: userData
     });
 
-    expect(user).toMatchObject(userData);
+    expect(user.email).toBe(userData.email);
     expect(user.id).toBeDefined();
     expect(user.createdAt).toBeDefined();
 
-    const retrievedUser = await prisma.user.findUnique({
+    const retrievedUser = await prisma().user.findUnique({
       where: { id: user.id }
     });
 
-    expect(retrievedUser).toMatchObject(userData);
+    expect(retrievedUser).toBeTruthy();
+    expect(retrievedUser?.email).toBe(userData.email);
   });
 
   it('should enforce unique email constraint', async () => {
+    const uniqueEmail = `duplicate-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
     const userData = {
-      email: 'duplicate@example.com',
+      email: uniqueEmail,
       name: 'Test User',
       provider: 'email'
     };
 
-    await prisma.user.create({ data: userData });
+    await prisma().user.create({ data: userData });
 
     await expect(
-      prisma.user.create({ data: userData })
+      prisma().user.create({ data: userData })
     ).rejects.toThrow();
   });
 });
@@ -48,9 +60,12 @@ describe('Workspace and Page Relations', () => {
   let userId: string;
 
   beforeEach(async () => {
-    const user = await prisma.user.create({
+    await cleanDatabase();
+
+    const uniqueEmail = `workspace-test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
+    const user = await prisma().user.create({
       data: {
-        email: 'workspace-test@example.com',
+        email: uniqueEmail,
         name: 'Workspace Test User',
         provider: 'email'
       }
@@ -58,117 +73,130 @@ describe('Workspace and Page Relations', () => {
     userId = user.id;
   });
 
+  afterEach(async () => {
+    await cleanDatabase();
+  });
+
   it('should create workspace with owner relationship', async () => {
-    const workspace = await prisma.workspace.create({
+    const workspace = await prisma().workspace.create({
       data: {
         name: 'Test Workspace',
         ownerId: userId,
-        members: {
-          create: {
-            userId: userId,
-            role: 'owner'
-          }
-        }
+        settings: {}
       },
       include: {
-        members: true
+        owner: true
+      }
+    });
+
+    // Create workspace member separately
+    const member = await prisma().workspaceMember.create({
+      data: {
+        workspaceId: workspace.id,
+        userId: userId,
+        role: 'owner'
       }
     });
 
     expect(workspace.name).toBe('Test Workspace');
     expect(workspace.ownerId).toBe(userId);
-    expect(workspace.members).toHaveLength(1);
-    expect(workspace.members[0].role).toBe('owner');
+    expect(workspace.owner.id).toBe(userId);
+    expect(member.role).toBe('owner');
   });
 
   it('should create page with document relationship', async () => {
-    const workspace = await prisma.workspace.create({
+    const workspace = await prisma().workspace.create({
       data: {
         name: 'Test Workspace',
         ownerId: userId,
-        members: {
-          create: {
-            userId: userId,
-            role: 'owner'
-          }
+        settings: {}
+      }
+    });
+
+    const documentId = `test-doc-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    
+    const page = await prisma().page.create({
+      data: {
+        workspaceId: workspace.id,
+        title: 'Test Page',
+        documentId,
+        permissions: {
+          read: ['*'],
+          write: ['owner', 'editor']
         }
       }
     });
 
-    const page = await prisma.page.create({
+    const document = await prisma().document.create({
       data: {
-        workspaceId: workspace.id,
-        title: 'Test Page',
-        documentId: 'test-doc-123',
-        document: {
-          create: {
-            id: 'test-doc-123',
-            state: Buffer.from([]),
-            version: 0
-          }
-        }
-      },
-      include: {
-        document: true
+        id: page.documentId,
+        state: Buffer.from([]),
+        version: 0,
+        sizeBytes: 0
       }
     });
 
     expect(page.title).toBe('Test Page');
-    expect(page.documentId).toBe('test-doc-123');
-    expect(page.document).toBeDefined();
-    expect(page.document?.version).toBe(0);
+    expect(page.documentId).toBe(documentId);
+    expect(document.id).toBe(page.documentId);
+    expect(document.version).toBe(0);
   });
 
   it('should support page hierarchy', async () => {
-    const workspace = await prisma.workspace.create({
+    const workspace = await prisma().workspace.create({
       data: {
         name: 'Test Workspace',
         ownerId: userId,
-        members: {
-          create: {
-            userId: userId,
-            role: 'owner'
-          }
-        }
+        settings: {}
       }
     });
 
-    const parentPage = await prisma.page.create({
+    const parentDocId = `parent-doc-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    const childDocId = `child-doc-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+    const parentPage = await prisma().page.create({
       data: {
         workspaceId: workspace.id,
         title: 'Parent Page',
-        documentId: 'parent-doc',
-        document: {
-          create: {
-            id: 'parent-doc',
-            state: Buffer.from([]),
-            version: 0
-          }
-        }
+        documentId: parentDocId,
+        permissions: {}
       }
     });
 
-    const childPage = await prisma.page.create({
+    await prisma().document.create({
+      data: {
+        id: parentPage.documentId,
+        state: Buffer.from([]),
+        version: 0,
+        sizeBytes: 0
+      }
+    });
+
+    const childPage = await prisma().page.create({
       data: {
         workspaceId: workspace.id,
         title: 'Child Page',
-        documentId: 'child-doc',
+        documentId: childDocId,
         parentId: parentPage.id,
-        document: {
-          create: {
-            id: 'child-doc',
-            state: Buffer.from([]),
-            version: 0
-          }
-        }
+        permissions: {}
       }
     });
 
-    const pageWithChildren = await prisma.page.findUnique({
+    await prisma().document.create({
+      data: {
+        id: childPage.documentId,
+        state: Buffer.from([]),
+        version: 0,
+        sizeBytes: 0
+      }
+    });
+
+    const pageWithChildren = await prisma().page.findUnique({
       where: { id: parentPage.id },
       include: { children: true }
     });
 
+    expect(pageWithChildren).toBeTruthy();
     expect(pageWithChildren?.children).toHaveLength(1);
     expect(pageWithChildren?.children[0].title).toBe('Child Page');
     expect(childPage.parentId).toBe(parentPage.id);

@@ -20,13 +20,13 @@ export interface OfflineManagerConfig {
 
 // TODO: Implement in Task 5 - Y.js 실시간 협업 구현
 export class AwarenessManager {
-  constructor(config: any) {}
+  constructor(/* config: any */) {}
 }
 
 export class YjsProvider {
-  constructor(config: YjsProviderConfig) {}
+  constructor(/* config: YjsProviderConfig */) {}
 }
 
 export class OfflineManager {
-  constructor(config: OfflineManagerConfig) {}
+  constructor(/* config: OfflineManagerConfig */) {}
 }

@@ -12,11 +12,11 @@ export interface ThemeConfig {
 }
 
 // TODO: Implement in Task 22 - 모바일 반응형 인터페이스 구현
-export const Button: React.FC<ButtonProps> = ({ children, onClick }) => {
+export const Button: React.FC<ButtonProps> = (/* { children, onClick } */) => {
   return null; // Placeholder
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = (/* { children } */) => {
   return null; // Placeholder
 };
 

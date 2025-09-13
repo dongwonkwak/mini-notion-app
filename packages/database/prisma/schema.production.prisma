@@ -1,15 +1,13 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Production Prisma schema with PostgreSQL
+// This file can be used for production deployments
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-  // Multi-provider support: SQLite for development, PostgreSQL for production
-  // To use PostgreSQL, set DATABASE_URL to postgresql://... and change provider to "postgresql"
 }
 
 model User {
