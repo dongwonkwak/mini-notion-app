@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
 import { execSync } from 'child_process';
+import path from 'path';
 import { prisma } from '../index';
 
 describe('Database Schema Validation', () => {
@@ -8,9 +9,14 @@ describe('Database Schema Validation', () => {
   beforeAll(async () => {
     // 스키마가 데이터베이스와 동기화되어 있는지 확인
     try {
-      execSync('npx prisma db push --force-reset --accept-data-loss --schema=/Users/gwagdong-won/project/mini-notion-app/packages/database/prisma/schema.prisma', { 
+      execSync('npx prisma db push --force-reset --accept-data-loss --schema=./prisma/schema.prisma', { 
         stdio: 'pipe',
-        timeout: 30000
+        timeout: 30000,
+        cwd: path.join(__dirname, '../../'), // packages/database 디렉토리로 이동
+        env: { 
+          ...process.env,
+          PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes'
+        }
       });
     } catch (error) {
       console.warn('Schema validation setup warning:', error);

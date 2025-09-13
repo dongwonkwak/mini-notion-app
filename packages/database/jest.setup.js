@@ -86,10 +86,15 @@ beforeAll(async () => {
           attempts++;
           console.log(`🔄 DB push attempt ${attempts} for worker ${process.env.JEST_WORKER_ID || '1'}`);
           
-          execSync('npx prisma db push --force-reset --accept-data-loss --schema=/Users/gwagdong-won/project/mini-notion-app/packages/database/prisma/schema.prisma', { 
+          execSync('npx prisma db push --force-reset --accept-data-loss --schema=./prisma/schema.prisma', { 
             stdio: 'pipe',
-            env: { ...process.env, DATABASE_URL: dbUrl },
-            timeout: 30000 // 30초 타임아웃
+            env: { 
+              ...process.env, 
+              DATABASE_URL: dbUrl,
+              PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes'
+            },
+            timeout: 30000, // 30초 타임아웃
+            cwd: __dirname // 현재 디렉토리를 packages/database로 설정
           });
           pushSuccess = true;
           console.log(`✅ DB push successful for worker ${process.env.JEST_WORKER_ID || '1'}`);
