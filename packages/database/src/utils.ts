@@ -7,6 +7,21 @@ import { PrismaClient } from '@prisma/client';
 // 워커별 Prisma client instance (Jest 워커 격리를 위해)
 const prismaInstances = new Map<string, PrismaClient>();
 
+// 메모리 관리용: 인스턴스 생성 시간과 마지막 사용 시간 추적
+interface PrismaInstanceInfo {
+  instance: PrismaClient;
+  createdAt: number;
+  lastUsedAt: number;
+  shutdownHandler: () => Promise<void>;
+}
+
+const instanceInfo = new Map<string, PrismaInstanceInfo>();
+
+// 인스턴스 정리를 위한 설정
+const INSTANCE_CLEANUP_INTERVAL = 5 * 60 * 1000; // 5분
+const INSTANCE_MAX_IDLE_TIME = 10 * 60 * 1000; // 10분
+const MAX_INSTANCES = 50; // 최대 인스턴스 수 제한
+
 /**
  * 워커별 고유 키 생성
  */
@@ -18,15 +33,111 @@ function getWorkerKey(): string {
 }
 
 /**
+ * 유휴 인스턴스 정리
+ */
+async function cleanupIdleInstances(): Promise<void> {
+  const now = Date.now();
+  const keysToRemove: string[] = [];
+
+  for (const [key, info] of instanceInfo.entries()) {
+    const idleTime = now - info.lastUsedAt;
+    
+    // 유휴 시간이 초과하거나 최대 인스턴스 수를 초과한 경우
+    if (idleTime > INSTANCE_MAX_IDLE_TIME || instanceInfo.size > MAX_INSTANCES) {
+      keysToRemove.push(key);
+    }
+  }
+
+  // 가장 오래된 인스턴스부터 정리 (LRU 방식)
+  const sortedKeys = Array.from(instanceInfo.keys()).sort((a, b) => {
+    const infoA = instanceInfo.get(a)!;
+    const infoB = instanceInfo.get(b)!;
+    return infoA.lastUsedAt - infoB.lastUsedAt;
+  });
+
+  // 최대 인스턴스 수 초과 시 오래된 것부터 제거
+  while (instanceInfo.size > MAX_INSTANCES && sortedKeys.length > 0) {
+    const oldestKey = sortedKeys.shift()!;
+    if (!keysToRemove.includes(oldestKey)) {
+      keysToRemove.push(oldestKey);
+    }
+  }
+
+  // 인스턴스 정리 실행
+  for (const key of keysToRemove) {
+    const info = instanceInfo.get(key);
+    if (info) {
+      try {
+        await info.shutdownHandler();
+        instanceInfo.delete(key);
+        prismaInstances.delete(key);
+        console.log(`🧹 Cleaned up idle Prisma instance: ${key}`);
+      } catch (error) {
+        console.error(`❌ Failed to cleanup instance ${key}:`, error);
+      }
+    }
+  }
+}
+
+/**
+ * 정기적인 인스턴스 정리 스케줄러 시작
+ */
+function startCleanupScheduler(): void {
+  // 이미 스케줄러가 실행 중인지 확인
+  if ((global as any).__prismaCleanupInterval) {
+    return;
+  }
+
+  (global as any).__prismaCleanupInterval = setInterval(async () => {
+    try {
+      await cleanupIdleInstances();
+    } catch (error) {
+      console.error('❌ Instance cleanup failed:', error);
+    }
+  }, INSTANCE_CLEANUP_INTERVAL);
+
+  // 프로세스 종료 시 정리
+  const cleanup = async () => {
+    if ((global as any).__prismaCleanupInterval) {
+      clearInterval((global as any).__prismaCleanupInterval);
+      (global as any).__prismaCleanupInterval = null;
+    }
+    
+    // 모든 인스턴스 정리
+    for (const [key, info] of instanceInfo.entries()) {
+      try {
+        await info.shutdownHandler();
+      } catch (error) {
+        console.error(`❌ Failed to cleanup instance ${key} on exit:`, error);
+      }
+    }
+    
+    instanceInfo.clear();
+    prismaInstances.clear();
+  };
+
+  process.on('beforeExit', cleanup);
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
+}
+
+/**
  * Initialize Prisma client with proper configuration
- * 워커별로 독립적인 인스턴스 관리
+ * 워커별로 독립적인 인스턴스 관리 + 메모리 효율성 개선
  */
 export function initPrisma(): PrismaClient {
   const workerKey = getWorkerKey();
   
-  if (prismaInstances.has(workerKey)) {
-    return prismaInstances.get(workerKey)!;
+  // 기존 인스턴스가 있고 유효한지 확인
+  const existingInfo = instanceInfo.get(workerKey);
+  if (existingInfo) {
+    // 마지막 사용 시간 업데이트
+    existingInfo.lastUsedAt = Date.now();
+    return existingInfo.instance;
   }
+
+  // 정리 스케줄러 시작 (최초 한 번만)
+  startCleanupScheduler();
 
   const prisma = new PrismaClient({
     log: process.env.NODE_ENV === 'development' && !process.env.JEST_WORKER_ID 
@@ -35,42 +146,51 @@ export function initPrisma(): PrismaClient {
     errorFormat: 'pretty',
   });
 
-  // 워커별 인스턴스 저장
-  prismaInstances.set(workerKey, prisma);
+  const now = Date.now();
 
   // Handle graceful shutdown (워커별로)
   const shutdownHandler = async () => {
-    const instance = prismaInstances.get(workerKey);
-    if (instance) {
-      await instance.$disconnect();
+    try {
+      await prisma.$disconnect();
+      instanceInfo.delete(workerKey);
       prismaInstances.delete(workerKey);
+      console.log(`🔌 Prisma connection closed for worker: ${workerKey}`);
+    } catch (error) {
+      console.error(`❌ Error closing Prisma connection for ${workerKey}:`, error);
     }
   };
 
-  process.on('beforeExit', shutdownHandler);
-  process.on('SIGINT', shutdownHandler);
-  process.on('SIGTERM', shutdownHandler);
+  // 인스턴스 정보 저장 (메모리 관리용)
+  const info: PrismaInstanceInfo = {
+    instance: prisma,
+    createdAt: now,
+    lastUsedAt: now,
+    shutdownHandler,
+  };
+
+  instanceInfo.set(workerKey, info);
+  prismaInstances.set(workerKey, prisma);
 
   return prisma;
 }
 
 /**
  * Get Prisma client instance (워커별)
- * 안전한 인스턴스 반환을 위한 검증 로직 포함
+ * 안전한 인스턴스 반환을 위한 검증 로직 포함 + 사용 시간 추적
  */
 export function getPrisma(): PrismaClient {
   const workerKey = getWorkerKey();
   
-  if (!prismaInstances.has(workerKey)) {
-    return initPrisma();
+  // 인스턴스 정보에서 가져오기 (사용 시간 추적을 위해)
+  const info = instanceInfo.get(workerKey);
+  if (info) {
+    // 마지막 사용 시간 업데이트
+    info.lastUsedAt = Date.now();
+    return info.instance;
   }
   
-  const instance = prismaInstances.get(workerKey);
-  if (!instance) {
-    throw new Error(`Prisma client instance not found for worker: ${workerKey}. This should not happen.`);
-  }
-  
-  return instance;
+  // 인스턴스가 없으면 새로 생성
+  return initPrisma();
 }
 
 /**
@@ -78,13 +198,50 @@ export function getPrisma(): PrismaClient {
  */
 export async function closePrisma(): Promise<void> {
   const workerKey = getWorkerKey();
-  const instance = prismaInstances.get(workerKey);
+  const info = instanceInfo.get(workerKey);
   
-  if (instance) {
-    await instance.$disconnect();
-    prismaInstances.delete(workerKey);
-    console.log(`🔌 Prisma connection closed for worker: ${workerKey}`);
+  if (info) {
+    await info.shutdownHandler();
   }
+}
+
+/**
+ * 메모리 사용량 모니터링 함수
+ */
+export function getMemoryStats() {
+  const stats = {
+    totalInstances: instanceInfo.size,
+    maxInstances: MAX_INSTANCES,
+    cleanupInterval: INSTANCE_CLEANUP_INTERVAL,
+    maxIdleTime: INSTANCE_MAX_IDLE_TIME,
+    instances: Array.from(instanceInfo.entries()).map(([key, info]) => ({
+      key,
+      createdAt: info.createdAt,
+      lastUsedAt: info.lastUsedAt,
+      age: Date.now() - info.createdAt,
+      idleTime: Date.now() - info.lastUsedAt,
+    })),
+  };
+
+  return stats;
+}
+
+/**
+ * 강제로 유휴 인스턴스 정리
+ */
+export async function forceCleanup(): Promise<{ cleaned: number; errors: string[] }> {
+  const errors: string[] = [];
+  let cleaned = 0;
+
+  try {
+    const beforeCount = instanceInfo.size;
+    await cleanupIdleInstances();
+    cleaned = beforeCount - instanceInfo.size;
+  } catch (error) {
+    errors.push(`Cleanup failed: ${error}`);
+  }
+
+  return { cleaned, errors };
 }
 
 /**
