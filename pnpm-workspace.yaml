@@ -1,3 +1,7 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - apps/*
+  - packages/*
+
+overrides:
+  micromatch@<4.0.8: '>=4.0.8'
+  tmp@<=0.2.3: '>=0.2.4'
