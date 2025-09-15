@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 # Get staged files (before commit)
@@ -24,7 +24,7 @@ while IFS= read -r file; do
   dir=$(dirname "$file")
   while [[ "$dir" != "." && "$dir" != "/" ]]; do
     if [[ -f "$dir/package.json" ]]; then
-      pkgName=$(node -e "console.log(require(process.argv[1]).name)" "$dir/package.json")
+      pkgName=$(node -e "console.log(require(require('path').resolve(process.argv[1])).name)" "$dir/package.json")
       pkgs["$pkgName"]="$dir"
       break
     fi

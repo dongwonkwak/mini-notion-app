@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, 'feature/**' ]
+    branches: [main, develop, 'feature/**']
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,7 +28,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Prisma client
-        run: pnpm -w --filter @editor/database run db:generate || true
+        run: |
+          echo "Generating Prisma client..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Run full type-check
         run: pnpm run type-check
 
@@ -55,13 +61,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Prisma client
-        run: pnpm -w --filter @editor/database run db:generate || true
+        run: |
+          echo "Generating Prisma client..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Lint check
         run: pnpm run lint
       - name: Run unit tests
         run: pnpm run test:ci
       - name: Build project
         run: pnpm run build
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Upload coverage reports
         if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v4
@@ -97,7 +111,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Prisma client
-        run: pnpm -w --filter @editor/database run db:generate || true
+        run: |
+          echo "Generating Prisma client..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Run database tests
         run: pnpm run test:ci --testPathPattern="database"
         env:
@@ -147,261 +167,35 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build all packages
         run: pnpm run build
-      - name: Check build outputs
-        run: |
-          echo "Checking build outputs..."
-          ls -la apps/web/.next/ || echo "Next.js build output not found"
-          ls -la apps/api/dist/ || echo "API build output not found"
-          ls -la apps/server/dist/ || echo "Server build output not found"
-      - name: Bundle size analysis (Next.js)
-        working-directory: apps/web
-        run: |
-          echo "Bundle size analysis..."
-          npx next build --debug || echo "Bundle analysis completed"
-
-  ci-success:
-    name: CI Success
-    runs-on: ubuntu-latest
-    needs: [build-and-test, database-tests, security-audit, build-artifacts]
-    if: always()
-    steps:
-      - name: Check all jobs status
-        run: |
-          echo "Build and Test: ${{ needs.build-and-test.result }}"
-          echo "Database Tests: ${{ needs.database-tests.result }}"
-          echo "Security Audit: ${{ needs.security-audit.result }}"
-          echo "Build Artifacts: ${{ needs.build-artifacts.result }}"
-
-          if [[ "${{ needs.build-and-test.result }}" != "success" || 
-                "${{ needs.database-tests.result }}" != "success" || 
-                "${{ needs.security-audit.result }}" != "success" || 
-                "${{ needs.build-artifacts.result }}" != "success" ]]; then
-            echo "❌ One or more CI jobs failed"
-            exit 1
-          else
-            echo "✅ All CI jobs completed successfully"
-          fi
-name: CI
-
-on:
-  push:
-    branches: [ main, feature/** ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.12.1 --activate
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma clients
-        run: pnpm -w --filter @editor/database run db:generate || true
-
-      - name: Build
-        run: pnpm build
-
-      - name: Run tests (optional)
-        run: pnpm test --silent || true
-name: Continuous Integration
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  # 빌드 및 기본 검증
-  build-and-test:
-    name: Build and Test
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-
-  needs: [type-check-full]
-  steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.16.1
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma client
-        run: pnpm run db:generate
-
-      - name: Type check
-        run: pnpm run type-check
-
-      - name: Lint check
-        run: pnpm run lint
-
-      - name: Run unit tests
-        run: pnpm run test:ci
-
-      - name: Build project
-        run: pnpm run build
-
-      - name: Upload coverage reports
-        if: matrix.node-version == '20.x'
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-
-  # 데이터베이스 관련 테스트
-  database-tests:
-    name: Database Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.16.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma client
-        run: pnpm run db:generate
-
-      - name: Run database tests
-        run: pnpm run test:ci --testPathPattern="database"
         env:
-          REDIS_URL: redis://localhost:6379
-
-  # 보안 및 의존성 검사
-  security-audit:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.16.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run security audit
-        run: pnpm audit --audit-level moderate
-
-      - name: Check for outdated dependencies
-        run: pnpm outdated --format table || true
-
-  # 빌드 아티팩트 확인
-  build-artifacts:
-    name: Build Artifacts Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: [build-and-test]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.16.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build all packages
-        run: pnpm run build
-
+          DATABASE_URL: 'file:./dev.db'
       - name: Check build outputs
         run: |
           echo "Checking build outputs..."
           ls -la apps/web/.next/ || echo "Next.js build output not found"
           ls -la apps/api/dist/ || echo "API build output not found"
           ls -la apps/server/dist/ || echo "Server build output not found"
-
+      - name: Generate Prisma client for bundle analysis
+        run: |
+          echo "Generating Prisma client for bundle analysis..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Bundle size analysis (Next.js)
         working-directory: apps/web
         run: |
           echo "Bundle size analysis..."
           npx next build --debug || echo "Bundle analysis completed"
+        env:
+          DATABASE_URL: 'file:./dev.db'
 
-  # 통합 결과 리포트
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
     needs: [build-and-test, database-tests, security-audit, build-artifacts]
     if: always()
-
     steps:
       - name: Check all jobs status
         run: |
