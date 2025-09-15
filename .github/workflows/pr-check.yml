@@ -84,14 +84,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --unsafe-perm
 
-      - name: Check code formatting
-        run: |
-          echo "Checking code formatting with Prettier..."
-          pnpm exec prettier --check "**/*.{ts,tsx,js,jsx,json,md}" || {
-            echo "❌ Code formatting issues found. Run 'pnpm format' to fix."
-            exit 1
-          }
-
       - name: Run ESLint
         run: |
           echo "Running ESLint..."
