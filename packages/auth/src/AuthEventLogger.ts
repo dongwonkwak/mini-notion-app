@@ -3,7 +3,7 @@
  * 사용자의 인증 관련 활동을 추적하고 로깅합니다.
  */
 import { logger } from '@editor/config';
-import { getPrisma } from '@editor/database';
+import { getPrisma, type AuthEvent as PrismaAuthEvent } from '@editor/database';
 
 export interface AuthEvent {
   type:
@@ -241,7 +241,7 @@ export class AuthEventLogger {
         skip: filter.offset || 0,
       });
 
-      return events.map(event => ({
+      return events.map((event: PrismaAuthEvent) => ({
         type: event.eventType as AuthEvent['type'],
         userId: event.userId || '',
         timestamp: event.createdAt,
