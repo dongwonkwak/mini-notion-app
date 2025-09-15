@@ -55,7 +55,9 @@ jobs:
             ${{ runner.os }}-prisma-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: |
+          echo "Installing dependencies with approved build scripts..."
+          pnpm install --frozen-lockfile --prefer-offline
 
       - name: Verify ESLint installation
         run: |
@@ -151,7 +153,9 @@ jobs:
             ${{ runner.os }}-prisma-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: |
+          echo "Installing dependencies with approved build scripts..."
+          pnpm install --frozen-lockfile --prefer-offline
 
       - name: Verify Prisma installation
         run: |
