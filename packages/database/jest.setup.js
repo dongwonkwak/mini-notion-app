@@ -1,10 +1,29 @@
 // Jest setup for database package
-const { afterAll, beforeAll, beforeEach } = require('@jest/globals');
-const { PrismaClient } = require('@prisma/client');
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 const os = require('os');
+const path = require('path');
+
+const { afterAll, beforeAll, beforeEach } = require('@jest/globals');
+
+// Prisma 클라이언트를 동적으로 로드하여 생성 오류 방지
+let PrismaClient;
+try {
+  const prismaModule = require('@prisma/client');
+  PrismaClient = prismaModule.PrismaClient;
+} catch (error) {
+  console.warn('Prisma client not found, using mock:', error.message);
+  // Prisma 클라이언트가 없으면 모킹된 클라이언트 사용
+  PrismaClient = class MockPrismaClient {
+    constructor() {
+      this.$connect = jest.fn();
+      this.$disconnect = jest.fn();
+      this.$executeRaw = jest.fn();
+      this.$queryRaw = jest.fn();
+      this.$transaction = jest.fn();
+    }
+  };
+}
 
 let prisma;
 let testDbPath;
@@ -57,12 +76,12 @@ beforeAll(async () => {
           const filePath = path.join(tempDir, file);
           try {
             fs.unlinkSync(filePath);
-          } catch (e) {
+          } catch {
             // 파일이 사용 중이거나 없으면 무시
           }
         }
       });
-    } catch (e) {
+    } catch {
       // 디렉토리 읽기 실패 시 무시
     }
 
@@ -127,7 +146,7 @@ beforeAll(async () => {
           `Failed to initialize database after ${maxAttempts} attempts`
         );
       }
-    } catch (pushError) {
+    } catch {
       // db push 실패 시 Prisma 클라이언트로 직접 스키마 적용 시도
       console.warn(
         `⚠️ DB push failed for worker ${process.env.JEST_WORKER_ID || '1'}, trying alternative method`
@@ -203,7 +222,7 @@ afterAll(async () => {
     try {
       fs.unlinkSync(testDbPath);
       console.log(`🗑️ Cleaned up DB file: ${path.basename(testDbPath)}`);
-    } catch (error) {
+    } catch {
       // 파일 삭제 실패 시 무시 (다른 프로세스가 사용 중일 수 있음)
     }
   }

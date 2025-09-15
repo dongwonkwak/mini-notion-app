@@ -8,27 +8,7 @@ module.exports = {
   tabWidth: 2,
   useTabs: false,
 
-  // Import 정렬 플러그인
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
-
-  // Import 정렬 관련
-  importOrder: [
-    // 1. Node.js 내장 모듈
-    '^(assert|buffer|child_process|cluster|console|constants|crypto|dgram|dns|domain|events|fs|http|https|module|net|os|path|punycode|querystring|readline|repl|stream|string_decoder|sys|timers|tls|tty|url|util|vm|zlib)(/.*)?$',
-
-    // 2. 외부 라이브러리 (node_modules)
-    '^[a-z]',
-
-    // 3. 내부 패키지 (@editor/*)
-    '^@editor/(.*)$',
-
-    // 4. 상대 경로 imports
-    '^[./]',
-  ],
-  importOrderSeparation: true,
-  importOrderSortSpecifiers: true,
-  importOrderGroupNamespaceSpecifiers: true,
-  importOrderCaseInsensitive: true,
+  // Import 정렬은 ESLint가 담당하므로 Prettier에서는 제거
 
   // 기타 설정
   bracketSpacing: true,

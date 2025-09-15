@@ -203,7 +203,15 @@ export class TokenService {
 
       return {
         userId: decoded.userId,
-        email: (decoded as any).email,
+        email: (
+          decoded as {
+            userId: string;
+            email: string;
+            type: string;
+            iat: number;
+            exp: number;
+          }
+        ).email,
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {

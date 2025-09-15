@@ -173,7 +173,7 @@ describe('PermissionService', () => {
         },
       };
 
-      mockPrisma.page.findUnique.mockResolvedValue(mockPage as any);
+      mockPrisma.page.findUnique.mockResolvedValue(mockPage as never);
 
       // Act
       const result = await permissionService.checkPagePermission(
@@ -202,7 +202,7 @@ describe('PermissionService', () => {
         },
       };
 
-      mockPrisma.page.findUnique.mockResolvedValue(mockPage as any);
+      mockPrisma.page.findUnique.mockResolvedValue(mockPage as never);
 
       // Act
       const result = await permissionService.checkPagePermission(
@@ -226,7 +226,7 @@ describe('PermissionService', () => {
         },
       };
 
-      mockPrisma.page.findUnique.mockResolvedValue(mockPage as any);
+      mockPrisma.page.findUnique.mockResolvedValue(mockPage as never);
 
       // Act
       const result = await permissionService.checkPagePermission(

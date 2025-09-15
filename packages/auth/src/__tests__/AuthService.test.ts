@@ -59,45 +59,10 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     // Mock 인스턴스 생성
-    mockTokenService = {
-      generateJWT: jest.fn(),
-      verifyJWT: jest.fn(),
-      generateRefreshToken: jest.fn(),
-      generatePasswordResetToken: jest.fn(),
-      verifyPasswordResetToken: jest.fn(),
-    } as any;
-
-    mockMFAService = {
-      setupMFA: jest.fn(),
-      enableMFA: jest.fn(),
-      disableMFA: jest.fn(),
-      verifyMFA: jest.fn(),
-      getMFAStatus: jest.fn(),
-    } as any;
-
-    mockCacheService = {
-      cacheSession: jest.fn(),
-      getCachedSession: jest.fn(),
-      cacheUser: jest.fn(),
-      getCachedUser: jest.fn(),
-      getCachedUserByEmail: jest.fn(),
-      invalidateUser: jest.fn().mockResolvedValue(undefined),
-    } as any;
-
-    mockEventLogger = {
-      logEvent: jest.fn(),
-      logLogin: jest.fn(),
-      logLogout: jest.fn(),
-      logMfaSetup: jest.fn(),
-      logPasswordReset: jest.fn(),
-      logAccountLocked: jest.fn(),
-      logSuspiciousActivity: jest.fn(),
-      getEvents: jest.fn(),
-      getRecentLogins: jest.fn(),
-      detectSuspiciousActivity: jest.fn().mockResolvedValue(false),
-      getSecurityStats: jest.fn(),
-      cleanupOldLogs: jest.fn(),
-    } as any;
+    mockTokenService = jest.mocked(new TokenService());
+    mockMFAService = jest.mocked(new MFAService());
+    mockCacheService = jest.mocked(new SessionCacheService());
+    mockEventLogger = jest.mocked(new AuthEventLogger());
 
     // Mock 클래스가 인스턴스를 반환하도록 설정
     MockTokenService.mockImplementation(() => mockTokenService);
@@ -437,7 +402,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
       });
       mockBcrypt.hash.mockResolvedValue('newHashedPassword' as never);
-      mockPrisma.user.update.mockResolvedValue({} as any);
+      mockPrisma.user.update.mockResolvedValue({} as never);
 
       // Act
       const result = await authService.resetPassword(

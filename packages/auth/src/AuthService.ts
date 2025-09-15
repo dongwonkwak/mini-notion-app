@@ -232,7 +232,7 @@ export class AuthService {
           avatarUrl: userData.avatar,
           mfaEnabled: false,
           emailVerified: userData.provider !== 'email' ? new Date() : null,
-        } as any,
+        },
       });
 
       return this.sanitizeUser(user);
@@ -268,7 +268,7 @@ export class AuthService {
             avatarUrl: userData.avatar,
             lastActiveAt: new Date(),
             emailVerified: new Date(),
-          } as any,
+          },
         });
         return this.sanitizeUser(updatedUser);
       }
@@ -283,7 +283,7 @@ export class AuthService {
           avatarUrl: userData.avatar,
           mfaEnabled: false,
           emailVerified: new Date(),
-        } as any,
+        },
       });
 
       return this.sanitizeUser(user);
@@ -312,7 +312,9 @@ export class AuthService {
   /**
    * JWT 토큰 검증 (TokenService 위임)
    */
-  async verifyJWT(token: string): Promise<any> {
+  async verifyJWT(
+    token: string
+  ): Promise<{ userId: string; email: string; iat: number; exp: number }> {
     return this.tokenService.verifyJWT(token);
   }
 
@@ -330,7 +332,7 @@ export class AuthService {
     userId: string,
     ip?: string,
     userAgent?: string
-  ): Promise<any> {
+  ): Promise<{ secret: string; qrCode: string; backupCodes: string[] }> {
     const result = await this.mfaService.setupMFA(userId);
 
     // MFA 설정 시작 로깅
@@ -379,7 +381,9 @@ export class AuthService {
   /**
    * MFA 상태 확인 (MFAService 위임)
    */
-  async getMFAStatus(userId: string): Promise<any> {
+  async getMFAStatus(
+    userId: string
+  ): Promise<{ enabled: boolean; setupDate?: Date; lastUsed?: Date }> {
     return this.mfaService.getMFAStatus(userId);
   }
 
@@ -422,7 +426,7 @@ export class AuthService {
         createdAt: true,
         updatedAt: true,
         lastActiveAt: true,
-      } as any,
+      },
     }) as Promise<UserWithPassword | null>;
   }
 
@@ -446,7 +450,7 @@ export class AuthService {
         createdAt: true,
         updatedAt: true,
         lastActiveAt: true,
-      } as any,
+      },
     });
 
     return user ? this.sanitizeUser(user as unknown as UserWithPassword) : null;
@@ -529,7 +533,7 @@ export class AuthService {
 
       await getPrisma().user.update({
         where: { id: userId },
-        data: { password: hashedPassword } as any,
+        data: { password: hashedPassword },
       });
 
       // 사용자 캐시 무효화 (이메일 정보가 필요한 경우)

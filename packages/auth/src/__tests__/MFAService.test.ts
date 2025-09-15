@@ -63,9 +63,11 @@ describe('MFAService', () => {
       const mockQRCode = 'data:image/png;base64,mock-qr-code';
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockSpeakeasy.generateSecret.mockReturnValue(mockSecret as any);
-      (_mockQRCode as any).toDataURL.mockResolvedValue(mockQRCode);
-      mockPrisma.user.update.mockResolvedValue({} as any);
+      mockSpeakeasy.generateSecret.mockReturnValue(mockSecret as never);
+      (
+        _mockQRCode as unknown as { toDataURL: jest.Mock }
+      ).toDataURL.mockResolvedValue(mockQRCode);
+      mockPrisma.user.update.mockResolvedValue({} as never);
 
       // Act
       const result = await mfaService.setupMFA(userId);
@@ -108,7 +110,7 @@ describe('MFAService', () => {
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockSpeakeasy.totp.verify.mockReturnValue(true);
-      mockPrisma.user.update.mockResolvedValue({} as any);
+      mockPrisma.user.update.mockResolvedValue({} as never);
 
       // Act
       const result = await mfaService.enableMFA(userId, token);
@@ -173,7 +175,7 @@ describe('MFAService', () => {
     it('should disable MFA for user', async () => {
       // Arrange
       const userId = 'user-1';
-      mockPrisma.user.update.mockResolvedValue({} as any);
+      mockPrisma.user.update.mockResolvedValue({} as never);
 
       // Act
       const result = await mfaService.disableMFA(userId);
@@ -263,7 +265,7 @@ describe('MFAService', () => {
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.user.update.mockResolvedValue({} as any);
+      mockPrisma.user.update.mockResolvedValue({} as never);
 
       // Act
       const result = await mfaService.verifyBackupCode(userId, backupCode);
@@ -321,7 +323,7 @@ describe('MFAService', () => {
       };
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.user.update.mockResolvedValue({} as any);
+      mockPrisma.user.update.mockResolvedValue({} as never);
 
       // Act
       const result = await mfaService.regenerateBackupCodes(userId);

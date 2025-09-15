@@ -176,7 +176,7 @@ export class MFAService {
       // 백업 코드 목록에서 검색 (대소문자 무시)
       const normalizedCode = backupCode.toUpperCase();
       const codeIndex = user.mfaBackupCodes.findIndex(
-        (code: any) =>
+        (code: unknown) =>
           typeof code === 'string' && code.toUpperCase() === normalizedCode
       );
 
@@ -186,7 +186,7 @@ export class MFAService {
 
       // 사용된 백업 코드 제거
       const updatedCodes = user.mfaBackupCodes.filter(
-        (_: any, index: number) => index !== codeIndex
+        (_: unknown, index: number) => index !== codeIndex
       );
       await getPrisma().user.update({
         where: { id: userId },

@@ -1,7 +1,7 @@
-// Jest setup for web app
+// Global Jest setup for the entire monorepo
 const { jest } = require('@jest/globals');
 
-// Mock Prisma client to prevent import errors
+// Mock Prisma client globally to prevent import errors
 jest.mock('@prisma/client', () => {
   const mockPrismaClient = {
     $connect: jest.fn(),
@@ -102,7 +102,7 @@ jest.mock('@prisma/client', () => {
   };
 });
 
-// Mock Redis client
+// Mock Redis client globally
 jest.mock('ioredis', () => {
   return jest.fn().mockImplementation(() => ({
     setex: jest.fn(),

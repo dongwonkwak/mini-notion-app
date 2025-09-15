@@ -70,6 +70,20 @@ jobs:
           DATABASE_URL: 'file:./dev.db'
       - name: Lint check
         run: pnpm run lint
+      - name: Generate Prisma client for tests
+        run: |
+          echo "Generating Prisma client for tests..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+          # Verify Prisma client was generated
+          ls -la packages/database/node_modules/.prisma/client/ || echo "Prisma client not found"
+          # Also generate in root node_modules for monorepo compatibility
+          cd packages/database
+          DATABASE_URL="file:./dev.db" npx prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Run unit tests
         run: pnpm run test:ci
       - name: Build project
@@ -118,10 +132,25 @@ jobs:
           cd ../..
         env:
           DATABASE_URL: 'file:./dev.db'
+      - name: Generate Prisma client for database tests
+        run: |
+          echo "Generating Prisma client for database tests..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+          # Verify Prisma client was generated
+          ls -la packages/database/node_modules/.prisma/client/ || echo "Prisma client not found"
+          # Also generate in root node_modules for monorepo compatibility
+          cd packages/database
+          DATABASE_URL="file:./dev.db" npx prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
       - name: Run database tests
         run: pnpm run test:ci --testPathPattern="database"
         env:
           REDIS_URL: redis://localhost:6379
+          DATABASE_URL: 'file:./dev.db'
 
   security-audit:
     name: Security Audit

@@ -10,5 +10,6 @@ module.exports = {
   transformIgnorePatterns: ['node_modules/(?!@editor/types)'],
   moduleNameMapper: {
     '^@editor/types$': '<rootDir>/../../packages/types/src/index.ts',
+    '^@editor/database$': '<rootDir>/../../packages/database/src/index.ts',
   },
 };

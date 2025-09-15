@@ -245,7 +245,7 @@ export class PermissionService {
     role: UserRole,
     resource: string,
     action: string,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): boolean {
     const rolePermissions = this.getRolePermissions(role);
 

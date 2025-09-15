@@ -6,7 +6,6 @@ import NextAuth from 'next-auth';
 
 import { authOptions } from '@/lib/auth';
 
-
 /**
  * NextAuth.js 핸들러
  * GET, POST 요청을 모두 처리합니다.

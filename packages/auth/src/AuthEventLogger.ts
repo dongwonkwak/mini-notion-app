@@ -48,7 +48,9 @@ export class AuthEventLogger {
             userId: event.userId,
             ipAddress: event.ip,
             userAgent: event.userAgent,
-            details: event.metadata || ({} as any),
+            details: event.metadata
+              ? JSON.parse(JSON.stringify(event.metadata))
+              : null,
           },
         });
       } else {
@@ -217,12 +219,13 @@ export class AuthEventLogger {
       }
 
       if (filter.startDate || filter.endDate) {
-        where.createdAt = {} as any;
+        where.createdAt = {};
         if (filter.startDate) {
-          (where.createdAt as any).gte = filter.startDate;
+          (where.createdAt as { gte?: Date; lte?: Date }).gte =
+            filter.startDate;
         }
         if (filter.endDate) {
-          (where.createdAt as any).lte = filter.endDate;
+          (where.createdAt as { gte?: Date; lte?: Date }).lte = filter.endDate;
         }
       }
 
