@@ -1,12 +1,13 @@
+import { beforeAll, describe, expect, it } from '@jest/globals';
+import { PrismaClient } from '@prisma/client';
+
 import { execSync } from 'child_process';
 import path from 'path';
-
-import { beforeAll, describe, expect, it } from '@jest/globals';
 
 import { prisma } from '../index';
 
 describe('Database Schema Validation', () => {
-  let db: any;
+  let db: PrismaClient;
 
   beforeAll(async () => {
     // 스키마가 데이터베이스와 동기화되어 있는지 확인
@@ -35,7 +36,7 @@ describe('Database Schema Validation', () => {
       SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_migrations';
     `;
 
-    const tableNames = tables.map((t: any) => t.name);
+    const tableNames = tables.map((t: { name: string }) => t.name);
     const expectedTables = [
       'users',
       'sessions',
@@ -60,14 +61,25 @@ describe('Database Schema Validation', () => {
       PRAGMA table_info(users);
     `;
 
-    const columnMap = columns.reduce((acc: any, col: any) => {
+    type ColumnInfo = {
+      name: string;
+      type: string;
+      notnull: number;
+      pk: number;
+    };
+    type ColumnMap = Record<
+      string,
+      { type: string; required: boolean; primaryKey: boolean }
+    >;
+
+    const columnMap = columns.reduce((acc: ColumnMap, col: ColumnInfo) => {
       acc[col.name] = {
         type: col.type,
         required: col.notnull === 1,
         primaryKey: col.pk > 0,
       };
       return acc;
-    }, {});
+    }, {} as ColumnMap);
 
     expect(columnMap.id).toBeDefined();
     expect(columnMap.id.primaryKey).toBe(true);

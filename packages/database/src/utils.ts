@@ -1,7 +1,6 @@
 /**
  * Database utility functions and helpers
  */
-
 import { PrismaClient } from '@prisma/client';
 
 // 워커별 Prisma client instance (Jest 워커 격리를 위해)
@@ -30,6 +29,12 @@ function getWorkerKey(): string {
   const workerId = process.env.JEST_WORKER_ID || 'main';
   const processId = process.pid;
   return `${workerId}-${processId}`;
+}
+
+// Extend the global type for the cleanup interval to avoid using `any` casts
+declare global {
+  // global variable used to store the cleanup interval ID
+  var __prismaCleanupInterval: NodeJS.Timeout | null | undefined;
 }
 
 /**
@@ -92,11 +97,11 @@ function startCleanupScheduler(): void {
   }
 
   // 이미 스케줄러가 실행 중인지 확인
-  if ((global as any).__prismaCleanupInterval) {
+  if (global.__prismaCleanupInterval) {
     return;
   }
 
-  (global as any).__prismaCleanupInterval = setInterval(async () => {
+  global.__prismaCleanupInterval = setInterval(async () => {
     try {
       await cleanupIdleInstances();
     } catch (error) {
@@ -106,9 +111,9 @@ function startCleanupScheduler(): void {
 
   // 프로세스 종료 시 정리
   const cleanup = async () => {
-    if ((global as any).__prismaCleanupInterval) {
-      clearInterval((global as any).__prismaCleanupInterval);
-      (global as any).__prismaCleanupInterval = null;
+    if (global.__prismaCleanupInterval) {
+      clearInterval(global.__prismaCleanupInterval);
+      global.__prismaCleanupInterval = null;
     }
 
     // 모든 인스턴스 정리

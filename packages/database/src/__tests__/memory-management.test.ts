@@ -1,14 +1,13 @@
 /**
  * Memory management tests for Prisma instance handling
  */
-
 import {
-  initPrisma,
-  getPrisma,
-  closePrisma,
-  getMemoryStats,
-  forceCleanup,
   checkDatabaseHealth,
+  closePrisma,
+  forceCleanup,
+  getMemoryStats,
+  getPrisma,
+  initPrisma,
 } from '../utils';
 
 // Mock PrismaClient
@@ -24,7 +23,8 @@ describe('Memory Management', () => {
     // Clear all instances before each test
     jest.clearAllMocks();
     // Reset global cleanup interval
-    (global as any).__prismaCleanupInterval = null;
+    // typed global declared in utils.ts
+    global.__prismaCleanupInterval = null;
   });
 
   afterEach(async () => {

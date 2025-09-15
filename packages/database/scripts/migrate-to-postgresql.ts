@@ -2,8 +2,8 @@
  * SQLite에서 PostgreSQL로 마이그레이션 스크립트
  * 프로덕션 배포 시 사용합니다.
  */
-
 import { PrismaClient } from '@prisma/client';
+
 import { config } from '@editor/config/environment';
 
 interface MigrationResult {
@@ -305,25 +305,57 @@ export async function validateMigration(): Promise<boolean> {
     });
 
     // 각 테이블의 레코드 수 비교
-    const tables = [
-      'user',
-      'session',
-      'workspace',
+    // Compare counts for each model explicitly (avoid dynamic any indexing)
+    const comparisons: Array<[string, number, number]> = [];
+
+    const userSource = await sourceDb.user.count();
+    const userTarget = await targetDb.user.count();
+    comparisons.push(['user', userSource, userTarget]);
+
+    const sessionSource = await sourceDb.session.count();
+    const sessionTarget = await targetDb.session.count();
+    comparisons.push(['session', sessionSource, sessionTarget]);
+
+    const workspaceSource = await sourceDb.workspace.count();
+    const workspaceTarget = await targetDb.workspace.count();
+    comparisons.push(['workspace', workspaceSource, workspaceTarget]);
+
+    const workspaceMemberSource = await sourceDb.workspaceMember.count();
+    const workspaceMemberTarget = await targetDb.workspaceMember.count();
+    comparisons.push([
       'workspaceMember',
-      'page',
-      'document',
+      workspaceMemberSource,
+      workspaceMemberTarget,
+    ]);
+
+    const pageSource = await sourceDb.page.count();
+    const pageTarget = await targetDb.page.count();
+    comparisons.push(['page', pageSource, pageTarget]);
+
+    const documentSource = await sourceDb.document.count();
+    const documentTarget = await targetDb.document.count();
+    comparisons.push(['document', documentSource, documentTarget]);
+
+    const documentHistorySource = await sourceDb.documentHistory.count();
+    const documentHistoryTarget = await targetDb.documentHistory.count();
+    comparisons.push([
       'documentHistory',
-      'comment',
-      'fileUpload',
-    ];
+      documentHistorySource,
+      documentHistoryTarget,
+    ]);
 
-    for (const table of tables) {
-      const sourceCount = await (sourceDb as any)[table].count();
-      const targetCount = await (targetDb as any)[table].count();
+    const commentSource = await sourceDb.comment.count();
+    const commentTarget = await targetDb.comment.count();
+    comparisons.push(['comment', commentSource, commentTarget]);
 
+    const fileUploadSource = await sourceDb.fileUpload.count();
+    const fileUploadTarget = await targetDb.fileUpload.count();
+    comparisons.push(['fileUpload', fileUploadSource, fileUploadTarget]);
+
+    for (const [tableName, sourceCount, targetCount] of comparisons) {
       if (sourceCount !== targetCount) {
         console.error(
-          `Table ${table}: source has ${sourceCount} records, target has ${targetCount} records`
+          `Table ${tableName}: source has ${sourceCount} records, target has ${targetCount} records`
         );
         return false;
       }

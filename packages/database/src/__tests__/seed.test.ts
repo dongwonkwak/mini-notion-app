@@ -1,9 +1,10 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
+import { PrismaClient } from '@prisma/client';
 
 import { prisma } from '../index';
 
 describe('Database Seeding', () => {
-  let seedPrisma: any;
+  let seedPrisma: PrismaClient;
 
   beforeAll(async () => {
     try {

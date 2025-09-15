@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { beforeAll, describe, expect, it } from '@jest/globals';
+import { PrismaClient } from '@prisma/client';
 
-import { prisma, cleanDatabase } from '../index';
+import { cleanDatabase, prisma } from '../index';
 
 describe('Database Query Performance', () => {
-  let db: any;
+  let db: PrismaClient;
 
   beforeAll(async () => {
     db = prisma();
@@ -84,6 +85,10 @@ describe('Database Query Performance', () => {
     const duration = Date.now() - startTime;
 
     expect(result).toBeDefined();
+    // result can be null in case of missing workspace; guard before accessing pages
+    if (!result) {
+      throw new Error('Workspace not found in test setup');
+    }
     expect(result.pages).toHaveLength(10);
     expect(duration).toBeLessThan(1000); // Should complete within 1 second
   });

@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+import { PrismaClient } from '@prisma/client';
 
-import { prisma, cleanDatabase } from '../index';
+import { cleanDatabase, prisma } from '../index';
 
 describe('Database Migration Validation', () => {
-  let db: any;
+  let db: PrismaClient;
 
   beforeEach(async () => {
     await cleanDatabase();

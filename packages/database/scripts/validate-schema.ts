@@ -1,20 +1,20 @@
 #!/usr/bin/env tsx
-
 /**
  * 데이터베이스 스키마 검증 스크립트
  *
  * 사용법:
  * pnpm tsx scripts/validate-schema.ts
  */
-
 import { PrismaClient } from '@prisma/client';
-import chalk from 'chalk';
+
 import { execSync } from 'child_process';
+
+import chalk from 'chalk';
 
 interface ValidationResult {
   success: boolean;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 class SchemaValidator {

@@ -1,7 +1,6 @@
 /**
  * Redis connection and caching utilities for session management and document caching
  */
-
 import { Redis } from 'ioredis';
 
 // Redis connection instance
@@ -163,7 +162,12 @@ export class SessionCache {
   /**
    * Cache user session
    */
-  async setSession(userId: string, sessionData: any): Promise<void> {
+  // Use a generic record for session data rather than `any` so callers can pass
+  // structured JSON-compatible data. Keep it flexible while avoiding `any`.
+  async setSession(
+    userId: string,
+    sessionData: Record<string, unknown>
+  ): Promise<void> {
     const key = `session:${userId}`;
     await this.redis.setex(key, 86400, JSON.stringify(sessionData)); // 24 hours TTL
   }
@@ -171,7 +175,7 @@ export class SessionCache {
   /**
    * Get cached session
    */
-  async getSession(userId: string): Promise<any | null> {
+  async getSession(userId: string): Promise<Record<string, unknown> | null> {
     const key = `session:${userId}`;
     const cached = await this.redis.get(key);
 
@@ -180,7 +184,15 @@ export class SessionCache {
     }
 
     try {
-      return JSON.parse(cached);
+      const parsed: unknown = JSON.parse(cached);
+
+      // Ensure we return a plain object (or null) rather than a primitive.
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+
+      // If the cached value isn't an object, treat it as missing/invalid.
+      return null;
     } catch (error) {
       console.error('Error parsing cached session:', error);
       return null;
