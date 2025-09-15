@@ -13,7 +13,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts --config ../../eslint.config.js"
   },
   "devDependencies": {
     "@jest/globals": "^30.1.2",

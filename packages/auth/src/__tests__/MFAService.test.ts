@@ -3,11 +3,13 @@
  * 다중 인증(MFA) 관련 기능 테스트
  */
 
-import { MFAService } from '../MFAService';
-import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
-import { AuthError } from '@editor/types';
+import speakeasy from 'speakeasy';
+
 import { Prisma } from '@editor/database';
+import { AuthError } from '@editor/types';
+
+import { MFAService } from '../MFAService';
 
 // 모킹
 const mockPrismaClient = {

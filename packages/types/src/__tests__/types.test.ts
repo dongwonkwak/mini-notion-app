@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+
 import type {
   ApiResponse,
   AwarenessState,
@@ -48,7 +49,7 @@ describe('Type Definitions', () => {
       updatedAt: new Date(),
     };
 
-    expect(workspace.members[0].role).toBe('owner');
+    expect(workspace.members[0]?.role).toBe('owner');
     expect(workspace.settings.isPublic).toBe(false);
   });
 

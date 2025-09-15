@@ -4,8 +4,9 @@
  */
 
 import jwt from 'jsonwebtoken';
+
 import type { JWTPayload, StrictJWTPayload, UserRole } from '@editor/types';
-import { AuthErrorCode, AuthError } from '@editor/types';
+import { AuthError, AuthErrorCode } from '@editor/types';
 
 export class TokenService {
   private readonly JWT_SECRET: string;
@@ -115,7 +116,12 @@ export class TokenService {
     token: string
   ): Promise<{ userId: string; type: string }> {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET) as any;
+      const decoded = jwt.verify(token, this.JWT_SECRET) as {
+        userId: string;
+        type: string;
+        iat: number;
+        exp: number;
+      };
 
       if (decoded.type !== 'refresh') {
         throw new AuthError(
@@ -182,7 +188,12 @@ export class TokenService {
     token: string
   ): Promise<{ userId: string; email: string }> {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET) as any;
+      const decoded = jwt.verify(token, this.JWT_SECRET) as {
+        userId: string;
+        type: string;
+        iat: number;
+        exp: number;
+      };
 
       if (decoded.type !== 'password-reset') {
         throw new AuthError(
@@ -193,7 +204,7 @@ export class TokenService {
 
       return {
         userId: decoded.userId,
-        email: decoded.email,
+        email: (decoded as any).email,
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {

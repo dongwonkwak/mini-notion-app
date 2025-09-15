@@ -11,7 +11,7 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint src --ext .ts,.tsx --config ../../eslint.config.js"
   },
   "dependencies": {
     "@editor/collaboration": "workspace:*",

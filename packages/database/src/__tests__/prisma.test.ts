@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
+
 import { prisma, checkDatabaseHealth, cleanDatabase } from '../index';
 
 describe('Prisma Database Connection', () => {

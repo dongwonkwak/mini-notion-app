@@ -3,9 +3,11 @@
  * JWT 토큰 생성, 검증, 관리 테스트
  */
 
-import { TokenService } from '../TokenService';
 import jwt from 'jsonwebtoken';
+
 import { AuthError } from '@editor/types';
+
+import { TokenService } from '../TokenService';
 
 // 모킹
 jest.mock('jsonwebtoken');

@@ -17,7 +17,7 @@ export interface AuthEvent {
   timestamp: Date;
   ip?: string;
   userAgent?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AuthEventFilter {
@@ -49,7 +49,7 @@ export class AuthEventLogger {
             userId: event.userId,
             ipAddress: event.ip,
             userAgent: event.userAgent,
-            details: event.metadata || {},
+            details: event.metadata || ({} as any),
           },
         });
       } else {
@@ -79,7 +79,7 @@ export class AuthEventLogger {
     userId: string,
     ip?: string,
     userAgent?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     await this.logEvent({
       type: 'LOGIN',
@@ -100,7 +100,7 @@ export class AuthEventLogger {
     userId: string,
     ip?: string,
     userAgent?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     await this.logEvent({
       type: 'LOGOUT',
@@ -121,7 +121,7 @@ export class AuthEventLogger {
     userId: string,
     ip?: string,
     userAgent?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     await this.logEvent({
       type: 'MFA_SETUP',
@@ -142,7 +142,7 @@ export class AuthEventLogger {
     userId: string,
     ip?: string,
     userAgent?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     await this.logEvent({
       type: 'PASSWORD_RESET',
@@ -163,7 +163,7 @@ export class AuthEventLogger {
     userId: string,
     ip?: string,
     userAgent?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     await this.logEvent({
       type: 'ACCOUNT_LOCKED',
@@ -184,7 +184,7 @@ export class AuthEventLogger {
     userId: string,
     ip?: string,
     userAgent?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     await this.logEvent({
       type: 'SUSPICIOUS_ACTIVITY',
@@ -207,7 +207,7 @@ export class AuthEventLogger {
         return [];
       }
 
-      const where: any = {};
+      const where: Record<string, unknown> = {};
 
       if (filter.userId) {
         where.userId = filter.userId;
@@ -218,12 +218,12 @@ export class AuthEventLogger {
       }
 
       if (filter.startDate || filter.endDate) {
-        where.createdAt = {};
+        where.createdAt = {} as any;
         if (filter.startDate) {
-          where.createdAt.gte = filter.startDate;
+          (where.createdAt as any).gte = filter.startDate;
         }
         if (filter.endDate) {
-          where.createdAt.lte = filter.endDate;
+          (where.createdAt as any).lte = filter.endDate;
         }
       }
 
@@ -242,7 +242,7 @@ export class AuthEventLogger {
         timestamp: event.createdAt,
         ip: event.ipAddress || undefined,
         userAgent: event.userAgent || undefined,
-        metadata: (event.details as Record<string, any>) || undefined,
+        metadata: (event.details as Record<string, unknown>) || undefined,
       }));
     } catch (error) {
       console.error('Failed to get auth events:', error);

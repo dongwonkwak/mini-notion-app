@@ -1,6 +1,8 @@
-import { beforeAll, describe, expect, it } from '@jest/globals';
 import { execSync } from 'child_process';
 import path from 'path';
+
+import { beforeAll, describe, expect, it } from '@jest/globals';
+
 import { prisma } from '../index';
 
 describe('Database Schema Validation', () => {

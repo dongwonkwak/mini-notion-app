@@ -3,11 +3,12 @@
  * TOTP 기반 MFA 설정, 검증, 백업 코드 관리를 담당합니다.
  */
 
-import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import speakeasy from 'speakeasy';
+
 import { getPrisma, Prisma } from '@editor/database';
 import type { MFASetup } from '@editor/types';
-import { AuthErrorCode, AuthError } from '@editor/types';
+import { AuthError, AuthErrorCode } from '@editor/types';
 
 export class MFAService {
   private readonly MFA_WINDOW = 2; // TOTP 시간 윈도우

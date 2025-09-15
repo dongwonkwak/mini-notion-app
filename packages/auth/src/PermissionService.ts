@@ -4,14 +4,14 @@
  */
 
 import { getPrisma } from '@editor/database';
+import type { UserRole } from '@editor/types';
 
 const prisma = getPrisma();
-import type { UserRole } from '@editor/types';
 
 export interface Permission {
   resource: string;
   action: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }
 
 export interface RolePermissions {
@@ -121,7 +121,7 @@ export class PermissionService {
     workspaceId: string,
     resource: string,
     action: string,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): Promise<boolean> {
     try {
       // 사용자의 워크스페이스 멤버십 확인
@@ -295,8 +295,8 @@ export class PermissionService {
    * 권한 조건 확인
    */
   private checkConditions(
-    conditions?: Record<string, any>,
-    context?: Record<string, any>
+    conditions?: Record<string, unknown>,
+    context?: Record<string, unknown>
   ): boolean {
     if (!conditions) return true;
     if (!context) return false;

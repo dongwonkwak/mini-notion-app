@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from '@jest/globals';
+
 import { prisma, cleanDatabase } from '../index';
 
 describe('Database Query Performance', () => {

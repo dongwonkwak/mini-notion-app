@@ -4,18 +4,21 @@
  */
 
 import bcrypt from 'bcryptjs';
+
 import { getPrisma, Prisma } from '@editor/database';
-import { TokenService } from './TokenService';
-import { MFAService } from './MFAService';
-import { SessionCacheService } from './SessionCacheService';
-import { AuthEventLogger } from './AuthEventLogger';
 import type {
-  User,
+  AuthResult,
   CreateUserData,
   LoginCredentials,
-  AuthResult,
+  User,
   UserRole,
 } from '@editor/types';
+import { AuthError, AuthErrorCode } from '@editor/types';
+
+import { AuthEventLogger } from './AuthEventLogger';
+import { MFAService } from './MFAService';
+import { SessionCacheService } from './SessionCacheService';
+import { TokenService } from './TokenService';
 
 // Password 필드를 포함한 User 타입 (Prisma 타입 사용)
 type UserWithPassword = Prisma.UserGetPayload<{
@@ -36,7 +39,6 @@ type UserWithPassword = Prisma.UserGetPayload<{
     lastActiveAt: true;
   };
 }>;
-import { AuthErrorCode, AuthError } from '@editor/types';
 
 export class AuthService {
   private readonly tokenService: TokenService;
@@ -448,7 +450,7 @@ export class AuthService {
       } as any,
     });
 
-    return user ? this.sanitizeUser(user) : null;
+    return user ? this.sanitizeUser(user as unknown as UserWithPassword) : null;
   }
 
   /**
@@ -467,7 +469,7 @@ export class AuthService {
   async logUserActivity(
     userId: string,
     activity: string,
-    metadata?: any
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     try {
       // 사용자 활동 로그 저장 (필요시 별도 테이블 생성)
@@ -480,17 +482,24 @@ export class AuthService {
   /**
    * 사용자 정보 정제 (민감한 정보 제거)
    */
-  private sanitizeUser(user: any): User {
-    const {
-      password: _password,
-      mfaSecret: _mfaSecret,
-      mfaBackupCodes: _mfaBackupCodes,
-      avatarUrl,
-      ...sanitized
-    } = user;
+  private sanitizeUser(user: UserWithPassword): User {
+    const { password, mfaSecret, mfaBackupCodes, avatarUrl, ...sanitized } =
+      user;
+
+    // 민감한 정보가 제거되었는지 확인 (개발 환경에서만)
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Sanitized user data, removed sensitive fields:', {
+        hasPassword: !!password,
+        hasMfaSecret: !!mfaSecret,
+        hasMfaBackupCodes: !!mfaBackupCodes,
+      });
+    }
+
     return {
       ...sanitized,
-      avatar: avatarUrl, // avatarUrl을 avatar로 매핑
+      avatar: avatarUrl || undefined, // avatarUrl을 avatar로 매핑
+      provider: sanitized.provider as 'email' | 'google' | 'github',
+      emailVerified: sanitized.emailVerified || undefined,
     };
   }
 

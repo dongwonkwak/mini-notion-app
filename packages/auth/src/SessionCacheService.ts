@@ -4,8 +4,8 @@
  */
 
 import { getRedis } from '@editor/database';
-import type { User } from '@editor/types';
 import { Prisma } from '@editor/database';
+import type { User } from '@editor/types';
 
 // Password 필드를 포함한 User 타입 (Prisma 타입 사용)
 type UserWithPassword = Prisma.UserGetPayload<{
@@ -34,7 +34,7 @@ interface CachedSession {
 }
 
 interface CachedJWT {
-  payload: any;
+  payload: Record<string, unknown>;
   expires: Date;
 }
 
@@ -104,7 +104,7 @@ export class SessionCacheService {
   /**
    * JWT 토큰 캐시 저장
    */
-  async cacheJWT(token: string, payload: any, ttl?: number): Promise<void> {
+  async cacheJWT(token: string, payload: Record<string, unknown>, ttl?: number): Promise<void> {
     try {
       const jwtData: CachedJWT = {
         payload,
@@ -124,7 +124,7 @@ export class SessionCacheService {
   /**
    * JWT 토큰 캐시 조회
    */
-  async getCachedJWT(token: string): Promise<any | null> {
+  async getCachedJWT(token: string): Promise<Record<string, unknown> | null> {
     try {
       const cached = await this.redis.get(
         `${this.JWT_PREFIX}${this.hashToken(token)}`
@@ -288,7 +288,7 @@ export class SessionCacheService {
             await this.redis.del(key);
             cleanedCount++;
           }
-        } catch (_parseError) {
+        } catch {
           // 잘못된 데이터는 삭제
           await this.redis.del(key);
           cleanedCount++;
@@ -359,7 +359,7 @@ export class SessionCacheService {
     try {
       await this.redis.ping();
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }

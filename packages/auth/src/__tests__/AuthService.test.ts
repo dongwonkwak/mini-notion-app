@@ -3,12 +3,13 @@
  * 인증 로직 및 JWT 토큰 관리 테스트
  */
 
+import bcrypt from 'bcryptjs';
+
+import { AuthEventLogger } from '../AuthEventLogger';
 import { AuthService } from '../AuthService';
-import { TokenService } from '../TokenService';
 import { MFAService } from '../MFAService';
 import { SessionCacheService } from '../SessionCacheService';
-import { AuthEventLogger } from '../AuthEventLogger';
-import bcrypt from 'bcryptjs';
+import { TokenService } from '../TokenService';
 
 // 모킹
 const mockPrismaClient = {

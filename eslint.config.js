@@ -48,9 +48,14 @@ export default [
     rules: {
       // TypeScript 관련 규칙
       'no-undef': 'off',
+      'no-unused-vars': 'off', // TypeScript에서 비활성화
       '@typescript-eslint/no-unused-vars': [
         'error',
-        { argsIgnorePattern: '^_' },
+        { 
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true
+        },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
 
@@ -95,9 +100,9 @@ export default [
       'jsx-a11y/anchor-has-content': 'error',
       'jsx-a11y/anchor-is-valid': 'error',
 
-      // Next.js 관련 규칙
-      '@next/next/no-img-element': 'error',
-      '@next/next/no-html-link-for-pages': 'error',
+      // Next.js 관련 규칙은 기본적으로 비활성화
+      '@next/next/no-img-element': 'off',
+      '@next/next/no-html-link-for-pages': 'off',
     },
     settings: {
       react: {
@@ -119,6 +124,14 @@ export default [
       'import/parsers': {
         '@typescript-eslint/parser': ['.ts', '.tsx'],
       },
+    },
+  },
+  // Next.js 앱에서만 Next.js 규칙 적용
+  {
+    files: ['apps/web/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      '@next/next/no-img-element': 'error',
+      '@next/next/no-html-link-for-pages': 'error',
     },
   },
 ];

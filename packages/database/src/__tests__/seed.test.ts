@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from '@jest/globals';
+
 import { prisma } from '../index';
 
 describe('Database Seeding', () => {
