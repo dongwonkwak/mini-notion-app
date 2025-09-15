@@ -5,6 +5,7 @@
 
 // 허용된 패키지 목록 (정확한 패키지명)
 const ALLOWED_PACKAGES = new Set([
+  // 현재 기존 허용 패키지들
   '@prisma/client',
   '@prisma/engines',
   'core-js-pure',
@@ -12,16 +13,89 @@ const ALLOWED_PACKAGES = new Set([
   'prisma',
   'sharp',
   'unrs-resolver',
+
+  // 프레임워크 및 런타임
+  'react',
+  'react-dom',
+  'next',
+  'typescript',
+
+  // 에디터 관련
+  'yjs',
+  'y-protocols',
+
+  // 인증 관련
+  'bcryptjs',
+  'jsonwebtoken',
+  'next-auth',
+  'qrcode',
+  'speakeasy',
+
+  // 데이터베이스
+  'ioredis',
+
+  // 개발 도구
+  'eslint',
+  'jest',
+  'turbo',
+  'husky',
+  'lint-staged',
+  'prettier',
+  'ts-jest',
+  'tsx',
+  'chalk',
+  'playwright',
+  'identity-obj-proxy',
+  'jest-environment-jsdom',
+  'jest-transform-stub',
+  'eslint-import-resolver-typescript',
+  'eslint-plugin-import',
+  'eslint-plugin-jsx-a11y',
+  'eslint-plugin-react',
+  'eslint-plugin-react-hooks',
+  'eslint-config-next',
 ]);
 
 // 허용된 스코프 (조직 패키지)
 const ALLOWED_SCOPES = new Set([
-  '@prisma', // Prisma 관련만 허용
+  '@prisma',
+  '@tiptap',
+  '@hocuspocus',
+  '@next-auth',
+  '@types',
+  '@eslint',
+  '@typescript-eslint',
+  '@next',
+  '@jest',
+  '@commitlint',
+  '@turbo',
+  '@testing-library',
+  '@playwright',
+  '@trivago',
+  '@editor', // 내부 워크스페이스 패키지들
 ]);
 
 // 개발 의존성에서만 허용되는 패키지들
 const DEV_ONLY_PACKAGES = new Set([
-  // 지정된 패키지들은 프로덕션에서도 사용 가능
+  'eslint',
+  'jest',
+  'turbo',
+  'husky',
+  'lint-staged',
+  'prettier',
+  'ts-jest',
+  'tsx',
+  'chalk',
+  'playwright',
+  'identity-obj-proxy',
+  'jest-environment-jsdom',
+  'jest-transform-stub',
+  'eslint-import-resolver-typescript',
+  'eslint-plugin-import',
+  'eslint-plugin-jsx-a11y',
+  'eslint-plugin-react',
+  'eslint-plugin-react-hooks',
+  'eslint-config-next',
 ]);
 
 // 패키지명에서 스코프 추출
