@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 # Get staged files (before commit)
 staged=$(git diff --cached --name-only || true)
