@@ -8,6 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "prisma generate",
+    "pretype-check": "prisma generate",
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
