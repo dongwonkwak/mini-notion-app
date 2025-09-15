@@ -82,7 +82,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --unsafe-perm
 
       - name: Check code formatting
         run: |
@@ -136,7 +136,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --unsafe-perm
 
       - name: Generate Prisma client
         if: needs.pr-info.outputs.has-package-changes == 'true'
@@ -178,7 +178,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --unsafe-perm
 
       - name: Build all packages
         run: pnpm run build
@@ -218,7 +218,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --unsafe-perm
 
       - name: Check for security vulnerabilities
         run: |
