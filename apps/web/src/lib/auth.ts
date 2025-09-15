@@ -11,7 +11,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import { AuthService } from '@editor/auth';
 import { getPrisma } from '@editor/database';
 
-const authService = new AuthService();
+const authService = AuthService.getInstance();
 
 /**
  * NextAuth.js 설정

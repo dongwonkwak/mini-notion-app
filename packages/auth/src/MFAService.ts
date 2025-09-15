@@ -5,6 +5,7 @@
 import QRCode from 'qrcode';
 import speakeasy from 'speakeasy';
 
+import { logger } from '@editor/config';
 import { getPrisma, Prisma } from '@editor/database';
 import type { MFASetup } from '@editor/types';
 import { AuthError, AuthErrorCode } from '@editor/types';
@@ -58,7 +59,9 @@ export class MFAService {
         throw error;
       }
 
-      console.error('MFA setup error:', error);
+      logger.error('MFA setup error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_SETUP_FAILED,
         'MFA 설정에 실패했습니다.',
@@ -104,7 +107,9 @@ export class MFAService {
         throw error;
       }
 
-      console.error('MFA enable error:', error);
+      logger.error('MFA enable error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_ENABLE_FAILED,
         'MFA 활성화에 실패했습니다.',
@@ -129,7 +134,9 @@ export class MFAService {
 
       return true;
     } catch (error) {
-      console.error('MFA disable error:', error);
+      logger.error('MFA disable error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_DISABLE_FAILED,
         'MFA 비활성화에 실패했습니다.',
@@ -150,7 +157,9 @@ export class MFAService {
         window: this.MFA_WINDOW,
       });
     } catch (error) {
-      console.error('MFA verification error:', error);
+      logger.error('MFA verification error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -195,7 +204,9 @@ export class MFAService {
 
       return true;
     } catch (error) {
-      console.error('Backup code verification error:', error);
+      logger.error('Backup code verification error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -226,7 +237,9 @@ export class MFAService {
         throw error;
       }
 
-      console.error('Backup codes regeneration error:', error);
+      logger.error('Backup codes regeneration error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_SETUP_FAILED,
         '백업 코드 재생성에 실패했습니다.',
@@ -274,7 +287,9 @@ export class MFAService {
         throw error;
       }
 
-      console.error('MFA status check error:', error);
+      logger.error('MFA status check error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
         'MFA 상태 확인에 실패했습니다.',

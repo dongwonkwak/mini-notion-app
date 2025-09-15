@@ -17,6 +17,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@editor/config": "workspace:*",
     "@editor/database": "workspace:*",
     "@editor/types": "workspace:*",
     "bcryptjs": "^3.0.2",

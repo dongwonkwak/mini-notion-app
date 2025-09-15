@@ -2,6 +2,7 @@
  * 인증 이벤트 로깅 시스템
  * 사용자의 인증 관련 활동을 추적하고 로깅합니다.
  */
+import { logger } from '@editor/config';
 import { getPrisma } from '@editor/database';
 
 export interface AuthEvent {
@@ -54,8 +55,8 @@ export class AuthEventLogger {
           },
         });
       } else {
-        // 테이블이 없으면 콘솔에 로깅
-        console.log('Auth Event:', {
+        // 테이블이 없으면 로거에 로깅
+        logger.info('Auth Event', {
           type: event.type,
           userId: event.userId,
           timestamp: new Date(),
@@ -68,7 +69,9 @@ export class AuthEventLogger {
       // 실시간 알림 (선택적)
       await this.handleRealTimeNotification(event);
     } catch (error) {
-      console.error('Failed to log auth event:', error);
+      logger.error('Failed to log auth event', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       // 로깅 실패가 애플리케이션 동작을 방해하지 않도록 에러를 던지지 않음
     }
   }

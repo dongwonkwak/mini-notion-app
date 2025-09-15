@@ -2,6 +2,7 @@
  * 권한 관리 서비스 (RBAC - Role-Based Access Control)
  * 5단계 권한 레벨을 지원합니다: Guest, Viewer, Editor, Admin, Owner
  */
+import { logger } from '@editor/config';
 import { getPrisma } from '@editor/database';
 import type { UserRole } from '@editor/types';
 
@@ -140,7 +141,9 @@ export class PermissionService {
         context
       );
     } catch (error) {
-      console.error('Permission check error:', error);
+      logger.error('Permission check error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -185,7 +188,9 @@ export class PermissionService {
         isPublic: page.isPublic,
       });
     } catch (error) {
-      console.error('Page permission check error:', error);
+      logger.error('Page permission check error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -233,7 +238,9 @@ export class PermissionService {
         }
       );
     } catch (error) {
-      console.error('Document permission check error:', error);
+      logger.error('Document permission check error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -375,7 +382,9 @@ export class PermissionService {
 
       return true;
     } catch (error) {
-      console.error('User invitation error:', error);
+      logger.error('User invitation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -435,7 +444,9 @@ export class PermissionService {
 
       return true;
     } catch (error) {
-      console.error('Member role update error:', error);
+      logger.error('Member role update error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -480,7 +491,9 @@ export class PermissionService {
 
       return true;
     } catch (error) {
-      console.error('Member removal error:', error);
+      logger.error('Member removal error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -511,7 +524,9 @@ export class PermissionService {
         permissions: this.getRolePermissions(membership.role as UserRole),
       }));
     } catch (error) {
-      console.error('Get user permissions error:', error);
+      logger.error('Get user permissions error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return [];
     }
   }

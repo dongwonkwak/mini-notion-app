@@ -2,6 +2,7 @@
  * 세션 캐시 서비스
  * Redis를 활용한 사용자 세션 및 JWT 토큰 캐싱을 담당합니다.
  */
+import { logger } from '@editor/config';
 import { getRedis } from '@editor/database';
 import { Prisma } from '@editor/database';
 import type { User } from '@editor/types';
@@ -64,7 +65,9 @@ export class SessionCacheService {
         JSON.stringify(sessionData)
       );
     } catch (error) {
-      console.error('Session cache error:', error);
+      logger.error('Session cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       // 캐시 오류는 치명적이지 않으므로 예외를 던지지 않음
     }
   }
@@ -95,7 +98,9 @@ export class SessionCacheService {
 
       return sessionData.user;
     } catch (error) {
-      console.error('Session cache retrieval error:', error);
+      logger.error('Session cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -120,7 +125,9 @@ export class SessionCacheService {
         JSON.stringify(jwtData)
       );
     } catch (error) {
-      console.error('JWT cache error:', error);
+      logger.error('JWT cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -144,7 +151,9 @@ export class SessionCacheService {
 
       return jwtData.payload;
     } catch (error) {
-      console.error('JWT cache retrieval error:', error);
+      logger.error('JWT cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -160,7 +169,9 @@ export class SessionCacheService {
         JSON.stringify(user)
       );
     } catch (error) {
-      console.error('User cache error:', error);
+      logger.error('User cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -172,7 +183,9 @@ export class SessionCacheService {
       const cached = await this.redis.get(`${this.USER_PREFIX}${userId}`);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
-      console.error('User cache retrieval error:', error);
+      logger.error('User cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -192,7 +205,9 @@ export class SessionCacheService {
         JSON.stringify(user)
       );
     } catch (error) {
-      console.error('User email cache error:', error);
+      logger.error('User email cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -204,7 +219,9 @@ export class SessionCacheService {
       const cached = await this.redis.get(`${this.USER_EMAIL_PREFIX}${email}`);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
-      console.error('User email cache retrieval error:', error);
+      logger.error('User email cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -216,7 +233,9 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.SESSION_PREFIX}${userId}`);
     } catch (error) {
-      console.error('Session invalidation error:', error);
+      logger.error('Session invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -227,7 +246,9 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.JWT_PREFIX}${this.hashToken(token)}`);
     } catch (error) {
-      console.error('JWT invalidation error:', error);
+      logger.error('JWT invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -238,7 +259,9 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.USER_PREFIX}${userId}`);
     } catch (error) {
-      console.error('User cache invalidation error:', error);
+      logger.error('User cache invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -249,7 +272,9 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.USER_EMAIL_PREFIX}${email}`);
     } catch (error) {
-      console.error('User email cache invalidation error:', error);
+      logger.error('User email cache invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -269,7 +294,9 @@ export class SessionCacheService {
 
       await Promise.all(promises);
     } catch (error) {
-      console.error('User cache invalidation error:', error);
+      logger.error('User cache invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -300,7 +327,9 @@ export class SessionCacheService {
 
       return cleanedCount;
     } catch (error) {
-      console.error('Session cleanup error:', error);
+      logger.error('Session cleanup error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return 0;
     }
   }
@@ -331,7 +360,9 @@ export class SessionCacheService {
         userEmailCount: userEmailKeys.length,
       };
     } catch (error) {
-      console.error('Cache stats error:', error);
+      logger.error('Cache stats error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {
         sessionCount: 0,
         jwtCount: 0,

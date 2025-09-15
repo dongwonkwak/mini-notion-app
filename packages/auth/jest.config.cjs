@@ -11,5 +11,6 @@ module.exports = {
   moduleNameMapper: {
     '^@editor/types$': '<rootDir>/../../packages/types/src/index.ts',
     '^@editor/database$': '<rootDir>/../../packages/database/src/index.ts',
+    '^@editor/config$': '<rootDir>/../../packages/config/src/index.ts',
   },
 };

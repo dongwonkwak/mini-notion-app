@@ -7,10 +7,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
 import { AuthService } from '@editor/auth';
+import { logger } from '@editor/config';
 
 import { authOptions } from '@/lib/auth';
 
-const authService = new AuthService();
+// 테스트 환경에서는 mock을 사용할 수 있도록 함수로 래핑
+const getAuthService = () => AuthService.getInstance();
 
 /**
  * MFA 설정 시작
@@ -80,7 +82,11 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    const mfaSetup = await authService.setupMFA(session.user.id, ip, userAgent);
+    const mfaSetup = await getAuthService().setupMFA(
+      session.user.id,
+      ip,
+      userAgent
+    );
 
     return NextResponse.json({
       success: true,
@@ -90,7 +96,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error('MFA setup error:', error);
+    logger.error('MFA setup error', {
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     return NextResponse.json(
       {
@@ -189,14 +197,16 @@ export async function PUT(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    await authService.enableMFA(session.user.id, token, ip, userAgent);
+    await getAuthService().enableMFA(session.user.id, token, ip, userAgent);
 
     return NextResponse.json({
       success: true,
       message: 'MFA가 활성화되었습니다.',
     });
   } catch (error: unknown) {
-    console.error('MFA enable error:', error);
+    logger.error('MFA enable error', {
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     if ((error as Error).message.includes('토큰이 올바르지 않습니다')) {
       return NextResponse.json(

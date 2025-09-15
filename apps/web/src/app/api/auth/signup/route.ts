@@ -5,9 +5,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { AuthService } from '@editor/auth';
+import { logger } from '@editor/config';
 import type { CreateUserData } from '@editor/types';
 
-const authService = new AuthService();
+// 테스트 환경에서는 mock을 사용할 수 있도록 함수로 래핑
+const getAuthService = () => AuthService.getInstance();
 
 /**
  * 사용자 회원가입
@@ -127,7 +129,18 @@ export async function POST(request: NextRequest) {
       provider: 'email',
     };
 
-    const user = await authService.createUser(userData);
+    const user = await getAuthService().createUser(userData);
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'USER_CREATION_FAILED',
+          message: '사용자 생성에 실패했습니다.',
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
@@ -143,7 +156,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    console.error('Signup error:', error);
+    logger.error('Signup error', {
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     // 이메일 중복 오류 처리
     if ((error as Error).message.includes('이미 존재하는 이메일')) {

@@ -120,7 +120,9 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
 
     monitoring: {
       sentryDsn: process.env.SENTRY_DSN,
-      logLevel: (process.env.LOG_LEVEL as any) || 'info',
+      logLevel:
+        (process.env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') ||
+        'info',
     },
 
     features: {
@@ -205,7 +207,15 @@ export function validateEnvironmentConfig(config: EnvironmentConfig): void {
  */
 export const config = loadEnvironmentConfig();
 
-// 프로덕션 환경에서 설정 검증
-if (process.env.NODE_ENV === 'production') {
+// 프로덕션 환경에서 설정 검증 (빌드 시에는 제외)
+// Next.js 빌드, CI/CD 환경에서는 검증 건너뛰기
+const isBuildTime =
+  process.env.NEXT_PHASE ||
+  process.env.CI ||
+  process.env.GITHUB_ACTIONS ||
+  process.env.VERCEL ||
+  process.env.NETLIFY;
+
+if (process.env.NODE_ENV === 'production' && !isBuildTime) {
   validateEnvironmentConfig(config);
 }

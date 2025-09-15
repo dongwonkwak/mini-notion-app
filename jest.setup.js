@@ -1,5 +1,4 @@
 // Global Jest setup for the entire monorepo
-const { jest } = require('@jest/globals');
 
 // Mock Prisma client globally to prevent import errors
 jest.mock('@prisma/client', () => {
@@ -104,7 +103,7 @@ jest.mock('@prisma/client', () => {
 
 // Mock Redis client globally
 jest.mock('ioredis', () => {
-  return jest.fn().mockImplementation(() => ({
+  const mockRedisInstance = {
     setex: jest.fn(),
     get: jest.fn(),
     del: jest.fn(),
@@ -112,7 +111,17 @@ jest.mock('ioredis', () => {
     ping: jest.fn(),
     quit: jest.fn(),
     disconnect: jest.fn(),
-  }));
+    on: jest.fn(),
+    off: jest.fn(),
+    connect: jest.fn(),
+  };
+
+  const MockRedis = jest.fn().mockImplementation(() => mockRedisInstance);
+
+  return {
+    Redis: MockRedis,
+    default: MockRedis,
+  };
 });
 
 // Set test environment variables

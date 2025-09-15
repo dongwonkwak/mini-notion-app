@@ -4,6 +4,7 @@
  */
 import bcrypt from 'bcryptjs';
 
+import { logger } from '@editor/config';
 import { getPrisma, Prisma } from '@editor/database';
 import type {
   AuthResult,
@@ -40,6 +41,7 @@ type UserWithPassword = Prisma.UserGetPayload<{
 }>;
 
 export class AuthService {
+  private static instance: AuthService;
   private readonly tokenService: TokenService;
   private readonly mfaService: MFAService;
   private readonly cacheService: SessionCacheService;
@@ -50,6 +52,16 @@ export class AuthService {
     this.mfaService = new MFAService();
     this.cacheService = new SessionCacheService();
     this.eventLogger = new AuthEventLogger();
+  }
+
+  /**
+   * 싱글톤 인스턴스 반환
+   */
+  static getInstance(jwtSecret?: string): AuthService {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService(jwtSecret);
+    }
+    return AuthService.instance;
   }
 
   /**
@@ -194,7 +206,9 @@ export class AuthService {
         throw error;
       }
 
-      console.error('Authentication error:', error);
+      logger.error('Authentication error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
         '인증 중 오류가 발생했습니다.',
@@ -241,7 +255,9 @@ export class AuthService {
         throw error;
       }
 
-      console.error('User creation error:', error);
+      logger.error('User creation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
         '사용자 생성에 실패했습니다.',
@@ -288,7 +304,9 @@ export class AuthService {
 
       return this.sanitizeUser(user);
     } catch (error) {
-      console.error('OAuth user creation error:', error);
+      logger.error('OAuth user creation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
         'OAuth 사용자 생성에 실패했습니다.',
@@ -476,9 +494,15 @@ export class AuthService {
   ): Promise<void> {
     try {
       // 사용자 활동 로그 저장 (필요시 별도 테이블 생성)
-      console.log(`User ${userId} activity: ${activity}`, metadata);
+      logger.info('User activity', {
+        userId,
+        activity,
+        metadata,
+      });
     } catch (error) {
-      console.error('Activity logging error:', error);
+      logger.error('Activity logging error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -491,7 +515,7 @@ export class AuthService {
 
     // 민감한 정보가 제거되었는지 확인 (개발 환경에서만)
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Sanitized user data, removed sensitive fields:', {
+      logger.debug('Sanitized user data, removed sensitive fields', {
         hasPassword: !!password,
         hasMfaSecret: !!mfaSecret,
         hasMfaBackupCodes: !!mfaBackupCodes,
@@ -550,7 +574,9 @@ export class AuthService {
         throw error;
       }
 
-      console.error('Password reset error:', error);
+      logger.error('Password reset error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.PASSWORD_RESET_FAILED,
         '비밀번호 재설정에 실패했습니다.',

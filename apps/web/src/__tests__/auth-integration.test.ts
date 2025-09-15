@@ -5,6 +5,7 @@
 import { NextRequest } from 'next/server';
 
 import { AuthService } from '@editor/auth';
+import type { CreateUserData, User } from '@editor/types';
 
 import {
   PUT as mfaEnableHandler,
@@ -13,14 +14,54 @@ import {
 import { POST as signupHandler } from '../app/api/auth/signup/route';
 
 // 모킹
-jest.mock('@editor/auth');
+jest.mock('@editor/auth', () => ({
+  AuthService: {
+    getInstance: jest.fn(),
+  },
+}));
 jest.mock('next-auth');
 
 const mockAuthService = AuthService as jest.MockedClass<typeof AuthService>;
 
 describe('Authentication Integration Tests', () => {
+  let mockInstance: {
+    createUser: jest.MockedFunction<
+      (userData: CreateUserData) => Promise<User>
+    >;
+    setupMFA: jest.MockedFunction<
+      (userId: string, ip?: string, userAgent?: string) => Promise<unknown>
+    >;
+    enableMFA: jest.MockedFunction<
+      (
+        userId: string,
+        token: string,
+        ip?: string,
+        userAgent?: string
+      ) => Promise<boolean>
+    >;
+    generateJWT: jest.MockedFunction<(userId: string) => string>;
+    verifyJWT: jest.MockedFunction<(token: string) => unknown>;
+    generateRefreshToken: jest.MockedFunction<(userId: string) => string>;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // AuthService.getInstance() mock 설정
+    mockInstance = {
+      createUser: jest.fn(),
+      setupMFA: jest.fn(),
+      enableMFA: jest.fn(),
+      generateJWT: jest.fn(),
+      verifyJWT: jest.fn(),
+      generateRefreshToken: jest.fn(),
+    };
+
+    (
+      mockAuthService.getInstance as jest.MockedFunction<
+        typeof AuthService.getInstance
+      >
+    ).mockReturnValue(mockInstance as unknown as AuthService);
   });
 
   describe('Signup API', () => {
@@ -37,7 +78,7 @@ describe('Authentication Integration Tests', () => {
         lastActiveAt: new Date(),
       };
 
-      mockAuthService.prototype.createUser.mockResolvedValue(mockUser);
+      mockInstance.createUser.mockResolvedValue(mockUser);
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
@@ -59,7 +100,7 @@ describe('Authentication Integration Tests', () => {
       expect(response.status).toBe(201);
       expect(data.success).toBe(true);
       expect(data.user.email).toBe('test@example.com');
-      expect(mockAuthService.prototype.createUser).toHaveBeenCalledWith({
+      expect(mockInstance.createUser).toHaveBeenCalledWith({
         email: 'test@example.com',
         name: 'Test User',
         password: 'password123',
@@ -117,7 +158,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should handle duplicate email error', async () => {
       // Arrange
-      mockAuthService.prototype.createUser.mockRejectedValue(
+      mockInstance.createUser.mockRejectedValue(
         new Error('이미 존재하는 이메일입니다.')
       );
 
@@ -176,7 +217,7 @@ describe('Authentication Integration Tests', () => {
         backupCodes: ['ABC12345', 'DEF67890'],
       };
 
-      mockAuthService.prototype.setupMFA.mockResolvedValue(mockMfaSetup);
+      mockInstance.setupMFA.mockResolvedValue(mockMfaSetup);
 
       // Mock getServerSession
       const { getServerSession } = require('next-auth');
@@ -203,7 +244,7 @@ describe('Authentication Integration Tests', () => {
       expect(data.success).toBe(true);
       expect(data.data.qrCode).toBeDefined();
       expect(data.data.backupCodes).toHaveLength(2);
-      expect(mockAuthService.prototype.setupMFA).toHaveBeenCalledWith(
+      expect(mockInstance.setupMFA).toHaveBeenCalledWith(
         'user-1',
         'unknown',
         'unknown'
@@ -237,7 +278,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should enable MFA with valid token', async () => {
       // Arrange
-      mockAuthService.prototype.enableMFA.mockResolvedValue(true);
+      mockInstance.enableMFA.mockResolvedValue(true);
 
       const { getServerSession } = require('next-auth');
       getServerSession.mockResolvedValue({
@@ -265,7 +306,7 @@ describe('Authentication Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.message).toBe('MFA가 활성화되었습니다.');
-      expect(mockAuthService.prototype.enableMFA).toHaveBeenCalledWith(
+      expect(mockInstance.enableMFA).toHaveBeenCalledWith(
         'user-1',
         '123456',
         'unknown',
@@ -275,7 +316,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should reject invalid MFA token', async () => {
       // Arrange
-      mockAuthService.prototype.enableMFA.mockRejectedValue(
+      mockInstance.enableMFA.mockRejectedValue(
         new Error('MFA 토큰이 올바르지 않습니다.')
       );
 
@@ -353,7 +394,6 @@ describe('Authentication Integration Tests', () => {
   describe('JWT Token Management', () => {
     it('should generate and verify JWT tokens', async () => {
       // Arrange
-      const authService = new AuthService();
       const payload = {
         userId: 'user-1',
         email: 'test@example.com',
@@ -363,12 +403,12 @@ describe('Authentication Integration Tests', () => {
       };
 
       // Mock the actual implementation
-      mockAuthService.prototype.generateJWT.mockResolvedValue('mock-jwt-token');
-      mockAuthService.prototype.verifyJWT.mockResolvedValue(payload);
+      mockInstance.generateJWT = jest.fn().mockResolvedValue('mock-jwt-token');
+      mockInstance.verifyJWT = jest.fn().mockResolvedValue(payload);
 
       // Act
-      const token = await authService.generateJWT(payload);
-      const verified = await authService.verifyJWT(token);
+      const token = await mockInstance.generateJWT(payload.userId);
+      const verified = await mockInstance.verifyJWT(token);
 
       // Assert
       expect(token).toBe('mock-jwt-token');
@@ -377,20 +417,16 @@ describe('Authentication Integration Tests', () => {
 
     it('should handle token refresh', async () => {
       // Arrange
-      const authService = new AuthService();
-
-      mockAuthService.prototype.generateRefreshToken.mockResolvedValue(
-        'refresh-token'
-      );
+      mockInstance.generateRefreshToken = jest
+        .fn()
+        .mockResolvedValue('refresh-token');
 
       // Act
-      const refreshToken = await authService.generateRefreshToken('user-1');
+      const refreshToken = await mockInstance.generateRefreshToken('user-1');
 
       // Assert
       expect(refreshToken).toBe('refresh-token');
-      expect(
-        mockAuthService.prototype.generateRefreshToken
-      ).toHaveBeenCalledWith('user-1');
+      expect(mockInstance.generateRefreshToken).toHaveBeenCalledWith('user-1');
     });
   });
 });
