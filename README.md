@@ -29,6 +29,12 @@ mini-notion-app/
 │   ├── types/        # TypeScript 타입 정의
 │   ├── ai/           # AI 문서 생성 기능
 │   └── config/       # 공통 설정
+├── docs/
+│   ├── improvements/ # 개선사항 관리 시스템
+│   ├── api/          # API 문서
+│   ├── auth/         # 인증 관련 문서
+│   └── development/  # 개발 가이드
+└── scripts/          # 유틸리티 스크립트
 ```
 
 ## 🛠️ 개발 환경 설정
@@ -136,6 +142,31 @@ docker-compose down
 - [요구사항 문서](./.kiro/specs/realtime-collaborative-editor/requirements.md)
 - [설계 문서](./.kiro/specs/realtime-collaborative-editor/design.md)
 - [구현 계획](./.kiro/specs/realtime-collaborative-editor/tasks.md)
+- [개선사항 관리](./docs/improvements/README.md)
+
+## 🔄 개선사항 관리
+
+프로젝트의 지속적인 개선을 위한 체계적인 관리 시스템을 제공합니다.
+
+### 주요 기능
+
+- **날짜별 개선사항 추적**: YAML 형식으로 구조화된 개선사항 관리
+- **우선순위 분류**: Critical, High, Medium, Low 4단계 우선순위
+- **진행 상황 추적**: 상태별, 담당자별 진행률 수동 관리
+
+### 사용법
+
+```bash
+# 수동으로 템플릿 복사
+cp docs/improvements/template.yaml docs/improvements/2024-12-20.yaml
+```
+
+### 개선사항 추가
+
+1. `docs/improvements/template.yaml`을 복사하여 날짜별 파일 생성
+2. 개선사항 정보 입력 (제목, 우선순위, 담당자, 예상 시간 등)
+3. 완료 시 상태를 `completed`로 변경
+4. 주간/월간 정기 검토를 통한 진행률 확인
 
 ## 🤝 기여하기
 
