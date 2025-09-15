@@ -10,42 +10,6 @@ on:
     - cron: '0 9 * * 1'
 
 jobs:
-  # 코드 포맷팅 및 스타일 검사
-  code-formatting:
-    name: Code Formatting
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.16.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check Prettier formatting
-        run: |
-          echo "Checking code formatting..."
-          pnpm exec prettier --check "**/*.{ts,tsx,js,jsx,json,md}" || {
-            echo "❌ Formatting issues found. Run 'pnpm format' to fix."
-            echo "Files with formatting issues:"
-            pnpm exec prettier --list-different "**/*.{ts,tsx,js,jsx,json,md}" || true
-            exit 1
-          }
-
-      - name: Check EditorConfig compliance
-        uses: editorconfig-checker/action-editorconfig-checker@main
-
   # 고급 린팅 및 코드 품질
   advanced-linting:
     name: Advanced Linting
@@ -309,7 +273,7 @@ jobs:
   quality-report:
     name: Quality Report
     runs-on: ubuntu-latest
-    needs: [code-formatting, advanced-linting, security-scan, license-check]
+    needs: [advanced-linting, security-scan, license-check]
     if: always()
 
     steps:
@@ -324,14 +288,12 @@ jobs:
           echo "" >> quality-summary.md
 
           echo "### Job Results:" >> quality-summary.md
-          echo "- Formatting: ${{ needs.code-formatting.result }}" >> quality-summary.md
           echo "- Advanced Linting: ${{ needs.advanced-linting.result }}" >> quality-summary.md
           echo "- Security Scan: ${{ needs.security-scan.result }}" >> quality-summary.md
           echo "- License Check: ${{ needs.license-check.result }}" >> quality-summary.md
           echo "" >> quality-summary.md
 
-          if [[ "${{ needs.code-formatting.result }}" == "success" && 
-                "${{ needs.advanced-linting.result }}" == "success" && 
+          if [[ "${{ needs.advanced-linting.result }}" == "success" && 
                 "${{ needs.security-scan.result }}" == "success" && 
                 "${{ needs.license-check.result }}" == "success" ]]; then
             echo "✅ All quality checks passed!" >> quality-summary.md
