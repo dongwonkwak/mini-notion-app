@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 
-import { prisma, checkDatabaseHealth, cleanDatabase } from '../index';
+import { checkDatabaseHealth, cleanDatabase, prisma } from '../index';
 
 describe('Prisma Database Connection', () => {
   // Clean up before and after each test to ensure isolation

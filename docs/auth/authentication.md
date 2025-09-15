@@ -334,8 +334,9 @@ function MyComponent() {
 ### 서버사이드 인증 확인
 
 ```typescript
-import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+
+import { getServerSession } from 'next-auth/next';
 
 export async function getServerSideProps(context) {
   const session = await getServerSession(context.req, context.res, authOptions);

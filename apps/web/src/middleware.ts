@@ -2,7 +2,6 @@
  * Next.js 미들웨어
  * 보안 헤더, CORS, 인증 등을 처리합니다.
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 
 import { config } from '@editor/config';

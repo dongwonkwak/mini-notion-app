@@ -2,7 +2,6 @@
  * 권한 관리 서비스 (RBAC - Role-Based Access Control)
  * 5단계 권한 레벨을 지원합니다: Guest, Viewer, Editor, Admin, Owner
  */
-
 import { getPrisma } from '@editor/database';
 import type { UserRole } from '@editor/types';
 

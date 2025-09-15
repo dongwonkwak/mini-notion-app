@@ -2,7 +2,6 @@
  * 회원가입 API 엔드포인트
  * 이메일/비밀번호 기반 사용자 등록을 처리합니다.
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 
 import { AuthService } from '@editor/auth';

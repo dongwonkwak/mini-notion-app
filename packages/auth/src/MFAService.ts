@@ -2,7 +2,6 @@
  * 다중 인증(MFA) 서비스
  * TOTP 기반 MFA 설정, 검증, 백업 코드 관리를 담당합니다.
  */
-
 import QRCode from 'qrcode';
 import speakeasy from 'speakeasy';
 

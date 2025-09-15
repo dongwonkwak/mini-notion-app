@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 
 import {
-  DocumentCache,
-  SessionCache,
-  RateLimiter,
-  initRedis,
   closeRedis,
+  DocumentCache,
+  initRedis,
+  RateLimiter,
+  SessionCache,
 } from '../redis';
 
 // Mock Redis for testing

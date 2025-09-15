@@ -2,7 +2,6 @@
  * 세션 캐시 서비스
  * Redis를 활용한 사용자 세션 및 JWT 토큰 캐싱을 담당합니다.
  */
-
 import { getRedis } from '@editor/database';
 import { Prisma } from '@editor/database';
 import type { User } from '@editor/types';
@@ -104,7 +103,11 @@ export class SessionCacheService {
   /**
    * JWT 토큰 캐시 저장
    */
-  async cacheJWT(token: string, payload: Record<string, unknown>, ttl?: number): Promise<void> {
+  async cacheJWT(
+    token: string,
+    payload: Record<string, unknown>,
+    ttl?: number
+  ): Promise<void> {
     try {
       const jwtData: CachedJWT = {
         payload,

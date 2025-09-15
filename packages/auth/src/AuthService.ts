@@ -2,7 +2,6 @@
  * 인증 서비스 클래스
  * 사용자 인증을 통합 관리하며, 분리된 서비스들을 조합하여 사용합니다.
  */
-
 import bcrypt from 'bcryptjs';
 
 import { getPrisma, Prisma } from '@editor/database';

@@ -2,7 +2,6 @@
  * MFAService 단위 테스트
  * 다중 인증(MFA) 관련 기능 테스트
  */
-
 import QRCode from 'qrcode';
 import speakeasy from 'speakeasy';
 

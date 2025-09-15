@@ -1389,6 +1389,7 @@ describe('CollaborativeEditor', () => {
 ```typescript
 // packages/collaboration/src/__tests__/YjsIntegration.test.ts
 import * as Y from 'yjs';
+
 import { YjsProvider } from '../YjsProvider';
 
 describe('Y.js Integration', () => {
@@ -1420,7 +1421,7 @@ describe('Y.js Integration', () => {
 
 ```typescript
 // apps/web/e2e/collaboration.spec.ts
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Collaborative Editing', () => {
   test('multiple users can edit simultaneously', async ({ browser }) => {
@@ -1704,7 +1705,7 @@ Feature: Real-time Collaboration
 
 ```typescript
 // e2e/steps/collaboration.steps.ts
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 Given('I am logged in as {string}', async function (email: string) {
@@ -1875,6 +1876,7 @@ components:
 ```typescript
 // packages/api/src/__tests__/contract/workspace.contract.test.ts
 import { Pact } from '@pact-foundation/pact';
+
 import { WorkspaceService } from '../services/WorkspaceService';
 
 describe('Workspace API Contract', () => {
@@ -2015,8 +2017,8 @@ export const generateDocument = () => ({
 
 ```typescript
 // packages/collaboration/src/__tests__/property/yjs.property.test.ts
-import fc from 'fast-check';
 import * as Y from 'yjs';
+import fc from 'fast-check';
 
 describe('Y.js Property-Based Tests', () => {
   it('should maintain consistency across random operations', () => {
@@ -2073,7 +2075,7 @@ describe('Y.js Property-Based Tests', () => {
 
 ```typescript
 // e2e/visual/editor.visual.test.ts
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Visual Regression Tests', () => {
   test('editor appearance should be consistent', async ({ page }) => {
@@ -2128,11 +2130,12 @@ test.describe('Visual Regression Tests', () => {
 
 ```typescript
 // packages/auth/src/config.ts
-import { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
+
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import GitHubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -2255,6 +2258,7 @@ export const authOptions: NextAuthOptions = {
 ```typescript
 // packages/auth/src/jwt.ts
 import jwt from 'jsonwebtoken';
+
 import { User } from '@editor/types';
 
 export interface JWTPayload {
@@ -2429,6 +2433,7 @@ export class PermissionChecker {
 ```typescript
 // apps/server/src/auth/hocuspocus-auth.ts
 import { onAuthenticatePayload } from '@hocuspocus/server';
+
 import { JWTService } from '@editor/auth';
 
 export class HocuspocusAuthenticator {
@@ -2500,8 +2505,8 @@ export class HocuspocusAuthenticator {
 
 ```typescript
 // packages/auth/src/mfa.ts
-import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import speakeasy from 'speakeasy';
 
 export class MFAService {
   generateSecret(userEmail: string): { secret: string; qrCode: string } {
@@ -2962,6 +2967,7 @@ Provide natural continuations that flow well with the existing content.`;
 ```typescript
 // packages/editor/src/extensions/AIAssistant.ts
 import { Extension } from '@tiptap/core';
+
 import { WritingAssistant } from '@editor/ai';
 
 export const AIAssistant = Extension.create({
@@ -3218,8 +3224,8 @@ module.exports = {
 
 ```typescript
 // performance/websocket-load-test.ts
-import WebSocket from 'ws';
 import * as Y from 'yjs';
+import WebSocket from 'ws';
 
 interface LoadTestConfig {
   concurrentUsers: number;
@@ -3546,8 +3552,8 @@ PROMETHEUS_ENABLED=false
 
 ```typescript
 // packages/database/src/seed.ts
-import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

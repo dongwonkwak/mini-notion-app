@@ -2,7 +2,6 @@
  * AuthService 단위 테스트
  * 인증 로직 및 JWT 토큰 관리 테스트
  */
-
 import bcrypt from 'bcryptjs';
 
 import { AuthEventLogger } from '../AuthEventLogger';

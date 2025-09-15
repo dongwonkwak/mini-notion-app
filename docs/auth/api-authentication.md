@@ -187,8 +187,9 @@ DELETE /api/files/:id              # 파일 삭제 (소유자만)
 ### 기본 인증 미들웨어
 
 ```typescript
-import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+
+import { getServerSession } from 'next-auth/next';
 
 export async function requireAuth(request: Request) {
   const session = await getServerSession(authOptions);

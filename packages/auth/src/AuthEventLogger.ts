@@ -2,7 +2,6 @@
  * 인증 이벤트 로깅 시스템
  * 사용자의 인증 관련 활동을 추적하고 로깅합니다.
  */
-
 import { getPrisma } from '@editor/database';
 
 export interface AuthEvent {

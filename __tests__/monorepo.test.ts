@@ -1,7 +1,9 @@
-import { describe, expect, it } from '@jest/globals';
+
 import { execSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
+
+import { describe, expect, it } from '@jest/globals';
 
 describe('Monorepo Structure', () => {
   it('should have correct package.json structure', () => {

@@ -2,7 +2,6 @@
  * JWT 토큰 관리 서비스
  * 토큰 생성, 검증, 갱신 등을 담당합니다.
  */
-
 import jwt from 'jsonwebtoken';
 
 import type { JWTPayload, StrictJWTPayload, UserRole } from '@editor/types';

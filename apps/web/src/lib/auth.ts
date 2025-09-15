@@ -2,7 +2,6 @@
  * NextAuth.js 설정 파일
  * 다중 프로바이더 인증 및 JWT 토큰 관리를 구현합니다.
  */
-
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';

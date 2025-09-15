@@ -2,7 +2,6 @@
  * TokenService 단위 테스트
  * JWT 토큰 생성, 검증, 관리 테스트
  */
-
 import jwt from 'jsonwebtoken';
 
 import { AuthError } from '@editor/types';

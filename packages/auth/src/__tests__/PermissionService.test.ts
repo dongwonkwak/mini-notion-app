@@ -2,7 +2,6 @@
  * PermissionService 단위 테스트
  * RBAC 권한 시스템 테스트
  */
-
 import { PermissionService } from '../PermissionService';
 
 // 모킹

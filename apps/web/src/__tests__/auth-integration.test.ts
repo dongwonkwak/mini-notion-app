@@ -2,14 +2,13 @@
  * 인증 시스템 통합 테스트
  * NextAuth.js와 API 엔드포인트 통합 테스트
  */
-
 import { NextRequest } from 'next/server';
 
 import { AuthService } from '@editor/auth';
 
 import {
-  POST as mfaSetupHandler,
   PUT as mfaEnableHandler,
+  POST as mfaSetupHandler,
 } from '../app/api/auth/mfa/setup/route';
 import { POST as signupHandler } from '../app/api/auth/signup/route';
 
