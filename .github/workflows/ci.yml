@@ -44,6 +44,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup Prisma cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/database/node_modules/.prisma
+            node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('packages/database/prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
@@ -55,8 +65,11 @@ jobs:
 
       - name: Generate Prisma Client
         run: |
+          echo "Generating Prisma client for lint and type check..."
           cd packages/database
           pnpm prisma generate
+          echo "Verifying Prisma client generation..."
+          ls -la node_modules/.prisma/client/ || echo "Prisma client not found"
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
@@ -78,6 +91,8 @@ jobs:
       - name: Lint
         run: pnpm lint
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -88,6 +103,8 @@ jobs:
       - name: Type Check
         run: pnpm type-check
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -123,19 +140,80 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup Prisma cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/database/node_modules/.prisma
+            node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('packages/database/prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
+      - name: Verify Prisma installation
+        run: |
+          echo "Checking Prisma installation..."
+          cd packages/database
+          pnpm prisma --version
+          echo "Checking if Prisma client exists..."
+          ls -la node_modules/.prisma/client/ || echo "Prisma client not found"
+
       - name: Generate Prisma Client
         run: |
+          echo "Generating Prisma client..."
           cd packages/database
           pnpm prisma generate
+          echo "Verifying Prisma client generation..."
+          ls -la node_modules/.prisma/client/
+          echo "Checking generated files..."
+          find node_modules/.prisma/client -name "*.js" | head -5
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Verify Prisma Client Generation
+        run: |
+          echo "Final verification of Prisma client..."
+          cd packages/database
+          if [ -f "node_modules/.prisma/client/index.js" ]; then
+            echo "✅ Prisma client generated successfully"
+            ls -la node_modules/.prisma/client/
+          else
+            echo "❌ Prisma client generation failed"
+            echo "Contents of node_modules/.prisma:"
+            ls -la node_modules/.prisma/ || echo "No .prisma directory found"
+            echo "Contents of node_modules:"
+            ls -la node_modules/ | grep prisma || echo "No prisma in node_modules"
+            exit 1
+          fi
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Pre-test verification
+        run: |
+          echo "Running pre-test verification..."
+          echo "Checking Prisma client in database package..."
+          cd packages/database
+          if [ -f "node_modules/.prisma/client/index.js" ]; then
+            echo "✅ Prisma client exists in database package"
+          else
+            echo "❌ Prisma client missing in database package"
+            echo "Regenerating Prisma client..."
+            pnpm prisma generate
+          fi
+
+          echo "Checking if @prisma/client can be imported..."
+          node -e "try { require('@prisma/client'); console.log('✅ @prisma/client can be imported'); } catch(e) { console.log('❌ @prisma/client import failed:', e.message); process.exit(1); }"
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Run tests
         run: pnpm test
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -146,6 +224,8 @@ jobs:
       - name: Run database tests
         run: pnpm test --testPathPatterns="database"
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -156,6 +236,8 @@ jobs:
       - name: Run API tests
         run: pnpm test --testPathPatterns="api"
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -166,6 +248,8 @@ jobs:
       - name: Run performance tests
         run: pnpm test --testPathPatterns="performance"
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -209,19 +293,34 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup Prisma cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/database/node_modules/.prisma
+            node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('packages/database/prisma/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Generate Prisma Client
         run: |
+          echo "Generating Prisma client for build..."
           cd packages/database
           pnpm prisma generate
+          echo "Verifying Prisma client generation..."
+          ls -la node_modules/.prisma/client/ || echo "Prisma client not found"
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Build packages
         run: pnpm build
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -264,6 +363,8 @@ jobs:
       - name: Run security audit
         run: pnpm audit --audit-level moderate
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
@@ -274,6 +375,8 @@ jobs:
       - name: Check for known vulnerabilities
         run: pnpm audit --audit-level high
         env:
+          CI: true
+          GITHUB_ACTIONS: true
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}

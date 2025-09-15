@@ -9,6 +9,7 @@
   "scripts": {
     "prebuild": "prisma generate",
     "pretype-check": "prisma generate",
+    "pretest": "prisma generate",
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",

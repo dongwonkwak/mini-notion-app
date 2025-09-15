@@ -9,11 +9,22 @@ const { afterAll, beforeAll, beforeEach } = require('@jest/globals');
 // Prisma 클라이언트를 동적으로 로드하여 생성 오류 방지
 let PrismaClient;
 try {
+  // CI 환경에서 Prisma 클라이언트 생성 확인
   const prismaModule = require('@prisma/client');
   PrismaClient = prismaModule.PrismaClient;
+  console.log('✅ Prisma client loaded successfully');
 } catch (error) {
-  console.warn('Prisma client not found, using mock:', error.message);
-  // Prisma 클라이언트가 없으면 모킹된 클라이언트 사용
+  console.error('❌ Prisma client loading failed:', error.message);
+  console.error('Error details:', error);
+
+  // CI 환경에서는 Prisma 클라이언트가 필수이므로 에러 발생
+  if (process.env.CI || process.env.GITHUB_ACTIONS) {
+    console.error('🚨 CI environment detected - Prisma client is required');
+    process.exit(1);
+  }
+
+  // 로컬 개발 환경에서만 모킹된 클라이언트 사용
+  console.warn('⚠️ Using mock Prisma client for local development');
   PrismaClient = class MockPrismaClient {
     constructor() {
       this.$connect = jest.fn();
