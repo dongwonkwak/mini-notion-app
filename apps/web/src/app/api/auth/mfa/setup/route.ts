@@ -77,8 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 클라이언트 정보 추출
-    const ip =
-      request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const mfaSetup = await authService.setupMFA(session.user.id, ip, userAgent);
@@ -187,8 +186,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 클라이언트 정보 추출
-    const ip =
-      request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     await authService.enableMFA(session.user.id, token, ip, userAgent);

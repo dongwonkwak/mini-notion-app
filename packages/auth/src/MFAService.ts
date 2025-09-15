@@ -165,14 +165,19 @@ export class MFAService {
         select: { mfaBackupCodes: true },
       });
 
-      if (!user || !user.mfaBackupCodes || !Array.isArray(user.mfaBackupCodes)) {
+      if (
+        !user ||
+        !user.mfaBackupCodes ||
+        !Array.isArray(user.mfaBackupCodes)
+      ) {
         return false;
       }
 
       // 백업 코드 목록에서 검색 (대소문자 무시)
       const normalizedCode = backupCode.toUpperCase();
       const codeIndex = user.mfaBackupCodes.findIndex(
-        (code: any) => typeof code === 'string' && code.toUpperCase() === normalizedCode
+        (code: any) =>
+          typeof code === 'string' && code.toUpperCase() === normalizedCode
       );
 
       if (codeIndex === -1) {
@@ -256,8 +261,13 @@ export class MFAService {
 
       return {
         enabled: user.mfaEnabled,
-        hasBackupCodes: !!user.mfaBackupCodes && Array.isArray(user.mfaBackupCodes) && user.mfaBackupCodes.length > 0,
-        backupCodesCount: Array.isArray(user.mfaBackupCodes) ? user.mfaBackupCodes.length : 0,
+        hasBackupCodes:
+          !!user.mfaBackupCodes &&
+          Array.isArray(user.mfaBackupCodes) &&
+          user.mfaBackupCodes.length > 0,
+        backupCodesCount: Array.isArray(user.mfaBackupCodes)
+          ? user.mfaBackupCodes.length
+          : 0,
       };
     } catch (error) {
       if (error instanceof AuthError) {

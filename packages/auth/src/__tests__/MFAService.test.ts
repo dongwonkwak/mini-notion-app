@@ -197,7 +197,9 @@ describe('MFAService', () => {
 
       // Act & Assert
       await expect(mfaService.disableMFA(userId)).rejects.toThrow(AuthError);
-      await expect(mfaService.disableMFA(userId)).rejects.toThrow('MFA 비활성화에 실패했습니다.');
+      await expect(mfaService.disableMFA(userId)).rejects.toThrow(
+        'MFA 비활성화에 실패했습니다.'
+      );
     });
   });
 

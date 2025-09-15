@@ -177,7 +177,11 @@ export class SessionCacheService {
   /**
    * 이메일로 사용자 정보 캐시 저장 (password 포함)
    */
-  async cacheUserByEmail(email: string, user: UserWithPassword, ttl?: number): Promise<void> {
+  async cacheUserByEmail(
+    email: string,
+    user: UserWithPassword,
+    ttl?: number
+  ): Promise<void> {
     try {
       await this.redis.setex(
         `${this.USER_EMAIL_PREFIX}${email}`,
@@ -255,11 +259,11 @@ export class SessionCacheService {
         this.invalidateSession(userId),
         this.invalidateUser(userId),
       ];
-      
+
       if (email) {
         promises.push(this.invalidateUserByEmail(email));
       }
-      
+
       await Promise.all(promises);
     } catch (error) {
       console.error('User cache invalidation error:', error);
@@ -308,12 +312,14 @@ export class SessionCacheService {
     userEmailCount: number;
   }> {
     try {
-      const [sessionKeys, jwtKeys, userKeys, userEmailKeys] = await Promise.all([
-        this.redis.keys(`${this.SESSION_PREFIX}*`),
-        this.redis.keys(`${this.JWT_PREFIX}*`),
-        this.redis.keys(`${this.USER_PREFIX}*`),
-        this.redis.keys(`${this.USER_EMAIL_PREFIX}*`),
-      ]);
+      const [sessionKeys, jwtKeys, userKeys, userEmailKeys] = await Promise.all(
+        [
+          this.redis.keys(`${this.SESSION_PREFIX}*`),
+          this.redis.keys(`${this.JWT_PREFIX}*`),
+          this.redis.keys(`${this.USER_PREFIX}*`),
+          this.redis.keys(`${this.USER_EMAIL_PREFIX}*`),
+        ]
+      );
 
       return {
         sessionCount: sessionKeys.length,

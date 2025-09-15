@@ -61,7 +61,8 @@ export class AuthService {
   ): Promise<AuthResult> {
     try {
       // 캐시에서 사용자 정보 확인 (이메일로 캐시 키 생성)
-      let user: UserWithPassword | null = await this.cacheService.getCachedUserByEmail(credentials.email);
+      let user: UserWithPassword | null =
+        await this.cacheService.getCachedUserByEmail(credentials.email);
 
       if (!user) {
         // DB에서 사용자 조회
@@ -87,7 +88,7 @@ export class AuthService {
         // 캐시에 저장 (이메일 기반 캐시와 ID 기반 캐시 모두)
         await Promise.all([
           this.cacheService.cacheUserByEmail(credentials.email, user),
-          this.cacheService.cacheUser(user.id, this.sanitizeUser(user))
+          this.cacheService.cacheUser(user.id, this.sanitizeUser(user)),
         ]);
       }
 
@@ -110,7 +111,7 @@ export class AuthService {
           '비밀번호가 설정되지 않은 계정입니다.'
         );
       }
-      
+
       const isValidPassword = await this.verifyPassword(
         credentials.password,
         user.password

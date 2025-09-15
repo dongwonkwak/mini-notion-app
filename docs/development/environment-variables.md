@@ -9,18 +9,21 @@ IMP-001: 환경 변수 관리 체계화에 따른 환경 변수 설정 및 관�
 ## 환경별 설정
 
 ### Development (개발 환경)
+
 - **파일**: `.env.development`
 - **특징**: 개발에 최적화된 설정, 디버깅 활성화
 - **데이터베이스**: SQLite (로컬 개발용)
 - **보안**: 개발용 기본값 사용 가능
 
 ### Staging (스테이징 환경)
+
 - **파일**: `.env.staging`
 - **특징**: 프로덕션과 유사한 설정, 테스트용
 - **데이터베이스**: PostgreSQL
 - **보안**: 실제 보안 키 사용 필요
 
 ### Production (프로덕션 환경)
+
 - **파일**: `.env.production`
 - **특징**: 최고 수준의 보안과 성능
 - **데이터베이스**: PostgreSQL (필수)
@@ -29,11 +32,13 @@ IMP-001: 환경 변수 관리 체계화에 따른 환경 변수 설정 및 관�
 ## 필수 환경 변수
 
 ### 데이터베이스 설정
+
 ```bash
 DATABASE_URL="postgresql://username:password@host:port/database"
 ```
 
 ### 인증 설정
+
 ```bash
 NEXTAUTH_URL="https://your-domain.com"
 NEXTAUTH_SECRET="your-secure-secret-key-32-chars-min"
@@ -42,6 +47,7 @@ ENCRYPTION_KEY="your-encryption-key-32-chars-min"
 ```
 
 ### OAuth 제공자 (선택사항)
+
 ```bash
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
@@ -50,29 +56,34 @@ GITHUB_CLIENT_SECRET="your-github-client-secret"
 ```
 
 ### Redis 설정 (선택사항)
+
 ```bash
 REDIS_URL="redis://localhost:6379"
 ```
 
 ### 보안 설정
+
 ```bash
 RATE_LIMIT_WINDOW_MS="900000"  # 15분
 RATE_LIMIT_MAX_REQUESTS="100"  # 최대 요청 수
 ```
 
 ### 파일 업로드 설정
+
 ```bash
 UPLOAD_MAX_SIZE="10485760"  # 10MB
 ALLOWED_FILE_TYPES="image/jpeg,image/png,image/gif,application/pdf"
 ```
 
 ### 모니터링 설정
+
 ```bash
 SENTRY_DSN="your-sentry-dsn"  # 선택사항
 LOG_LEVEL="info"  # debug, info, warn, error
 ```
 
 ### 기능 플래그
+
 ```bash
 ENABLE_MFA="true"           # 다중 인증 활성화
 ENABLE_ANALYTICS="false"    # 분석 도구 활성화
@@ -82,18 +93,21 @@ ENABLE_DEBUG_MODE="false"   # 디버그 모드 활성화
 ## 사용법
 
 ### 1. 환경 파일 생성
+
 ```bash
 # 환경별 .env 파일 생성
 pnpm run env:setup
 ```
 
 ### 2. 환경 변수 상태 확인
+
 ```bash
 # 현재 환경 변수 상태 확인
 pnpm run env:check
 ```
 
 ### 3. 환경 변수 검증
+
 ```bash
 # 환경 변수 유효성 검사
 pnpm run env:validate
@@ -105,12 +119,14 @@ pnpm run env:validate:files
 ## 보안 가이드라인
 
 ### 프로덕션 환경
+
 - **절대 사용 금지**: `development-secret`, `change-in-production` 등의 기본값
 - **최소 길이**: 보안 키는 최소 32자 이상
 - **HTTPS 필수**: `NEXTAUTH_URL`은 반드시 `https://`로 시작
 - **PostgreSQL 필수**: SQLite 사용 금지
 
 ### 개발 환경
+
 - 기본값 사용 가능하지만 실제 서비스에서는 변경 권장
 - 로컬 개발용 SQLite 사용 가능
 - 디버그 모드 활성화 가능
@@ -128,18 +144,21 @@ GitHub Actions에서 자동으로 환경 변수를 검증합니다:
 ### 일반적인 오류
 
 #### 1. "NEXTAUTH_SECRET must be changed from default value"
+
 ```bash
 # 해결: 강력한 시크릿 키 생성
 openssl rand -base64 32
 ```
 
 #### 2. "PostgreSQL must be used in production"
+
 ```bash
 # 해결: 프로덕션에서는 PostgreSQL URL 사용
 DATABASE_URL="postgresql://user:pass@host:5432/db"
 ```
 
 #### 3. "HTTPS must be used in production"
+
 ```bash
 # 해결: 프로덕션에서는 HTTPS URL 사용
 NEXTAUTH_URL="https://your-domain.com"

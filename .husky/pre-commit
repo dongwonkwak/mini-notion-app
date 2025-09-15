@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run prettier format before committing
+ # Run lint-staged (formats & lints staged files)
+ pnpm -w lint-staged
+
+ # Run type check only for changed packages (faster)
+ pnpm type-check:changed
