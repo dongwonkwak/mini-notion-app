@@ -70,14 +70,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get pnpm version
-        id: pnpm-version
-        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ steps.pnpm-version.outputs.version }}
+          version: 10.16.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -128,14 +124,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get pnpm version
-        id: pnpm-version
-        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ steps.pnpm-version.outputs.version }}
+          version: 10.16.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -174,14 +166,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get pnpm version
-        id: pnpm-version
-        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ steps.pnpm-version.outputs.version }}
+          version: 10.16.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -218,14 +206,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get pnpm version
-        id: pnpm-version
-        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ steps.pnpm-version.outputs.version }}
+          version: 10.16.1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
