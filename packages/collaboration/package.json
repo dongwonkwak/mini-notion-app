@@ -15,12 +15,12 @@
   },
   "dependencies": {
     "@editor/types": "workspace:*",
-    "yjs": "^13.6.20",
-    "@hocuspocus/provider": "^2.15.0",
-    "y-protocols": "^1.0.6"
+    "@hocuspocus/provider": "^3.2.3",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.27"
   },
   "devDependencies": {
-    "@types/node": "^22.10.5",
-    "typescript": "^5.7.2"
+    "@types/node": "^24.4.0",
+    "typescript": "^5.9.2"
   }
 }

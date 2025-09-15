@@ -14,17 +14,17 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@editor/types": "workspace:*",
     "@editor/collaboration": "workspace:*",
-    "@tiptap/core": "^2.10.3",
-    "@tiptap/pm": "^2.10.3",
-    "@tiptap/react": "^2.10.3",
-    "@tiptap/starter-kit": "^2.10.3",
-    "react": "^18.3.1"
+    "@editor/types": "workspace:*",
+    "@tiptap/core": "^3.4.2",
+    "@tiptap/pm": "^3.4.2",
+    "@tiptap/react": "^3.4.2",
+    "@tiptap/starter-kit": "^3.4.2",
+    "react": "^19.1.1"
   },
   "devDependencies": {
-    "@types/react": "^18.3.17",
-    "typescript": "^5.7.2"
+    "@types/react": "^19.1.13",
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "react": "^18.0.0"
