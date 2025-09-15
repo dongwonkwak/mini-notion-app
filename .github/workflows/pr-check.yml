@@ -3,7 +3,7 @@ name: Pull Request Checks
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 # PR 체크가 진행 중일 때 새로운 push가 있으면 이전 실행을 취소
 concurrency:
@@ -48,14 +48,14 @@ jobs:
         run: |
           FILES_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l)
           LINES_CHANGED=$(git diff --stat ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | tail -1 | awk '{print $4+$6}')
-          
+
           echo "Files changed: $FILES_CHANGED"
           echo "Lines changed: $LINES_CHANGED"
-          
+
           if [ $FILES_CHANGED -gt 50 ]; then
             echo "⚠️ Warning: Large PR with $FILES_CHANGED files changed"
           fi
-          
+
           if [ $LINES_CHANGED -gt 1000 ]; then
             echo "⚠️ Warning: Large PR with $LINES_CHANGED lines changed"
           fi
@@ -70,10 +70,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -124,10 +128,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -166,10 +174,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -206,10 +218,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -246,7 +262,7 @@ jobs:
           echo "Code Quality: ${{ needs.code-quality.result }}"
           echo "Tests: ${{ needs.tests.result }}"
           echo "Build Check: ${{ needs.build-check.result }}"
-          
+
           if [[ "${{ needs.code-quality.result }}" != "success" || 
                 "${{ needs.tests.result }}" != "success" || 
                 "${{ needs.build-check.result }}" != "success" ]]; then

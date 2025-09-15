@@ -1,0 +1,150 @@
+name: Environment Variables Validation
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  env-validation:
+    name: Validate Environment Variables
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        environment: [development, staging, production]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set environment variables for ${{ matrix.environment }}
+        run: |
+          echo "NODE_ENV=${{ matrix.environment }}" >> $GITHUB_ENV
+          if [ "${{ matrix.environment }}" = "development" ]; then
+            echo "DATABASE_URL=sqlite:./test.db" >> $GITHUB_ENV
+            echo "NEXTAUTH_URL=http://localhost:3000" >> $GITHUB_ENV
+            echo "NEXTAUTH_SECRET=test-secret-key-for-development" >> $GITHUB_ENV
+            echo "JWT_SECRET=test-jwt-secret-for-development" >> $GITHUB_ENV
+            echo "ENCRYPTION_KEY=test-encryption-key-for-development" >> $GITHUB_ENV
+            echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+            echo "LOG_LEVEL=debug" >> $GITHUB_ENV
+            echo "ENABLE_MFA=true" >> $GITHUB_ENV
+            echo "ENABLE_ANALYTICS=false" >> $GITHUB_ENV
+            echo "ENABLE_DEBUG_MODE=true" >> $GITHUB_ENV
+          elif [ "${{ matrix.environment }}" = "staging" ]; then
+            echo "DATABASE_URL=postgresql://user:pass@localhost:5432/test_staging" >> $GITHUB_ENV
+            echo "NEXTAUTH_URL=https://staging.mini-notion.app" >> $GITHUB_ENV
+            echo "NEXTAUTH_SECRET=staging-secret-key-must-be-secure-32chars" >> $GITHUB_ENV
+            echo "JWT_SECRET=staging-jwt-secret-must-be-secure-32chars" >> $GITHUB_ENV
+            echo "ENCRYPTION_KEY=staging-encryption-key-must-be-secure-32chars" >> $GITHUB_ENV
+            echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+            echo "LOG_LEVEL=info" >> $GITHUB_ENV
+            echo "ENABLE_MFA=true" >> $GITHUB_ENV
+            echo "ENABLE_ANALYTICS=true" >> $GITHUB_ENV
+            echo "ENABLE_DEBUG_MODE=false" >> $GITHUB_ENV
+          elif [ "${{ matrix.environment }}" = "production" ]; then
+            echo "DATABASE_URL=postgresql://user:pass@localhost:5432/test_production" >> $GITHUB_ENV
+            echo "NEXTAUTH_URL=https://mini-notion.app" >> $GITHUB_ENV
+            echo "NEXTAUTH_SECRET=production-secret-key-must-be-very-secure-32chars" >> $GITHUB_ENV
+            echo "JWT_SECRET=production-jwt-secret-must-be-very-secure-32chars" >> $GITHUB_ENV
+            echo "ENCRYPTION_KEY=production-encryption-key-must-be-very-secure-32chars" >> $GITHUB_ENV
+            echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+            echo "LOG_LEVEL=warn" >> $GITHUB_ENV
+            echo "ENABLE_MFA=true" >> $GITHUB_ENV
+            echo "ENABLE_ANALYTICS=true" >> $GITHUB_ENV
+            echo "ENABLE_DEBUG_MODE=false" >> $GITHUB_ENV
+          fi
+
+      - name: Validate environment variables for ${{ matrix.environment }}
+        run: pnpm run env:validate
+
+      - name: Check environment files
+        run: pnpm run env:validate:files
+
+      - name: Test environment configuration loading
+        run: |
+          # Test that the config package can load environment variables
+          node -e "
+            import('./packages/config/src/environment.js').then(module => {
+              try {
+                const config = module.loadEnvironmentConfig();
+                console.log('✅ Environment config loaded successfully');
+                console.log('Environment:', process.env.NODE_ENV);
+                console.log('Database provider:', config.database.provider);
+                console.log('Auth URL:', config.auth.nextAuthUrl);
+                console.log('MFA enabled:', config.features.enableMfa);
+              } catch (error) {
+                console.error('❌ Failed to load environment config:', error.message);
+                process.exit(1);
+              }
+            });
+          "
+
+  security-check:
+    name: Security Check for Environment Variables
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "🔍 Checking for hardcoded secrets..."
+
+          # Check for common secret patterns
+          if grep -r "password.*=" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" src/ apps/ packages/; then
+            echo "❌ Found potential hardcoded passwords"
+            exit 1
+          fi
+
+          if grep -r "secret.*=" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" src/ apps/ packages/; then
+            echo "❌ Found potential hardcoded secrets"
+            exit 1
+          fi
+
+          if grep -r "api.*key.*=" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" src/ apps/ packages/; then
+            echo "❌ Found potential hardcoded API keys"
+            exit 1
+          fi
+
+          echo "✅ No hardcoded secrets found"
+
+      - name: Check for default/example values in production
+        run: |
+          echo "🔍 Checking for default values in production code..."
+
+          # Check if any production code uses default/example values
+          if grep -r "your-.*-here" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" src/ apps/ packages/; then
+            echo "❌ Found example/placeholder values in source code"
+            exit 1
+          fi
+
+          if grep -r "development-secret" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" src/ apps/ packages/; then
+            echo "❌ Found development secrets in source code"
+            exit 1
+          fi
+
+          echo "✅ No default/example values found in source code"

@@ -2,16 +2,16 @@ name: Code Quality & Security
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # 매주 월요일 오전 9시 (UTC)에 보안 검사 실행
     - cron: '0 9 * * 1'
 
 jobs:
   # 코드 포맷팅 및 스타일 검사
-  formatting:
+  code-formatting:
     name: Code Formatting
     runs-on: ubuntu-latest
 
@@ -19,10 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -57,10 +61,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -92,10 +100,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -110,14 +122,14 @@ jobs:
         run: |
           echo "Running security audit..."
           pnpm audit --audit-level moderate --json > audit-report.json || true
-          
+
           # 심각한 취약점 체크
           HIGH_VULNS=$(jq '.metadata.vulnerabilities.high // 0' audit-report.json)
           CRITICAL_VULNS=$(jq '.metadata.vulnerabilities.critical // 0' audit-report.json)
-          
+
           echo "Critical vulnerabilities: $CRITICAL_VULNS"
           echo "High vulnerabilities: $HIGH_VULNS"
-          
+
           if [ "$CRITICAL_VULNS" -gt 0 ]; then
             echo "❌ Critical security vulnerabilities found!"
             pnpm audit --audit-level critical
@@ -143,7 +155,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript' ]
+        language: ['javascript']
 
     steps:
       - name: Checkout repository
@@ -155,10 +167,14 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -187,10 +203,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -205,10 +225,10 @@ jobs:
         run: |
           echo "Checking dependency licenses..."
           npx license-checker --summary --excludePrivatePackages > license-summary.txt
-          
+
           echo "License summary:"
           cat license-summary.txt
-          
+
           # 금지된 라이선스 체크
           FORBIDDEN_LICENSES="GPL-3.0;AGPL-3.0;LGPL-2.1"
           for license in $(echo $FORBIDDEN_LICENSES | tr ";" "\n"); do
@@ -228,7 +248,7 @@ jobs:
   docker-security:
     name: Docker Security Scan
     runs-on: ubuntu-latest
-    if: false  # 현재는 비활성화, Docker 이미지 구축 후 활성화
+    if: false # 현재는 비활성화, Docker 이미지 구축 후 활성화
 
     steps:
       - name: Checkout repository
@@ -248,10 +268,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -267,7 +291,7 @@ jobs:
         run: |
           echo "Building Next.js app for bundle analysis..."
           ANALYZE=true pnpm run build || pnpm run build
-          
+
           # 번들 크기 정보 추출
           if [ -f ".next/analyze.json" ]; then
             echo "Bundle analysis completed"
@@ -282,7 +306,7 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            
+
             try {
               // 번들 크기 정보가 있다면 댓글로 추가
               const comment = '📦 Bundle size analysis completed. Check the build logs for details.';
@@ -301,7 +325,7 @@ jobs:
   quality-report:
     name: Quality Report
     runs-on: ubuntu-latest
-    needs: [formatting, advanced-linting, security-scan, license-check]
+    needs: [code-formatting, advanced-linting, security-scan, license-check]
     if: always()
 
     steps:
@@ -314,15 +338,15 @@ jobs:
         run: |
           echo "## 🔍 Code Quality Report" > quality-summary.md
           echo "" >> quality-summary.md
-          
+
           echo "### Job Results:" >> quality-summary.md
-          echo "- Formatting: ${{ needs.formatting.result }}" >> quality-summary.md
+          echo "- Formatting: ${{ needs.code-formatting.result }}" >> quality-summary.md
           echo "- Advanced Linting: ${{ needs.advanced-linting.result }}" >> quality-summary.md
           echo "- Security Scan: ${{ needs.security-scan.result }}" >> quality-summary.md
           echo "- License Check: ${{ needs.license-check.result }}" >> quality-summary.md
           echo "" >> quality-summary.md
-          
-          if [[ "${{ needs.formatting.result }}" == "success" && 
+
+          if [[ "${{ needs.code-formatting.result }}" == "success" && 
                 "${{ needs.advanced-linting.result }}" == "success" && 
                 "${{ needs.security-scan.result }}" == "success" && 
                 "${{ needs.license-check.result }}" == "success" ]]; then
@@ -330,7 +354,7 @@ jobs:
           else
             echo "❌ Some quality checks failed. Please review the logs." >> quality-summary.md
           fi
-          
+
           cat quality-summary.md
 
       - name: Upload quality summary

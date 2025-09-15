@@ -2,9 +2,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,10 +25,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -82,10 +86,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -114,10 +122,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -145,10 +157,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Get pnpm version
+        id: pnpm-version
+        run: echo "version=$(node scripts/get-pnpm-version.js)" >> $GITHUB_OUTPUT
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: ${{ steps.pnpm-version.outputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -189,7 +205,7 @@ jobs:
           echo "Database Tests: ${{ needs.database-tests.result }}"
           echo "Security Audit: ${{ needs.security-audit.result }}"
           echo "Build Artifacts: ${{ needs.build-artifacts.result }}"
-          
+
           if [[ "${{ needs.build-and-test.result }}" != "success" || 
                 "${{ needs.database-tests.result }}" != "success" || 
                 "${{ needs.security-audit.result }}" != "success" || 
