@@ -107,6 +107,7 @@ temp/
 # Editor directories and files
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
@@ -136,5 +137,3 @@ benchmark-results/
 *.crt
 secrets/
 credentials.json
-
-issue-template.md
