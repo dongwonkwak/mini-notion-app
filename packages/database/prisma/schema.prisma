@@ -17,7 +17,7 @@ model User {
   email          String    @unique
   name           String
   avatarUrl      String?   @map("avatar_url")
-  password       String?   // For email/password authentication
+  password       String? // For email/password authentication
   provider       String
   providerId     String?   @map("provider_id")
   emailVerified  DateTime? @map("email_verified")
@@ -59,7 +59,7 @@ model Workspace {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  owner   User             @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  owner   User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members WorkspaceMember[]
   pages   Page[]
 
@@ -70,7 +70,7 @@ model WorkspaceMember {
   id          String   @id @default(cuid())
   workspaceId String   @map("workspace_id")
   userId      String   @map("user_id")
-  role        String   // 'owner' | 'admin' | 'editor' | 'viewer' | 'guest'
+  role        String // 'owner' | 'admin' | 'editor' | 'viewer' | 'guest'
   joinedAt    DateTime @default(now()) @map("joined_at")
 
   // Relations
@@ -144,9 +144,9 @@ model Comment {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parent   Comment?  @relation("CommentThread", fields: [parentId], references: [id])
-  replies  Comment[] @relation("CommentThread")
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentThread", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentThread")
 
   @@map("comments")
 }
