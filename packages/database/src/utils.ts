@@ -34,7 +34,6 @@ function getWorkerKey(): string {
 // Extend the global type for the cleanup interval to avoid using `any` casts
 declare global {
   // global variable used to store the cleanup interval ID
-  // eslint-disable-next-line no-unused-vars
   var __prismaCleanupInterval: NodeJS.Timeout | null | undefined;
 }
 

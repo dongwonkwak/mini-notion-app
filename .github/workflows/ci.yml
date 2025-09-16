@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main, develop]
 
+# GitHub API 권한 설정
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  checks: write
+  statuses: write
+
 env:
   NODE_VERSION: '22'
   PNPM_VERSION: '10.16.1'
@@ -359,3 +367,149 @@ jobs:
           JWT_SECRET: ${{ env.JWT_SECRET }}
           ENCRYPTION_KEY: ${{ env.ENCRYPTION_KEY }}
           LOG_LEVEL: ${{ env.LOG_LEVEL }}
+
+  bundle-size-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Generate Prisma Client
+        run: |
+          echo "🔍 Validating Prisma schema..."
+          cd packages/database
+          pnpm prisma validate
+          pnpm prisma format --check
+          echo "✅ Schema validation completed"
+
+          # Setup Mock Prisma Client using script
+          cd ../..
+          chmod +x scripts/setup-mock-prisma.sh
+          ./scripts/setup-mock-prisma.sh
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Build for analysis
+        run: pnpm build
+        env:
+          CI: true
+          GITHUB_ACTIONS: true
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+          ENCRYPTION_KEY: ${{ env.ENCRYPTION_KEY }}
+          LOG_LEVEL: ${{ env.LOG_LEVEL }}
+
+      - name: Analyze bundle size
+        run: |
+          echo "📦 Analyzing bundle size..."
+          
+          # Next.js 앱 번들 크기 분석
+          if [ -d "apps/web/.next" ]; then
+            echo "## 📊 Bundle Size Analysis" >> bundle-analysis.md
+            echo "" >> bundle-analysis.md
+            echo "### Web App Bundle" >> bundle-analysis.md
+            echo "" >> bundle-analysis.md
+            
+            # .next/static 폴더 크기 분석
+            if [ -d "apps/web/.next/static" ]; then
+              echo "#### Static Assets" >> bundle-analysis.md
+              echo '```' >> bundle-analysis.md
+              du -sh apps/web/.next/static/* | sort -hr >> bundle-analysis.md
+              echo '```' >> bundle-analysis.md
+              echo "" >> bundle-analysis.md
+            fi
+            
+            # 전체 .next 폴더 크기
+            echo "#### Total Bundle Size" >> bundle-analysis.md
+            echo '```' >> bundle-analysis.md
+            du -sh apps/web/.next >> bundle-analysis.md
+            echo '```' >> bundle-analysis.md
+            echo "" >> bundle-analysis.md
+          fi
+          
+          # 패키지별 dist 폴더 크기 분석
+          echo "### Package Bundles" >> bundle-analysis.md
+          echo "" >> bundle-analysis.md
+          echo '```' >> bundle-analysis.md
+          find packages -name "dist" -type d -exec du -sh {} \; | sort -hr >> bundle-analysis.md
+          echo '```' >> bundle-analysis.md
+          echo "" >> bundle-analysis.md
+          
+          # 앱별 dist 폴더 크기 분석
+          echo "### App Bundles" >> bundle-analysis.md
+          echo "" >> bundle-analysis.md
+          echo '```' >> bundle-analysis.md
+          find apps -name "dist" -type d -exec du -sh {} \; | sort -hr >> bundle-analysis.md
+          echo '```' >> bundle-analysis.md
+          echo "" >> bundle-analysis.md
+          
+          echo "✅ Bundle size analysis completed"
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        if: success()
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              // bundle-analysis.md 파일 읽기
+              const analysisPath = path.join(process.cwd(), 'bundle-analysis.md');
+              
+              if (fs.existsSync(analysisPath)) {
+                const analysisContent = fs.readFileSync(analysisPath, 'utf8');
+                
+                // PR에 댓글 작성
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: analysisContent
+                });
+                
+                console.log('✅ Bundle size analysis comment posted successfully');
+              } else {
+                console.log('⚠️ Bundle analysis file not found, posting simple message');
+                
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: '📦 Bundle size analysis completed. Check the build logs for details.'
+                });
+              }
+            } catch (error) {
+              console.error('❌ Failed to post bundle analysis comment:', error.message);
+              
+              // 에러가 발생해도 워크플로우를 실패시키지 않음
+              console.log('⚠️ Continuing workflow despite comment failure');
+            }
