@@ -59,8 +59,35 @@
     "turbo": "^2.5.6"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
+    "packages/database/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/database && pnpm eslint src --fix"
+    ],
+    "packages/auth/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/auth && pnpm eslint src --fix"
+    ],
+    "packages/config/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/config && pnpm eslint src --fix"
+    ],
+    "packages/collaboration/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/collaboration && pnpm eslint src --fix"
+    ],
+    "packages/editor/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/editor && pnpm eslint src --fix"
+    ],
+    "packages/types/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/types && pnpm eslint src --fix"
+    ],
+    "packages/ui/src/**/*.{ts,tsx,js,jsx}": [
+      "cd packages/ui && pnpm eslint src --fix"
+    ],
+    "apps/web/src/**/*.{ts,tsx,js,jsx}": [
+      "cd apps/web && pnpm eslint src --fix"
+    ],
+    "apps/api/src/**/*.{ts,tsx,js,jsx}": [
+      "cd apps/api && pnpm eslint src --fix"
+    ],
+    "apps/server/src/**/*.{ts,tsx,js,jsx}": [
+      "cd apps/server && pnpm eslint src --fix"
     ]
   },
   "packageManager": "pnpm@10.16.1",

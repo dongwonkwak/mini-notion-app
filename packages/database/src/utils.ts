@@ -34,6 +34,7 @@ function getWorkerKey(): string {
 // Extend the global type for the cleanup interval to avoid using `any` casts
 declare global {
   // global variable used to store the cleanup interval ID
+  // eslint-disable-next-line no-unused-vars
   var __prismaCleanupInterval: NodeJS.Timeout | null | undefined;
 }
 
@@ -300,7 +301,7 @@ export async function cleanDatabase(): Promise<void> {
     await client.$executeRaw`PRAGMA foreign_keys = OFF;`;
 
     // 테이블이 존재하는 경우에만 데이터 정리
-    const tableNames = tables.map(t => t.name);
+    const tableNames = tables.map((t: { name: string }) => t.name);
 
     if (tableNames.includes('comments')) {
       await client.comment.deleteMany();
