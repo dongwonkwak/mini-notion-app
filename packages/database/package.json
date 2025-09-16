@@ -7,9 +7,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prebuild": "prisma generate",
-    "pretype-check": "prisma generate",
-    "pretest": "prisma generate",
+    "prebuild": "npm run db:ensure-client",
+    "pretype-check": "npm run db:ensure-client",
+    "pretest": "npm run db:ensure-client",
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
@@ -17,12 +17,13 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts --config ../../eslint.config.js",
+    "db:ensure-client": "if [ ! -f node_modules/.prisma/client/index.js ]; then prisma generate; fi",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
-    "db:validate": "tsx scripts/validate-schema.ts",
+    "db:validate": "prisma validate && prisma format --check",
     "db:test": "jest --testPathPattern=__tests__"
   },
   "dependencies": {
