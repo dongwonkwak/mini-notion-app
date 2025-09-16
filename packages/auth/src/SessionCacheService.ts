@@ -4,28 +4,25 @@
  */
 import { logger } from '@editor/config';
 import { getRedis } from '@editor/database';
-import { Prisma } from '@editor/database';
 import type { User } from '@editor/types';
 
 // Password 필드를 포함한 User 타입 (Prisma 타입 사용)
-type UserWithPassword = Prisma.UserGetPayload<{
-  select: {
-    id: true;
-    email: true;
-    name: true;
-    avatarUrl: true;
-    password: true;
-    provider: true;
-    providerId: true;
-    emailVerified: true;
-    mfaEnabled: true;
-    mfaSecret: true;
-    mfaBackupCodes: true;
-    createdAt: true;
-    updatedAt: true;
-    lastActiveAt: true;
-  };
-}>;
+type UserWithPassword = {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  password: string | null;
+  provider: string;
+  providerId: string | null;
+  emailVerified: Date | null;
+  mfaEnabled: boolean;
+  mfaSecret: string | null;
+  mfaBackupCodes: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  lastActiveAt: Date;
+};
 
 interface CachedSession {
   user: User;

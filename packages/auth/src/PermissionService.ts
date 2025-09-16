@@ -517,7 +517,7 @@ export class PermissionService {
         },
       });
 
-      return memberships.map(membership => ({
+      return memberships.map((membership: { workspaceId: string; workspace: { name: string }; role: string }) => ({
         workspaceId: membership.workspaceId,
         workspaceName: membership.workspace.name,
         role: membership.role as UserRole,
