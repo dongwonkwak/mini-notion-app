@@ -2,7 +2,6 @@
  * PermissionService 단위 테스트
  * RBAC 권한 시스템 테스트
  */
-
 import { PermissionService } from '../PermissionService';
 
 // 모킹
@@ -14,19 +13,19 @@ jest.mock('@editor/database', () => {
       update: jest.fn(),
       updateMany: jest.fn(),
       deleteMany: jest.fn(),
-      findMany: jest.fn()
+      findMany: jest.fn(),
     },
     page: {
       findUnique: jest.fn(),
-      findFirst: jest.fn()
+      findFirst: jest.fn(),
     },
     user: {
-      findUnique: jest.fn()
-    }
+      findUnique: jest.fn(),
+    },
   };
 
   return {
-    getPrisma: jest.fn(() => mockPrismaClient)
+    getPrisma: jest.fn(() => mockPrismaClient),
   };
 });
 
@@ -50,7 +49,7 @@ describe('PermissionService', () => {
         userId: 'user-1',
         workspaceId: 'workspace-1',
         role: 'owner',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act
@@ -72,7 +71,7 @@ describe('PermissionService', () => {
         userId: 'user-2',
         workspaceId: 'workspace-1',
         role: 'viewer',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act
@@ -94,7 +93,7 @@ describe('PermissionService', () => {
         userId: 'user-3',
         workspaceId: 'workspace-1',
         role: 'editor',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act
@@ -124,7 +123,7 @@ describe('PermissionService', () => {
         userId: 'user-4',
         workspaceId: 'workspace-1',
         role: 'admin',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act
@@ -165,14 +164,16 @@ describe('PermissionService', () => {
         createdBy: 'user-1',
         isPublic: false,
         workspace: {
-          members: [{
-            userId: 'user-1',
-            role: 'editor'
-          }]
-        }
+          members: [
+            {
+              userId: 'user-1',
+              role: 'editor',
+            },
+          ],
+        },
       };
 
-      mockPrisma.page.findUnique.mockResolvedValue(mockPage as any);
+      mockPrisma.page.findUnique.mockResolvedValue(mockPage as never);
 
       // Act
       const result = await permissionService.checkPagePermission(
@@ -192,14 +193,16 @@ describe('PermissionService', () => {
         createdBy: 'user-1',
         isPublic: false,
         workspace: {
-          members: [{
-            userId: 'user-2',
-            role: 'editor'
-          }]
-        }
+          members: [
+            {
+              userId: 'user-2',
+              role: 'editor',
+            },
+          ],
+        },
       };
 
-      mockPrisma.page.findUnique.mockResolvedValue(mockPage as any);
+      mockPrisma.page.findUnique.mockResolvedValue(mockPage as never);
 
       // Act
       const result = await permissionService.checkPagePermission(
@@ -219,11 +222,11 @@ describe('PermissionService', () => {
         createdBy: 'user-1',
         isPublic: true,
         workspace: {
-          members: []
-        }
+          members: [],
+        },
       };
 
-      mockPrisma.page.findUnique.mockResolvedValue(mockPage as any);
+      mockPrisma.page.findUnique.mockResolvedValue(mockPage as never);
 
       // Act
       const result = await permissionService.checkPagePermission(
@@ -246,14 +249,14 @@ describe('PermissionService', () => {
           userId: 'admin-user',
           workspaceId: 'workspace-1',
           role: 'admin',
-          joinedAt: new Date()
+          joinedAt: new Date(),
         })
         .mockResolvedValueOnce(null); // No existing membership for invitee
 
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'new-user',
         email: 'newuser@example.com',
-        name: 'New User'
+        name: 'New User',
       });
 
       mockPrisma.workspaceMember.create.mockResolvedValue({
@@ -261,7 +264,7 @@ describe('PermissionService', () => {
         userId: 'new-user',
         workspaceId: 'workspace-1',
         role: 'editor',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act
@@ -278,8 +281,8 @@ describe('PermissionService', () => {
         data: {
           userId: 'new-user',
           workspaceId: 'workspace-1',
-          role: 'editor'
-        }
+          role: 'editor',
+        },
       });
     });
 
@@ -290,7 +293,7 @@ describe('PermissionService', () => {
         userId: 'viewer-user',
         workspaceId: 'workspace-1',
         role: 'viewer',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act & Assert
@@ -312,20 +315,20 @@ describe('PermissionService', () => {
           userId: 'admin-user',
           workspaceId: 'workspace-1',
           role: 'admin',
-          joinedAt: new Date()
+          joinedAt: new Date(),
         })
         .mockResolvedValueOnce({
           id: 'existing-member',
           userId: 'existing-user',
           workspaceId: 'workspace-1',
           role: 'editor',
-          joinedAt: new Date()
+          joinedAt: new Date(),
         });
 
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'existing-user',
         email: 'existing@example.com',
-        name: 'Existing User'
+        name: 'Existing User',
       });
 
       // Act & Assert
@@ -348,7 +351,7 @@ describe('PermissionService', () => {
         userId: 'admin-user',
         workspaceId: 'workspace-1',
         role: 'admin',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       mockPrisma.workspaceMember.update.mockResolvedValue({
@@ -356,7 +359,7 @@ describe('PermissionService', () => {
         userId: 'target-user',
         workspaceId: 'workspace-1',
         role: 'editor',
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act
@@ -372,9 +375,9 @@ describe('PermissionService', () => {
       expect(mockPrisma.workspaceMember.updateMany).toHaveBeenCalledWith({
         where: {
           userId: 'target-user',
-          workspaceId: 'workspace-1'
+          workspaceId: 'workspace-1',
         },
-        data: { role: 'editor' }
+        data: { role: 'editor' },
       });
     });
 
@@ -385,7 +388,7 @@ describe('PermissionService', () => {
         userId: 'admin-user',
         workspaceId: 'workspace-1',
         role: 'admin', // Not owner
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Act & Assert
@@ -407,7 +410,7 @@ describe('PermissionService', () => {
       expect(permissionService.isHigherRole('admin', 'editor')).toBe(true);
       expect(permissionService.isHigherRole('editor', 'viewer')).toBe(true);
       expect(permissionService.isHigherRole('viewer', 'guest')).toBe(true);
-      
+
       expect(permissionService.isHigherRole('guest', 'owner')).toBe(false);
       expect(permissionService.isHigherRole('editor', 'admin')).toBe(false);
     });
@@ -419,7 +422,7 @@ describe('PermissionService', () => {
       expect(permissionService.hasMinimumRole('owner', 'admin')).toBe(true);
       expect(permissionService.hasMinimumRole('admin', 'admin')).toBe(true);
       expect(permissionService.hasMinimumRole('editor', 'admin')).toBe(false);
-      
+
       expect(permissionService.hasMinimumRole('editor', 'viewer')).toBe(true);
       expect(permissionService.hasMinimumRole('viewer', 'editor')).toBe(false);
     });

@@ -21,6 +21,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ## 📊 응답 형식
 
 ### 성공 응답
+
 ```json
 {
   "success": true,
@@ -35,6 +36,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### 에러 응답
+
 ```json
 {
   "success": false,
@@ -56,6 +58,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ## 🔐 인증 API
 
 ### 회원가입
+
 ```http
 POST /auth/signup
 Content-Type: application/json
@@ -68,6 +71,7 @@ Content-Type: application/json
 ```
 
 **응답 (201 Created):**
+
 ```json
 {
   "success": true,
@@ -84,6 +88,7 @@ Content-Type: application/json
 ```
 
 ### 로그인
+
 ```http
 POST /auth/signin
 Content-Type: application/json
@@ -95,6 +100,7 @@ Content-Type: application/json
 ```
 
 **응답 (200 OK) - MFA 비활성화:**
+
 ```json
 {
   "success": true,
@@ -111,6 +117,7 @@ Content-Type: application/json
 ```
 
 **응답 (200 OK) - MFA 활성화:**
+
 ```json
 {
   "success": true,
@@ -122,22 +129,21 @@ Content-Type: application/json
 ```
 
 ### MFA 설정
+
 ```http
 POST /auth/mfa/setup
 Authorization: Bearer {token}
 ```
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
   "data": {
     "secret": "JBSWY3DPEHPK3PXP",
     "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-    "backupCodes": [
-      "ABCD-EFGH-IJKL",
-      "MNOP-QRST-UVWX"
-    ]
+    "backupCodes": ["ABCD-EFGH-IJKL", "MNOP-QRST-UVWX"]
   }
 }
 ```
@@ -145,12 +151,14 @@ Authorization: Bearer {token}
 ## 👤 사용자 API
 
 ### 프로필 조회
+
 ```http
 GET /user/profile
 Authorization: Bearer {token}
 ```
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
@@ -168,6 +176,7 @@ Authorization: Bearer {token}
 ```
 
 ### 프로필 수정
+
 ```http
 PUT /user/profile
 Authorization: Bearer {token}
@@ -182,12 +191,14 @@ Content-Type: application/json
 ## 🏢 워크스페이스 API
 
 ### 워크스페이스 목록 조회
+
 ```http
 GET /workspaces
 Authorization: Bearer {token}
 ```
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
@@ -206,6 +217,7 @@ Authorization: Bearer {token}
 ```
 
 ### 워크스페이스 생성
+
 ```http
 POST /workspaces
 Authorization: Bearer {token}
@@ -218,6 +230,7 @@ Content-Type: application/json
 ```
 
 **응답 (201 Created):**
+
 ```json
 {
   "success": true,
@@ -234,12 +247,14 @@ Content-Type: application/json
 ```
 
 ### 워크스페이스 상세 조회
+
 ```http
 GET /workspaces/{workspaceId}
 Authorization: Bearer {token}
 ```
 
 ### 멤버 초대
+
 ```http
 POST /workspaces/{workspaceId}/members
 Authorization: Bearer {token}
@@ -254,12 +269,14 @@ Content-Type: application/json
 **권한 요구사항**: Admin 이상
 
 ### 멤버 목록 조회
+
 ```http
 GET /workspaces/{workspaceId}/members
 Authorization: Bearer {token}
 ```
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
@@ -284,17 +301,20 @@ Authorization: Bearer {token}
 ## 📄 페이지 API
 
 ### 페이지 목록 조회
+
 ```http
 GET /workspaces/{workspaceId}/pages
 Authorization: Bearer {token}
 ```
 
 **쿼리 파라미터:**
+
 - `parent`: 부모 페이지 ID (선택적)
 - `limit`: 결과 수 제한 (기본값: 50)
 - `offset`: 페이지네이션 오프셋 (기본값: 0)
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
@@ -323,6 +343,7 @@ Authorization: Bearer {token}
 ```
 
 ### 페이지 생성
+
 ```http
 POST /workspaces/{workspaceId}/pages
 Authorization: Bearer {token}
@@ -339,6 +360,7 @@ Content-Type: application/json
 **권한 요구사항**: Editor 이상
 
 **응답 (201 Created):**
+
 ```json
 {
   "success": true,
@@ -358,12 +380,14 @@ Content-Type: application/json
 ```
 
 ### 페이지 상세 조회
+
 ```http
 GET /pages/{pageId}
 Authorization: Bearer {token}
 ```
 
 ### 페이지 수정
+
 ```http
 PUT /pages/{pageId}
 Authorization: Bearer {token}
@@ -379,24 +403,28 @@ Content-Type: application/json
 **권한 요구사항**: Editor 이상
 
 ### 페이지 삭제
+
 ```http
 DELETE /pages/{pageId}
 Authorization: Bearer {token}
 ```
 
-**권한 요구사항**: 
+**권한 요구사항**:
+
 - Admin 이상 (모든 페이지)
 - Editor (본인이 생성한 페이지만)
 
 ## 📝 문서 API
 
 ### 문서 내용 조회
+
 ```http
 GET /documents/{documentId}
 Authorization: Bearer {token}
 ```
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
@@ -413,6 +441,7 @@ Authorization: Bearer {token}
 ```
 
 ### 문서 내용 업데이트
+
 ```http
 PUT /documents/{documentId}
 Authorization: Bearer {token}
@@ -429,16 +458,19 @@ Content-Type: application/json
 ## 💬 댓글 API
 
 ### 댓글 목록 조회
+
 ```http
 GET /documents/{documentId}/comments
 Authorization: Bearer {token}
 ```
 
 **쿼리 파라미터:**
+
 - `resolved`: 해결된 댓글 포함 여부 (기본값: false)
 - `limit`: 결과 수 제한 (기본값: 50)
 
 ### 댓글 생성
+
 ```http
 POST /documents/{documentId}/comments
 Authorization: Bearer {token}
@@ -455,6 +487,7 @@ Content-Type: application/json
 **권한 요구사항**: Editor 이상
 
 ### 댓글 수정
+
 ```http
 PUT /comments/{commentId}
 Authorization: Bearer {token}
@@ -465,11 +498,13 @@ Content-Type: application/json
 }
 ```
 
-**권한 요구사항**: 
+**권한 요구사항**:
+
 - Admin 이상 (모든 댓글)
 - Editor (본인 댓글만)
 
 ### 댓글 해결/재열기
+
 ```http
 PATCH /comments/{commentId}/resolve
 Authorization: Bearer {token}
@@ -483,6 +518,7 @@ Content-Type: application/json
 ## 📁 파일 API
 
 ### 파일 업로드
+
 ```http
 POST /files/upload
 Authorization: Bearer {token}
@@ -495,6 +531,7 @@ workspaceId: ws_123
 **권한 요구사항**: Editor 이상
 
 **응답 (201 Created):**
+
 ```json
 {
   "success": true,
@@ -513,36 +550,42 @@ workspaceId: ws_123
 ```
 
 ### 파일 목록 조회
+
 ```http
 GET /workspaces/{workspaceId}/files
 Authorization: Bearer {token}
 ```
 
 ### 파일 삭제
+
 ```http
 DELETE /files/{fileId}
 Authorization: Bearer {token}
 ```
 
-**권한 요구사항**: 
+**권한 요구사항**:
+
 - Admin 이상 (모든 파일)
 - Editor (본인이 업로드한 파일만)
 
 ## 🔍 검색 API
 
 ### 전체 검색
+
 ```http
 GET /search
 Authorization: Bearer {token}
 ```
 
 **쿼리 파라미터:**
+
 - `q`: 검색어 (필수)
 - `workspace`: 워크스페이스 ID (선택적)
 - `type`: 검색 타입 (page, comment, file)
 - `limit`: 결과 수 제한 (기본값: 20)
 
 **응답 (200 OK):**
+
 ```json
 {
   "success": true,
@@ -565,29 +608,31 @@ Authorization: Bearer {token}
 
 ## 📊 HTTP 상태 코드
 
-| 코드 | 의미 | 설명 |
-|------|------|------|
-| 200 | OK | 요청 성공 |
-| 201 | Created | 리소스 생성 성공 |
-| 204 | No Content | 성공, 응답 본문 없음 |
-| 400 | Bad Request | 잘못된 요청 |
-| 401 | Unauthorized | 인증 필요 |
-| 403 | Forbidden | 권한 부족 |
-| 404 | Not Found | 리소스 없음 |
-| 409 | Conflict | 리소스 충돌 |
-| 422 | Unprocessable Entity | 검증 실패 |
-| 429 | Too Many Requests | 요청 한도 초과 |
-| 500 | Internal Server Error | 서버 오류 |
+| 코드 | 의미                  | 설명                 |
+| ---- | --------------------- | -------------------- |
+| 200  | OK                    | 요청 성공            |
+| 201  | Created               | 리소스 생성 성공     |
+| 204  | No Content            | 성공, 응답 본문 없음 |
+| 400  | Bad Request           | 잘못된 요청          |
+| 401  | Unauthorized          | 인증 필요            |
+| 403  | Forbidden             | 권한 부족            |
+| 404  | Not Found             | 리소스 없음          |
+| 409  | Conflict              | 리소스 충돌          |
+| 422  | Unprocessable Entity  | 검증 실패            |
+| 429  | Too Many Requests     | 요청 한도 초과       |
+| 500  | Internal Server Error | 서버 오류            |
 
 ## 🚦 Rate Limiting
 
 ### 제한 정책
+
 - **인증 API**: 15분당 5회
 - **일반 API**: 1분당 100회
 - **파일 업로드**: 1분당 10회
 - **검색 API**: 1분당 30회
 
 ### 헤더 정보
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -597,6 +642,7 @@ X-RateLimit-Reset: 1642248000
 ## 🧪 API 테스트
 
 ### cURL 예시
+
 ```bash
 # 로그인
 curl -X POST http://localhost:3001/api/auth/signin \
@@ -611,6 +657,7 @@ curl -X POST http://localhost:3001/api/workspaces/ws_123/pages \
 ```
 
 ### Postman Collection
+
 프로젝트 루트의 `postman/` 폴더에서 Postman 컬렉션을 확인할 수 있습니다.
 
 ---

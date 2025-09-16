@@ -9,7 +9,7 @@ export interface EnvironmentConfig {
     url: string;
     provider: 'sqlite' | 'postgresql';
   };
-  
+
   // Authentication
   auth: {
     nextAuthUrl: string;
@@ -17,7 +17,7 @@ export interface EnvironmentConfig {
     jwtSecret: string;
     encryptionKey: string;
   };
-  
+
   // OAuth Providers
   oauth: {
     google: {
@@ -29,32 +29,32 @@ export interface EnvironmentConfig {
       clientSecret: string;
     };
   };
-  
+
   // Redis
   redis: {
     url: string;
     enabled: boolean;
   };
-  
+
   // Security
   security: {
     rateLimitWindowMs: number;
     rateLimitMaxRequests: number;
     corsOrigins: string[];
   };
-  
+
   // File Upload
   upload: {
     maxSize: number;
     allowedTypes: string[];
   };
-  
+
   // Monitoring
   monitoring: {
     sentryDsn?: string;
     logLevel: 'debug' | 'info' | 'warn' | 'error';
   };
-  
+
   // Feature Flags
   features: {
     enableMfa: boolean;
@@ -70,57 +70,67 @@ export type Environment = 'development' | 'staging' | 'production';
  */
 export function loadEnvironmentConfig(): EnvironmentConfig {
   const nodeEnv = (process.env.NODE_ENV as Environment) || 'development';
-  
+
   return {
     database: {
       url: process.env.DATABASE_URL || 'sqlite:./dev.db',
-      provider: process.env.DATABASE_URL?.startsWith('postgresql') ? 'postgresql' : 'sqlite'
+      provider: process.env.DATABASE_URL?.startsWith('postgresql')
+        ? 'postgresql'
+        : 'sqlite',
     },
-    
+
     auth: {
       nextAuthUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
       nextAuthSecret: process.env.NEXTAUTH_SECRET || 'development-secret',
       jwtSecret: process.env.JWT_SECRET || 'development-jwt-secret',
-      encryptionKey: process.env.ENCRYPTION_KEY || 'development-encryption-key'
+      encryptionKey: process.env.ENCRYPTION_KEY || 'development-encryption-key',
     },
-    
+
     oauth: {
       google: {
         clientId: process.env.GOOGLE_CLIENT_ID || '',
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       },
       github: {
         clientId: process.env.GITHUB_CLIENT_ID || '',
-        clientSecret: process.env.GITHUB_CLIENT_SECRET || ''
-      }
+        clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+      },
     },
-    
+
     redis: {
       url: process.env.REDIS_URL || 'redis://localhost:6379',
-      enabled: !!process.env.REDIS_URL
+      enabled: !!process.env.REDIS_URL,
     },
-    
+
     security: {
       rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
-      rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
-      corsOrigins: getCorsOrigins(nodeEnv)
+      rateLimitMaxRequests: parseInt(
+        process.env.RATE_LIMIT_MAX_REQUESTS || '100'
+      ),
+      corsOrigins: getCorsOrigins(nodeEnv),
     },
-    
+
     upload: {
       maxSize: parseInt(process.env.UPLOAD_MAX_SIZE || '10485760'),
-      allowedTypes: (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,application/pdf').split(',')
+      allowedTypes: (
+        process.env.ALLOWED_FILE_TYPES ||
+        'image/jpeg,image/png,image/gif,application/pdf'
+      ).split(','),
     },
-    
+
     monitoring: {
       sentryDsn: process.env.SENTRY_DSN,
-      logLevel: (process.env.LOG_LEVEL as any) || 'info'
+      logLevel:
+        (process.env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') ||
+        'info',
     },
-    
+
     features: {
       enableMfa: process.env.ENABLE_MFA === 'true',
       enableAnalytics: process.env.ENABLE_ANALYTICS === 'true',
-      enableDebugMode: process.env.ENABLE_DEBUG_MODE === 'true' || nodeEnv === 'development'
-    }
+      enableDebugMode:
+        process.env.ENABLE_DEBUG_MODE === 'true' || nodeEnv === 'development',
+    },
   };
 }
 
@@ -145,36 +155,48 @@ function getCorsOrigins(env: Environment): string[] {
  */
 export function validateEnvironmentConfig(config: EnvironmentConfig): void {
   const errors: string[] = [];
-  
+
   // 필수 환경 변수 검증
-  if (!config.auth.nextAuthSecret || config.auth.nextAuthSecret === 'development-secret') {
+  if (
+    !config.auth.nextAuthSecret ||
+    config.auth.nextAuthSecret === 'development-secret'
+  ) {
     if (process.env.NODE_ENV === 'production') {
       errors.push('NEXTAUTH_SECRET must be set in production');
     }
   }
-  
-  if (!config.auth.jwtSecret || config.auth.jwtSecret === 'development-jwt-secret') {
+
+  if (
+    !config.auth.jwtSecret ||
+    config.auth.jwtSecret === 'development-jwt-secret'
+  ) {
     if (process.env.NODE_ENV === 'production') {
       errors.push('JWT_SECRET must be set in production');
     }
   }
-  
-  if (!config.auth.encryptionKey || config.auth.encryptionKey === 'development-encryption-key') {
+
+  if (
+    !config.auth.encryptionKey ||
+    config.auth.encryptionKey === 'development-encryption-key'
+  ) {
     if (process.env.NODE_ENV === 'production') {
       errors.push('ENCRYPTION_KEY must be set in production');
     }
   }
-  
+
   // 데이터베이스 URL 검증
   if (!config.database.url) {
     errors.push('DATABASE_URL must be set');
   }
-  
+
   // 프로덕션 환경에서 PostgreSQL 사용 검증
-  if (process.env.NODE_ENV === 'production' && config.database.provider !== 'postgresql') {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    config.database.provider !== 'postgresql'
+  ) {
     errors.push('PostgreSQL must be used in production environment');
   }
-  
+
   if (errors.length > 0) {
     throw new Error(`Environment configuration errors:\n${errors.join('\n')}`);
   }
@@ -185,7 +207,15 @@ export function validateEnvironmentConfig(config: EnvironmentConfig): void {
  */
 export const config = loadEnvironmentConfig();
 
-// 프로덕션 환경에서 설정 검증
-if (process.env.NODE_ENV === 'production') {
+// 프로덕션 환경에서 설정 검증 (빌드 시에는 제외)
+// Next.js 빌드, CI/CD 환경에서는 검증 건너뛰기
+const isBuildTime =
+  process.env.NEXT_PHASE ||
+  process.env.CI ||
+  process.env.GITHUB_ACTIONS ||
+  process.env.VERCEL ||
+  process.env.NETLIFY;
+
+if (process.env.NODE_ENV === 'production' && !isBuildTime) {
   validateEnvironmentConfig(config);
 }

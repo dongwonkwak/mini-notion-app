@@ -2,11 +2,27 @@
  * 세션 캐시 서비스
  * Redis를 활용한 사용자 세션 및 JWT 토큰 캐싱을 담당합니다.
  */
+import { logger } from '@editor/config';
+import { getRedis } from '@editor/database';
+import type { User } from '@editor/types';
 
-import { getRedisClient } from '@editor/database';
-import type { 
-  User
-} from '@editor/types';
+// Password 필드를 포함한 User 타입 (Prisma 타입 사용)
+type UserWithPassword = {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  password: string | null;
+  provider: string;
+  providerId: string | null;
+  emailVerified: Date | null;
+  mfaEnabled: boolean;
+  mfaSecret: string | null;
+  mfaBackupCodes: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  lastActiveAt: Date;
+};
 
 interface CachedSession {
   user: User;
@@ -15,15 +31,16 @@ interface CachedSession {
 }
 
 interface CachedJWT {
-  payload: any;
+  payload: Record<string, unknown>;
   expires: Date;
 }
 
 export class SessionCacheService {
-  private readonly redis = getRedisClient();
+  private readonly redis = getRedis();
   private readonly SESSION_PREFIX = 'session:';
   private readonly JWT_PREFIX = 'jwt:';
   private readonly USER_PREFIX = 'user:';
+  private readonly USER_EMAIL_PREFIX = 'user_email:';
   private readonly SESSION_TTL = 30 * 24 * 60 * 60; // 30일 (초)
   private readonly JWT_TTL = 60 * 60; // 1시간 (초)
   private readonly USER_TTL = 15 * 60; // 15분 (초)
@@ -36,7 +53,7 @@ export class SessionCacheService {
       const sessionData: CachedSession = {
         user,
         expires: new Date(Date.now() + (ttl || this.SESSION_TTL) * 1000),
-        lastActive: new Date()
+        lastActive: new Date(),
       };
 
       await this.redis.setex(
@@ -45,7 +62,9 @@ export class SessionCacheService {
         JSON.stringify(sessionData)
       );
     } catch (error) {
-      console.error('Session cache error:', error);
+      logger.error('Session cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       // 캐시 오류는 치명적이지 않으므로 예외를 던지지 않음
     }
   }
@@ -59,7 +78,7 @@ export class SessionCacheService {
       if (!cached) return null;
 
       const sessionData: CachedSession = JSON.parse(cached);
-      
+
       // 만료 확인
       if (new Date() > sessionData.expires) {
         await this.invalidateSession(userId);
@@ -76,7 +95,9 @@ export class SessionCacheService {
 
       return sessionData.user;
     } catch (error) {
-      console.error('Session cache retrieval error:', error);
+      logger.error('Session cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -84,11 +105,15 @@ export class SessionCacheService {
   /**
    * JWT 토큰 캐시 저장
    */
-  async cacheJWT(token: string, payload: any, ttl?: number): Promise<void> {
+  async cacheJWT(
+    token: string,
+    payload: Record<string, unknown>,
+    ttl?: number
+  ): Promise<void> {
     try {
       const jwtData: CachedJWT = {
         payload,
-        expires: new Date(Date.now() + (ttl || this.JWT_TTL) * 1000)
+        expires: new Date(Date.now() + (ttl || this.JWT_TTL) * 1000),
       };
 
       await this.redis.setex(
@@ -97,20 +122,24 @@ export class SessionCacheService {
         JSON.stringify(jwtData)
       );
     } catch (error) {
-      console.error('JWT cache error:', error);
+      logger.error('JWT cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
   /**
    * JWT 토큰 캐시 조회
    */
-  async getCachedJWT(token: string): Promise<any | null> {
+  async getCachedJWT(token: string): Promise<Record<string, unknown> | null> {
     try {
-      const cached = await this.redis.get(`${this.JWT_PREFIX}${this.hashToken(token)}`);
+      const cached = await this.redis.get(
+        `${this.JWT_PREFIX}${this.hashToken(token)}`
+      );
       if (!cached) return null;
 
       const jwtData: CachedJWT = JSON.parse(cached);
-      
+
       // 만료 확인
       if (new Date() > jwtData.expires) {
         await this.invalidateJWT(token);
@@ -119,7 +148,9 @@ export class SessionCacheService {
 
       return jwtData.payload;
     } catch (error) {
-      console.error('JWT cache retrieval error:', error);
+      logger.error('JWT cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -135,7 +166,9 @@ export class SessionCacheService {
         JSON.stringify(user)
       );
     } catch (error) {
-      console.error('User cache error:', error);
+      logger.error('User cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -147,7 +180,45 @@ export class SessionCacheService {
       const cached = await this.redis.get(`${this.USER_PREFIX}${userId}`);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
-      console.error('User cache retrieval error:', error);
+      logger.error('User cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
+
+  /**
+   * 이메일로 사용자 정보 캐시 저장 (password 포함)
+   */
+  async cacheUserByEmail(
+    email: string,
+    user: UserWithPassword,
+    ttl?: number
+  ): Promise<void> {
+    try {
+      await this.redis.setex(
+        `${this.USER_EMAIL_PREFIX}${email}`,
+        ttl || this.USER_TTL,
+        JSON.stringify(user)
+      );
+    } catch (error) {
+      logger.error('User email cache error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * 이메일로 사용자 정보 캐시 조회 (password 포함)
+   */
+  async getCachedUserByEmail(email: string): Promise<UserWithPassword | null> {
+    try {
+      const cached = await this.redis.get(`${this.USER_EMAIL_PREFIX}${email}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      logger.error('User email cache retrieval error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -159,7 +230,9 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.SESSION_PREFIX}${userId}`);
     } catch (error) {
-      console.error('Session invalidation error:', error);
+      logger.error('Session invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -170,7 +243,9 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.JWT_PREFIX}${this.hashToken(token)}`);
     } catch (error) {
-      console.error('JWT invalidation error:', error);
+      logger.error('JWT invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -181,21 +256,44 @@ export class SessionCacheService {
     try {
       await this.redis.del(`${this.USER_PREFIX}${userId}`);
     } catch (error) {
-      console.error('User cache invalidation error:', error);
+      logger.error('User cache invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * 이메일로 사용자 정보 캐시 무효화
+   */
+  async invalidateUserByEmail(email: string): Promise<void> {
+    try {
+      await this.redis.del(`${this.USER_EMAIL_PREFIX}${email}`);
+    } catch (error) {
+      logger.error('User email cache invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
   /**
    * 사용자 관련 모든 캐시 무효화
    */
-  async invalidateUserCache(userId: string): Promise<void> {
+  async invalidateUserCache(userId: string, email?: string): Promise<void> {
     try {
-      await Promise.all([
+      const promises = [
         this.invalidateSession(userId),
-        this.invalidateUser(userId)
-      ]);
+        this.invalidateUser(userId),
+      ];
+
+      if (email) {
+        promises.push(this.invalidateUserByEmail(email));
+      }
+
+      await Promise.all(promises);
     } catch (error) {
-      console.error('User cache invalidation error:', error);
+      logger.error('User cache invalidation error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -217,7 +315,7 @@ export class SessionCacheService {
             await this.redis.del(key);
             cleanedCount++;
           }
-        } catch (_parseError) {
+        } catch {
           // 잘못된 데이터는 삭제
           await this.redis.del(key);
           cleanedCount++;
@@ -226,7 +324,9 @@ export class SessionCacheService {
 
       return cleanedCount;
     } catch (error) {
-      console.error('Session cleanup error:', error);
+      logger.error('Session cleanup error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return 0;
     }
   }
@@ -238,25 +338,33 @@ export class SessionCacheService {
     sessionCount: number;
     jwtCount: number;
     userCount: number;
+    userEmailCount: number;
   }> {
     try {
-      const [sessionKeys, jwtKeys, userKeys] = await Promise.all([
-        this.redis.keys(`${this.SESSION_PREFIX}*`),
-        this.redis.keys(`${this.JWT_PREFIX}*`),
-        this.redis.keys(`${this.USER_PREFIX}*`)
-      ]);
+      const [sessionKeys, jwtKeys, userKeys, userEmailKeys] = await Promise.all(
+        [
+          this.redis.keys(`${this.SESSION_PREFIX}*`),
+          this.redis.keys(`${this.JWT_PREFIX}*`),
+          this.redis.keys(`${this.USER_PREFIX}*`),
+          this.redis.keys(`${this.USER_EMAIL_PREFIX}*`),
+        ]
+      );
 
       return {
         sessionCount: sessionKeys.length,
         jwtCount: jwtKeys.length,
-        userCount: userKeys.length
+        userCount: userKeys.length,
+        userEmailCount: userEmailKeys.length,
       };
     } catch (error) {
-      console.error('Cache stats error:', error);
+      logger.error('Cache stats error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {
         sessionCount: 0,
         jwtCount: 0,
-        userCount: 0
+        userCount: 0,
+        userEmailCount: 0,
       };
     }
   }
@@ -269,7 +377,7 @@ export class SessionCacheService {
     let hash = 0;
     for (let i = 0; i < token.length; i++) {
       const char = token.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // 32비트 정수로 변환
     }
     return Math.abs(hash).toString(36);
@@ -282,7 +390,7 @@ export class SessionCacheService {
     try {
       await this.redis.ping();
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }

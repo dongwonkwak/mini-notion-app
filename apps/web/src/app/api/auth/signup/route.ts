@@ -2,16 +2,18 @@
  * 회원가입 API 엔드포인트
  * 이메일/비밀번호 기반 사용자 등록을 처리합니다.
  */
-
-import { AuthService } from '@editor/auth';
-import type { CreateUserData } from '@editor/types';
 import { NextRequest, NextResponse } from 'next/server';
 
-const authService = new AuthService();
+import { AuthService } from '@editor/auth';
+import { logger } from '@editor/config';
+import type { CreateUserData } from '@editor/types';
+
+// 테스트 환경에서는 mock을 사용할 수 있도록 함수로 래핑
+const getAuthService = () => AuthService.getInstance();
 
 /**
  * 사용자 회원가입
- * 
+ *
  * @swagger
  * /api/auth/signup:
  *   post:
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, name, password } = body;
-    
+
     // 클라이언트 정보 추출 (현재 사용되지 않지만 향후 로깅에 사용 예정)
     // const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     // const userAgent = request.headers.get('user-agent') || 'unknown';
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'EMAIL_NAME_PASSWORD_REQUIRED',
-          message: '이메일, 이름, 비밀번호를 모두 입력해주세요.'
+          message: '이메일, 이름, 비밀번호를 모두 입력해주세요.',
         },
         { status: 400 }
       );
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'INVALID_EMAIL_FORMAT',
-          message: '올바른 이메일 형식을 입력해주세요.'
+          message: '올바른 이메일 형식을 입력해주세요.',
         },
         { status: 400 }
       );
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'PASSWORD_TOO_SHORT',
-          message: '비밀번호는 최소 8자 이상이어야 합니다.'
+          message: '비밀번호는 최소 8자 이상이어야 합니다.',
         },
         { status: 400 }
       );
@@ -124,10 +126,21 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       name: name.trim(),
       password,
-      provider: 'email'
+      provider: 'email',
     };
 
-    const user = await authService.createUser(userData);
+    const user = await getAuthService().createUser(userData);
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'USER_CREATION_FAILED',
+          message: '사용자 생성에 실패했습니다.',
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
@@ -137,14 +150,15 @@ export async function POST(request: NextRequest) {
           id: user.id,
           email: user.email,
           name: user.name,
-          avatar: user.avatar
-        }
+          avatar: user.avatar,
+        },
       },
       { status: 201 }
     );
-
   } catch (error: unknown) {
-    console.error('Signup error:', error);
+    logger.error('Signup error', {
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     // 이메일 중복 오류 처리
     if ((error as Error).message.includes('이미 존재하는 이메일')) {
@@ -152,7 +166,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'EMAIL_ALREADY_EXISTS',
-          message: '이미 사용 중인 이메일입니다.'
+          message: '이미 사용 중인 이메일입니다.',
         },
         { status: 409 }
       );
@@ -162,7 +176,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: 'SIGNUP_FAILED',
-        message: '회원가입 중 오류가 발생했습니다.'
+        message: '회원가입 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );

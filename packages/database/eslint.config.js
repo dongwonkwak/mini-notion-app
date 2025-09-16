@@ -15,15 +15,15 @@ export default [
         setTimeout: 'readonly',
         Buffer: 'readonly',
         process: 'readonly',
-        console: 'readonly'
-      }
+        console: 'readonly',
+      },
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      '@typescript-eslint': tseslint,
     },
     rules: {
       'no-console': 'off', // Allow console logs in database tests and setup
-      'no-undef': 'off' // Turn off no-undef as TypeScript handles this
-    }
-  }
+      'no-undef': 'off', // Turn off no-undef as TypeScript handles this
+    },
+  },
 ];

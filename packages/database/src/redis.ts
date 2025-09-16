@@ -1,7 +1,6 @@
 /**
  * Redis connection and caching utilities for session management and document caching
  */
-
 import { Redis } from 'ioredis';
 
 // Redis connection instance
@@ -16,7 +15,7 @@ export function initRedis(): Redis {
   }
 
   const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-  
+
   redis = new Redis(redisUrl, {
     maxRetriesPerRequest: 3,
     lazyConnect: true,
@@ -29,7 +28,7 @@ export function initRedis(): Redis {
     console.log('✅ Redis connected successfully');
   });
 
-  redis.on('error', (error) => {
+  redis.on('error', error => {
     console.error('❌ Redis connection error:', error);
   });
 
@@ -74,7 +73,11 @@ export class DocumentCache {
   /**
    * Cache document state
    */
-  async setDocument(documentId: string, state: Buffer, version: number): Promise<void> {
+  async setDocument(
+    documentId: string,
+    state: Buffer,
+    version: number
+  ): Promise<void> {
     const key = `doc:${documentId}`;
     const data = {
       state: state.toString('base64'),
@@ -89,7 +92,9 @@ export class DocumentCache {
   /**
    * Get cached document state
    */
-  async getDocument(documentId: string): Promise<{ state: Buffer; version: number; lastModified: Date } | null> {
+  async getDocument(
+    documentId: string
+  ): Promise<{ state: Buffer; version: number; lastModified: Date } | null> {
     const key = `doc:${documentId}`;
     const cached = await this.redis.get(key);
 
@@ -157,7 +162,12 @@ export class SessionCache {
   /**
    * Cache user session
    */
-  async setSession(userId: string, sessionData: any): Promise<void> {
+  // Use a generic record for session data rather than `any` so callers can pass
+  // structured JSON-compatible data. Keep it flexible while avoiding `any`.
+  async setSession(
+    userId: string,
+    sessionData: Record<string, unknown>
+  ): Promise<void> {
     const key = `session:${userId}`;
     await this.redis.setex(key, 86400, JSON.stringify(sessionData)); // 24 hours TTL
   }
@@ -165,7 +175,7 @@ export class SessionCache {
   /**
    * Get cached session
    */
-  async getSession(userId: string): Promise<any | null> {
+  async getSession(userId: string): Promise<Record<string, unknown> | null> {
     const key = `session:${userId}`;
     const cached = await this.redis.get(key);
 
@@ -174,7 +184,15 @@ export class SessionCache {
     }
 
     try {
-      return JSON.parse(cached);
+      const parsed: unknown = JSON.parse(cached);
+
+      // Ensure we return a plain object (or null) rather than a primitive.
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+
+      // If the cached value isn't an object, treat it as missing/invalid.
+      return null;
     } catch (error) {
       console.error('Error parsing cached session:', error);
       return null;
@@ -220,7 +238,12 @@ export class RateLimiter {
   /**
    * Check rate limit for user action
    */
-  async checkLimit(userId: string, action: string, maxRequests: number = 100, windowMs: number = 60000): Promise<boolean> {
+  async checkLimit(
+    userId: string,
+    action: string,
+    maxRequests: number = 100,
+    windowMs: number = 60000
+  ): Promise<boolean> {
     const key = `rate:${userId}:${action}`;
     const current = await this.redis.incr(key);
 

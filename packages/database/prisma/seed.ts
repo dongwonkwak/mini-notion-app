@@ -276,7 +276,7 @@ async function main() {
 
   // 문서 상태 생성 (빈 Y.js 문서)
   const emptyYjsState = Buffer.from([]);
-  
+
   await Promise.all(
     pages.map(page =>
       prisma.document.create({

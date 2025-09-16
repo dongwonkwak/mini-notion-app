@@ -8,11 +8,11 @@ module.exports = {
     '<rootDir>/packages/editor',
     '<rootDir>/packages/collaboration',
     '<rootDir>/packages/auth',
-    
+
     // Apps
     '<rootDir>/apps/web',
     '<rootDir>/apps/server',
-    '<rootDir>/apps/api'
+    '<rootDir>/apps/api',
   ],
   collectCoverageFrom: [
     'packages/*/src/**/*.{ts,tsx}',
@@ -20,11 +20,12 @@ module.exports = {
     '!**/*.d.ts',
     '!**/*.stories.{ts,tsx}',
     '!**/__tests__/**',
-    '!**/__mocks__/**'
+    '!**/__mocks__/**',
   ],
   coverageDirectory: '<rootDir>/coverage',
   maxWorkers: '50%',
   verbose: true,
   detectOpenHandles: true,
-  forceExit: true
+  forceExit: true,
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

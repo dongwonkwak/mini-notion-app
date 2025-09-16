@@ -13,6 +13,7 @@ export interface User {
 }
 
 export interface AuthResult {
+  success: boolean;
   user: User;
   token: string;
   refreshToken: string;
@@ -93,21 +94,40 @@ export enum AuthErrorCode {
   USER_ALREADY_EXISTS = 'USER_ALREADY_EXISTS',
   MFA_SETUP_FAILED = 'MFA_SETUP_FAILED',
   MFA_ENABLE_FAILED = 'MFA_ENABLE_FAILED',
+  MFA_DISABLE_FAILED = 'MFA_DISABLE_FAILED',
   INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
   PASSWORD_RESET_FAILED = 'PASSWORD_RESET_FAILED',
   PERMISSION_DENIED = 'PERMISSION_DENIED',
-  SESSION_EXPIRED = 'SESSION_EXPIRED'
+  SESSION_EXPIRED = 'SESSION_EXPIRED',
+  ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
 }
+
+// AuthErrorCode enum을 사용하여 타입 안전성 확보
+export const getAuthErrorCode = (code: string): AuthErrorCode | undefined => {
+  return Object.values(AuthErrorCode).find((value: string) => value === code);
+};
 
 // 더 구체적인 AuthError 클래스
 export class AuthError extends Error {
   constructor(
     public code: AuthErrorCode,
     message: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'AuthError';
+  }
+
+  // 에러 코드와 상세 정보를 포함한 메시지 반환
+  getFullMessage(): string {
+    let fullMessage = `${this.name}: ${this.message}`;
+    if (this.code) {
+      fullMessage += ` (Code: ${this.code})`;
+    }
+    if (this.details) {
+      fullMessage += ` (Details: ${JSON.stringify(this.details)})`;
+    }
+    return fullMessage;
   }
 }
 
@@ -157,19 +177,19 @@ export interface PagePermissions {
 export interface Block {
   id: string;
   type: BlockType;
-  content: any;
+  content: unknown;
   position: number;
   parentId?: string;
   metadata: BlockMetadata;
 }
 
-export type BlockType = 
-  | 'paragraph' 
-  | 'heading' 
-  | 'list' 
-  | 'code' 
-  | 'image' 
-  | 'table' 
+export type BlockType =
+  | 'paragraph'
+  | 'heading'
+  | 'list'
+  | 'code'
+  | 'image'
+  | 'table'
   | 'quote'
   | 'divider'
   | 'file';
@@ -235,7 +255,7 @@ export interface FileUpload {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -263,5 +283,5 @@ export interface UserActivity {
   type: 'edit' | 'cursor' | 'selection' | 'join' | 'leave';
   userId: string;
   timestamp: Date;
-  data?: any;
+  data?: unknown;
 }

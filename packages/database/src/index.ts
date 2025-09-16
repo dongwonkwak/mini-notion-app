@@ -3,35 +3,34 @@
  * Provides Prisma client, Redis utilities, and database operations
  */
 
-// Prisma client
+// Prisma client and types
 export { PrismaClient } from '@prisma/client';
-export { getPrisma as prisma, initPrisma, closePrisma, checkDatabaseHealth, cleanDatabase } from './utils';
+export type {
+  AuthEvent, Comment, Document, FileUpload, Page, Prisma, Session, User, Workspace,
+  WorkspaceMember
+} from '@prisma/client';
+
+export {
+  checkDatabaseHealth,
+  cleanDatabase,
+  closePrisma,
+  initPrisma,
+  getPrisma as prisma
+} from './utils';
 
 // Redis utilities
 export {
-  initRedis,
-  getRedis,
   closeRedis,
   DocumentCache,
-  SessionCache,
-  RateLimiter,
   documentCache,
-  sessionCache,
+  getRedis,
+  initRedis,
+  RateLimiter,
   rateLimiter,
+  SessionCache,
+  sessionCache
 } from './redis';
 
 // Database utilities
 export * from './utils';
 
-// Types
-export type {
-  User,
-  Workspace,
-  WorkspaceMember,
-  Page,
-  Document,
-  DocumentHistory,
-  Comment,
-  Session,
-  FileUpload,
-} from '@prisma/client';

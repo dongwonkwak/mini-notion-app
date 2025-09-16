@@ -8,7 +8,7 @@ export interface EditorConfig {
 
 export interface BlockType {
   type: string;
-  content: any;
+  content: unknown;
 }
 
 // TODO: Implement in Task 4 - Tiptap 기반 협업 에디터 기초 구축

@@ -3,10 +3,11 @@
  * 관리자용 보안 통계 및 이벤트 조회
  */
 
-import { AuthEventLogger } from '@editor/auth';
-import { getPrisma } from '@editor/database';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
+import { AuthEventLogger } from '@editor/auth';
+import { getPrisma } from '@editor/database';
 
 import { authOptions } from '@/lib/auth';
 
@@ -15,7 +16,7 @@ const eventLogger = new AuthEventLogger(prisma);
 
 /**
  * 보안 통계 조회
- * 
+ *
  * @swagger
  * /api/admin/security:
  *   get:
@@ -86,13 +87,13 @@ const eventLogger = new AuthEventLogger(prisma);
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         {
           success: false,
           error: 'AUTHENTICATION_REQUIRED',
-          message: '로그인이 필요합니다.'
+          message: '로그인이 필요합니다.',
         },
         { status: 401 }
       );
@@ -119,9 +120,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: stats
+      data: stats,
     });
-
   } catch (error: unknown) {
     console.error('Security stats error:', error);
 
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: 'SECURITY_STATS_FAILED',
-        message: '보안 통계 조회 중 오류가 발생했습니다.'
+        message: '보안 통계 조회 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * 보안 이벤트 조회
- * 
+ *
  * @swagger
  * /api/admin/security:
  *   post:
@@ -217,13 +217,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         {
           success: false,
           error: 'AUTHENTICATION_REQUIRED',
-          message: '로그인이 필요합니다.'
+          message: '로그인이 필요합니다.',
         },
         { status: 401 }
       );
@@ -251,16 +251,15 @@ export async function POST(request: NextRequest) {
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       limit: limit || 100,
-      offset: offset || 0
+      offset: offset || 0,
     };
 
     const events = await eventLogger.getEvents(filter);
 
     return NextResponse.json({
       success: true,
-      data: events
+      data: events,
     });
-
   } catch (error: unknown) {
     console.error('Security events error:', error);
 
@@ -268,7 +267,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: 'SECURITY_EVENTS_FAILED',
-        message: '보안 이벤트 조회 중 오류가 발생했습니다.'
+        message: '보안 이벤트 조회 중 오류가 발생했습니다.',
       },
       { status: 500 }
     );

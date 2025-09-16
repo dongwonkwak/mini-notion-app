@@ -1,10 +1,40 @@
 // Jest setup for database package
-const { afterAll, beforeAll, beforeEach } = require('@jest/globals');
-const { PrismaClient } = require('@prisma/client');
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 const os = require('os');
+const path = require('path');
+
+const { afterAll, beforeAll, beforeEach } = require('@jest/globals');
+
+// Prisma 클라이언트를 동적으로 로드하여 생성 오류 방지
+let PrismaClient;
+try {
+  // CI 환경에서 Prisma 클라이언트 생성 확인
+  const prismaModule = require('@prisma/client');
+  PrismaClient = prismaModule.PrismaClient;
+  console.log('✅ Prisma client loaded successfully');
+} catch (error) {
+  console.error('❌ Prisma client loading failed:', error.message);
+  console.error('Error details:', error);
+
+  // CI 환경에서는 Prisma 클라이언트가 필수이므로 에러 발생
+  if (process.env.CI || process.env.GITHUB_ACTIONS) {
+    console.error('🚨 CI environment detected - Prisma client is required');
+    process.exit(1);
+  }
+
+  // 로컬 개발 환경에서만 모킹된 클라이언트 사용
+  console.warn('⚠️ Using mock Prisma client for local development');
+  PrismaClient = class MockPrismaClient {
+    constructor() {
+      this.$connect = jest.fn();
+      this.$disconnect = jest.fn();
+      this.$executeRaw = jest.fn();
+      this.$queryRaw = jest.fn();
+      this.$transaction = jest.fn();
+    }
+  };
+}
 
 let prisma;
 let testDbPath;
@@ -16,16 +46,16 @@ let testDbPath;
 function createWorkerSpecificDbPath() {
   // Jest 워커 ID 가져오기 (환경변수에서)
   const workerId = process.env.JEST_WORKER_ID || '1';
-  
+
   // 프로세스 ID와 타임스탬프를 조합하여 고유성 보장
   const processId = process.pid;
   const timestamp = Date.now();
   const randomId = Math.random().toString(36).substr(2, 9);
-  
+
   // 임시 디렉토리에 워커별 DB 파일 생성
   const tempDir = os.tmpdir();
   const dbFileName = `jest-worker-${workerId}-${processId}-${timestamp}-${randomId}.db`;
-  
+
   return path.join(tempDir, dbFileName);
 }
 
@@ -34,30 +64,35 @@ beforeAll(async () => {
     // 워커별 고유 DB 파일 경로 생성
     testDbPath = createWorkerSpecificDbPath();
     const dbUrl = `file:${testDbPath}`;
-    
+
     // 환경변수 설정
     process.env.DATABASE_URL = dbUrl;
-    
-    console.log(`🗄️ Jest Worker ${process.env.JEST_WORKER_ID || '1'} using DB: ${path.basename(testDbPath)}`);
-    
+
+    console.log(
+      `🗄️ Jest Worker ${process.env.JEST_WORKER_ID || '1'} using DB: ${path.basename(testDbPath)}`
+    );
+
     // 기존 임시 DB 파일들 정리 (이 워커의 이전 실행 파일들만)
     const tempDir = os.tmpdir();
     const workerId = process.env.JEST_WORKER_ID || '1';
     const processId = process.pid;
-    
+
     try {
       const files = fs.readdirSync(tempDir);
       files.forEach(file => {
-        if (file.startsWith(`jest-worker-${workerId}-${processId}-`) && file.endsWith('.db')) {
+        if (
+          file.startsWith(`jest-worker-${workerId}-${processId}-`) &&
+          file.endsWith('.db')
+        ) {
           const filePath = path.join(tempDir, file);
           try {
             fs.unlinkSync(filePath);
-          } catch (e) {
+          } catch {
             // 파일이 사용 중이거나 없으면 무시
           }
         }
       });
-    } catch (e) {
+    } catch {
       // 디렉토리 읽기 실패 시 무시
     }
 
@@ -65,86 +100,101 @@ beforeAll(async () => {
     prisma = new PrismaClient({
       datasources: {
         db: {
-          url: dbUrl
-        }
+          url: dbUrl,
+        },
       },
-      log: [] // 테스트 중 로그 비활성화
+      log: [], // 테스트 중 로그 비활성화
     });
-    
+
     // 연결 테스트
     await prisma.$connect();
-    
+
     // 테스트 데이터베이스 초기화 (Prisma 클라이언트로)
     try {
       // 더 안정적인 DB 초기화를 위해 여러 번 시도
       let pushSuccess = false;
       let attempts = 0;
       const maxAttempts = 3;
-      
+
       while (!pushSuccess && attempts < maxAttempts) {
         try {
           attempts++;
-          console.log(`🔄 DB push attempt ${attempts} for worker ${process.env.JEST_WORKER_ID || '1'}`);
-          
-          execSync('npx prisma db push --force-reset --accept-data-loss --schema=./prisma/schema.prisma', { 
-            stdio: 'pipe',
-            env: { 
-              ...process.env, 
-              DATABASE_URL: dbUrl,
-              PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes'
-            },
-            timeout: 30000, // 30초 타임아웃
-            cwd: __dirname // 현재 디렉토리를 packages/database로 설정
-          });
+          console.log(
+            `🔄 DB push attempt ${attempts} for worker ${process.env.JEST_WORKER_ID || '1'}`
+          );
+
+          execSync(
+            'npx prisma db push --force-reset --accept-data-loss --schema=./prisma/schema.prisma',
+            {
+              stdio: 'pipe',
+              env: {
+                ...process.env,
+                DATABASE_URL: dbUrl,
+                PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
+              },
+              timeout: 30000, // 30초 타임아웃
+              cwd: __dirname, // 현재 디렉토리를 packages/database로 설정
+            }
+          );
           pushSuccess = true;
-          console.log(`✅ DB push successful for worker ${process.env.JEST_WORKER_ID || '1'}`);
+          console.log(
+            `✅ DB push successful for worker ${process.env.JEST_WORKER_ID || '1'}`
+          );
         } catch (pushError) {
-          console.warn(`⚠️ DB push attempt ${attempts} failed:`, pushError.message);
+          console.warn(
+            `⚠️ DB push attempt ${attempts} failed:`,
+            pushError.message
+          );
           if (attempts < maxAttempts) {
             // 잠시 대기 후 재시도
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
       }
-      
+
       if (!pushSuccess) {
-        throw new Error(`Failed to initialize database after ${maxAttempts} attempts`);
+        throw new Error(
+          `Failed to initialize database after ${maxAttempts} attempts`
+        );
       }
-      
-    } catch (pushError) {
+    } catch {
       // db push 실패 시 Prisma 클라이언트로 직접 스키마 적용 시도
-      console.warn(`⚠️ DB push failed for worker ${process.env.JEST_WORKER_ID || '1'}, trying alternative method`);
-      
+      console.warn(
+        `⚠️ DB push failed for worker ${process.env.JEST_WORKER_ID || '1'}, trying alternative method`
+      );
+
       // Prisma 클라이언트 재생성으로 스키마 동기화 시도
       await prisma.$disconnect();
       prisma = new PrismaClient({
         datasources: {
           db: {
-            url: dbUrl
-          }
+            url: dbUrl,
+          },
         },
-        log: []
+        log: [],
       });
       await prisma.$connect();
     }
-    
   } catch (error) {
-    console.warn(`⚠️ Database setup warning for worker ${process.env.JEST_WORKER_ID || '1'}:`, error.message);
-    
+    console.warn(
+      `⚠️ Database setup warning for worker ${process.env.JEST_WORKER_ID || '1'}:`,
+      error.message
+    );
+
     // Fallback: 기본 설정으로 시도
     prisma = new PrismaClient({
-      log: []
+      log: [],
     });
   }
 });
 
 beforeEach(async () => {
   if (!prisma) return;
-  
+
   try {
     // 외래키 제약 조건을 비활성화하고 데이터 정리
     await prisma.$executeRaw`PRAGMA foreign_keys = OFF;`;
-    
+
     // 올바른 순서로 데이터 정리 (외래키 의존성 고려)
     await prisma.comment.deleteMany();
     await prisma.documentHistory.deleteMany();
@@ -155,7 +205,7 @@ beforeEach(async () => {
     await prisma.session.deleteMany();
     await prisma.fileUpload.deleteMany();
     await prisma.user.deleteMany();
-    
+
     // 외래키 제약 조건 다시 활성화
     await prisma.$executeRaw`PRAGMA foreign_keys = ON;`;
   } catch (error) {
@@ -177,13 +227,13 @@ afterAll(async () => {
       console.warn('Prisma disconnect warning:', error.message);
     }
   }
-  
+
   // 워커별 임시 DB 파일 정리
   if (testDbPath && fs.existsSync(testDbPath)) {
     try {
       fs.unlinkSync(testDbPath);
       console.log(`🗑️ Cleaned up DB file: ${path.basename(testDbPath)}`);
-    } catch (error) {
+    } catch {
       // 파일 삭제 실패 시 무시 (다른 프로세스가 사용 중일 수 있음)
     }
   }

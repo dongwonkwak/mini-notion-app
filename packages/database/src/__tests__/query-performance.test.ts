@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeAll } from '@jest/globals';
-import { prisma, cleanDatabase } from '../index';
+import { beforeAll, describe, expect, it } from '@jest/globals';
+import { PrismaClient } from '@prisma/client';
+
+import { cleanDatabase, prisma } from '../index';
 
 describe('Database Query Performance', () => {
-  let db: any;
+  let db: PrismaClient;
 
   beforeAll(async () => {
     db = prisma();
@@ -18,16 +20,16 @@ describe('Database Query Performance', () => {
       data: {
         email: uniqueEmail,
         name: 'Performance User',
-        provider: 'email'
-      }
+        provider: 'email',
+      },
     });
 
     const workspace = await db.workspace.create({
       data: {
         name: 'Performance Workspace',
         ownerId: user.id,
-        settings: {}
-      }
+        settings: {},
+      },
     });
 
     // Create workspace member
@@ -35,22 +37,22 @@ describe('Database Query Performance', () => {
       data: {
         workspaceId: workspace.id,
         userId: user.id,
-        role: 'owner'
-      }
+        role: 'owner',
+      },
     });
 
     // Create test pages and documents sequentially to handle foreign key constraints
     for (let i = 0; i < 50; i++) {
       const documentId = `perf-doc-${i}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
+
       await db.page.create({
         data: {
           workspaceId: workspace.id,
           title: `Performance Page ${i}`,
           documentId,
           position: i,
-          permissions: {}
-        }
+          permissions: {},
+        },
       });
 
       await db.document.create({
@@ -58,31 +60,35 @@ describe('Database Query Performance', () => {
           id: documentId,
           state: Buffer.from([]),
           version: 0,
-          sizeBytes: 0
-        }
+          sizeBytes: 0,
+        },
       });
     }
 
     const startTime = Date.now();
-    
+
     const result = await db.workspace.findUnique({
       where: { id: workspace.id },
       include: {
         pages: {
           take: 10,
-          orderBy: { position: 'asc' }
+          orderBy: { position: 'asc' },
         },
         members: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     const duration = Date.now() - startTime;
 
     expect(result).toBeDefined();
+    // result can be null in case of missing workspace; guard before accessing pages
+    if (!result) {
+      throw new Error('Workspace not found in test setup');
+    }
     expect(result.pages).toHaveLength(10);
     expect(duration).toBeLessThan(1000); // Should complete within 1 second
   });
@@ -94,16 +100,16 @@ describe('Database Query Performance', () => {
       data: {
         email: uniqueEmail,
         name: 'Complex Query User',
-        provider: 'email'
-      }
+        provider: 'email',
+      },
     });
 
     await db.workspace.create({
       data: {
         name: 'Complex Workspace',
         ownerId: user.id,
-        settings: {}
-      }
+        settings: {},
+      },
     });
 
     const startTime = Date.now();
@@ -113,18 +119,18 @@ describe('Database Query Performance', () => {
         owner: true,
         pages: {
           include: {
-            document: true
+            document: true,
           },
-          take: 5
+          take: 5,
         },
         _count: {
           select: {
             pages: true,
-            members: true
-          }
-        }
+            members: true,
+          },
+        },
       },
-      take: 10
+      take: 10,
     });
 
     const duration = Date.now() - startTime;
@@ -140,30 +146,30 @@ describe('Database Query Performance', () => {
       data: {
         email: uniqueEmail,
         name: 'Pagination User',
-        provider: 'email'
-      }
+        provider: 'email',
+      },
     });
 
     const workspace = await db.workspace.create({
       data: {
         name: 'Pagination Workspace',
         ownerId: user.id,
-        settings: {}
-      }
+        settings: {},
+      },
     });
 
     // Create a few pages for pagination test
     for (let i = 0; i < 5; i++) {
       const documentId = `pagination-doc-${i}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
+
       await db.page.create({
         data: {
           workspaceId: workspace.id,
           title: `Pagination Page ${i}`,
           documentId,
           position: i,
-          permissions: {}
-        }
+          permissions: {},
+        },
       });
 
       await db.document.create({
@@ -171,8 +177,8 @@ describe('Database Query Performance', () => {
           id: documentId,
           state: Buffer.from([]),
           version: 0,
-          sizeBytes: 0
-        }
+          sizeBytes: 0,
+        },
       });
     }
 
@@ -190,12 +196,12 @@ describe('Database Query Performance', () => {
             owner: {
               select: {
                 name: true,
-                email: true
-              }
-            }
-          }
-        }
-      }
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     const duration = Date.now() - startTime;

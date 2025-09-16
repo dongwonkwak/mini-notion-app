@@ -1,5 +1,5 @@
 {
-  "name": "Git Workflow Automation", 
+  "name": "Git Workflow Automation",
   "description": "새로운 태스크 시작 시 자동으로 브랜치 생성, 이슈 등록, PR 준비를 수행합니다",
   "trigger": {
     "type": "manual",

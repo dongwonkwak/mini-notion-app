@@ -1,8 +1,17 @@
 /**
  * Database utility functions and helpers
  */
-
 import { PrismaClient } from '@prisma/client';
+
+// Create a client to access Prisma namespace values
+const client = new PrismaClient();
+
+// Export individual Prisma values that are commonly used
+export const PrismaJsonNull = (client as any).constructor.JsonNull;
+export const PrismaDbNull = (client as any).constructor.DbNull;
+
+// Disconnect the temporary client
+client.$disconnect();
 
 // 워커별 Prisma client instance (Jest 워커 격리를 위해)
 const prismaInstances = new Map<string, PrismaClient>();
@@ -32,6 +41,12 @@ function getWorkerKey(): string {
   return `${workerId}-${processId}`;
 }
 
+// Extend the global type for the cleanup interval to avoid using `any` casts
+declare global {
+  // global variable used to store the cleanup interval ID
+  var __prismaCleanupInterval: NodeJS.Timeout | null | undefined;
+}
+
 /**
  * 유휴 인스턴스 정리
  */
@@ -41,9 +56,12 @@ async function cleanupIdleInstances(): Promise<void> {
 
   for (const [key, info] of instanceInfo.entries()) {
     const idleTime = now - info.lastUsedAt;
-    
+
     // 유휴 시간이 초과하거나 최대 인스턴스 수를 초과한 경우
-    if (idleTime > INSTANCE_MAX_IDLE_TIME || instanceInfo.size > MAX_INSTANCES) {
+    if (
+      idleTime > INSTANCE_MAX_IDLE_TIME ||
+      instanceInfo.size > MAX_INSTANCES
+    ) {
       keysToRemove.push(key);
     }
   }
@@ -89,11 +107,11 @@ function startCleanupScheduler(): void {
   }
 
   // 이미 스케줄러가 실행 중인지 확인
-  if ((global as any).__prismaCleanupInterval) {
+  if (global.__prismaCleanupInterval) {
     return;
   }
 
-  (global as any).__prismaCleanupInterval = setInterval(async () => {
+  global.__prismaCleanupInterval = setInterval(async () => {
     try {
       await cleanupIdleInstances();
     } catch (error) {
@@ -103,11 +121,11 @@ function startCleanupScheduler(): void {
 
   // 프로세스 종료 시 정리
   const cleanup = async () => {
-    if ((global as any).__prismaCleanupInterval) {
-      clearInterval((global as any).__prismaCleanupInterval);
-      (global as any).__prismaCleanupInterval = null;
+    if (global.__prismaCleanupInterval) {
+      clearInterval(global.__prismaCleanupInterval);
+      global.__prismaCleanupInterval = null;
     }
-    
+
     // 모든 인스턴스 정리
     for (const [key, info] of instanceInfo.entries()) {
       try {
@@ -116,7 +134,7 @@ function startCleanupScheduler(): void {
         console.error(`❌ Failed to cleanup instance ${key} on exit:`, error);
       }
     }
-    
+
     instanceInfo.clear();
     prismaInstances.clear();
   };
@@ -132,7 +150,7 @@ function startCleanupScheduler(): void {
  */
 export function initPrisma(): PrismaClient {
   const workerKey = getWorkerKey();
-  
+
   // 기존 인스턴스가 있고 유효한지 확인
   const existingInfo = instanceInfo.get(workerKey);
   if (existingInfo) {
@@ -145,9 +163,10 @@ export function initPrisma(): PrismaClient {
   startCleanupScheduler();
 
   const prisma = new PrismaClient({
-    log: process.env.NODE_ENV === 'development' && !process.env.JEST_WORKER_ID 
-      ? ['query', 'info', 'warn', 'error'] 
-      : ['error'], // 테스트 중에는 에러만 로깅
+    log:
+      process.env.NODE_ENV === 'development' && !process.env.JEST_WORKER_ID
+        ? ['query', 'info', 'warn', 'error']
+        : ['error'], // 테스트 중에는 에러만 로깅
     errorFormat: 'pretty',
   });
 
@@ -161,7 +180,10 @@ export function initPrisma(): PrismaClient {
       prismaInstances.delete(workerKey);
       console.log(`🔌 Prisma connection closed for worker: ${workerKey}`);
     } catch (error) {
-      console.error(`❌ Error closing Prisma connection for ${workerKey}:`, error);
+      console.error(
+        `❌ Error closing Prisma connection for ${workerKey}:`,
+        error
+      );
     }
   };
 
@@ -185,7 +207,7 @@ export function initPrisma(): PrismaClient {
  */
 export function getPrisma(): PrismaClient {
   const workerKey = getWorkerKey();
-  
+
   // 인스턴스 정보에서 가져오기 (사용 시간 추적을 위해)
   const info = instanceInfo.get(workerKey);
   if (info) {
@@ -193,7 +215,7 @@ export function getPrisma(): PrismaClient {
     info.lastUsedAt = Date.now();
     return info.instance;
   }
-  
+
   // 인스턴스가 없으면 새로 생성
   return initPrisma();
 }
@@ -204,7 +226,7 @@ export function getPrisma(): PrismaClient {
 export async function closePrisma(): Promise<void> {
   const workerKey = getWorkerKey();
   const info = instanceInfo.get(workerKey);
-  
+
   if (info) {
     await info.shutdownHandler();
   }
@@ -234,7 +256,10 @@ export function getMemoryStats() {
 /**
  * 강제로 유휴 인스턴스 정리
  */
-export async function forceCleanup(): Promise<{ cleaned: number; errors: string[] }> {
+export async function forceCleanup(): Promise<{
+  cleaned: number;
+  errors: string[];
+}> {
   const errors: string[] = [];
   let cleaned = 0;
 
@@ -269,24 +294,24 @@ export async function checkDatabaseHealth(): Promise<boolean> {
  */
 export async function cleanDatabase(): Promise<void> {
   const client = getPrisma();
-  
+
   try {
     // 테이블 존재 여부 확인
     const tables = await client.$queryRaw<Array<{ name: string }>>`
       SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_migrations';
     `;
-    
+
     if (tables.length === 0) {
       // 테이블이 없으면 정리할 필요 없음
       return;
     }
-    
+
     // 외래키 제약 조건을 임시로 비활성화
     await client.$executeRaw`PRAGMA foreign_keys = OFF;`;
-    
+
     // 테이블이 존재하는 경우에만 데이터 정리
-    const tableNames = tables.map(t => t.name);
-    
+    const tableNames = tables.map((t: { name: string }) => t.name);
+
     if (tableNames.includes('comments')) {
       await client.comment.deleteMany();
     }
@@ -314,7 +339,7 @@ export async function cleanDatabase(): Promise<void> {
     if (tableNames.includes('users')) {
       await client.user.deleteMany();
     }
-    
+
     // 외래키 제약 조건 다시 활성화
     await client.$executeRaw`PRAGMA foreign_keys = ON;`;
   } catch {
@@ -354,7 +379,10 @@ export class WorkspaceService {
   /**
    * Get user role in workspace
    */
-  async getUserRole(userId: string, workspaceId: string): Promise<string | null> {
+  async getUserRole(
+    userId: string,
+    workspaceId: string
+  ): Promise<string | null> {
     const member = await this.prisma.workspaceMember.findUnique({
       where: {
         userId_workspaceId: {
@@ -370,9 +398,13 @@ export class WorkspaceService {
   /**
    * Check if user can perform action in workspace
    */
-  async canPerformAction(userId: string, workspaceId: string, action: 'read' | 'write' | 'admin'): Promise<boolean> {
+  async canPerformAction(
+    userId: string,
+    workspaceId: string,
+    action: 'read' | 'write' | 'admin'
+  ): Promise<boolean> {
     const role = await this.getUserRole(userId, workspaceId);
-    
+
     if (!role) return false;
 
     const permissions = {
@@ -382,7 +414,9 @@ export class WorkspaceService {
       owner: ['read', 'write', 'admin'],
     };
 
-    return permissions[role as keyof typeof permissions]?.includes(action) || false;
+    return (
+      permissions[role as keyof typeof permissions]?.includes(action) || false
+    );
   }
 }
 
@@ -417,7 +451,11 @@ export class DocumentService {
   /**
    * Update document state and version
    */
-  async updateDocumentState(documentId: string, state: Buffer, version: number): Promise<void> {
+  async updateDocumentState(
+    documentId: string,
+    state: Buffer,
+    version: number
+  ): Promise<void> {
     await this.prisma.document.update({
       where: { id: documentId },
       data: {
@@ -432,7 +470,12 @@ export class DocumentService {
   /**
    * Create document history entry
    */
-  async createHistoryEntry(documentId: string, state: Buffer, version: number, createdBy: string): Promise<void> {
+  async createHistoryEntry(
+    documentId: string,
+    state: Buffer,
+    version: number,
+    createdBy: string
+  ): Promise<void> {
     await this.prisma.documentHistory.create({
       data: {
         documentId,
@@ -491,10 +534,7 @@ export class UserService {
   async getUserWorkspaces(userId: string) {
     return await this.prisma.workspace.findMany({
       where: {
-        OR: [
-          { ownerId: userId },
-          { members: { some: { userId } } },
-        ],
+        OR: [{ ownerId: userId }, { members: { some: { userId } } }],
       },
       include: {
         owner: true,

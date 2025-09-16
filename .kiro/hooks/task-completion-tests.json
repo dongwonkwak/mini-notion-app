@@ -3,9 +3,7 @@
   "description": "태스크가 완료될 때마다 해당 태스크에 맞는 테스트를 자동으로 생성하고 실행합니다",
   "trigger": {
     "type": "file_change",
-    "patterns": [
-      ".kiro/specs/**/tasks.md"
-    ]
+    "patterns": [".kiro/specs/**/tasks.md"]
   },
   "conditions": [
     {

@@ -1,0 +1,273 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, develop]
+
+# PR 체크가 진행 중일 때 새로운 push가 있으면 이전 실행을 취소
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # PR 정보 및 변경사항 분석
+  pr-info:
+    name: PR Information
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    outputs:
+      has-package-changes: ${{ steps.changes.outputs.packages }}
+      has-app-changes: ${{ steps.changes.outputs.apps }}
+      has-config-changes: ${{ steps.changes.outputs.config }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+            apps:
+              - 'apps/**'
+            config:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'turbo.json'
+              - 'tsconfig.json'
+              - '.github/**'
+
+      - name: PR size check
+        run: |
+          FILES_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l)
+          LINES_CHANGED=$(git diff --stat ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | tail -1 | awk '{print $4+$6}')
+
+          echo "Files changed: $FILES_CHANGED"
+          echo "Lines changed: $LINES_CHANGED"
+
+          if [ $FILES_CHANGED -gt 50 ]; then
+            echo "⚠️ Warning: Large PR with $FILES_CHANGED files changed"
+          fi
+
+          if [ $LINES_CHANGED -gt 1000 ]; then
+            echo "⚠️ Warning: Large PR with $LINES_CHANGED lines changed"
+          fi
+
+  # 코드 품질 및 스타일 검사
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: |
+          echo "Running ESLint..."
+          pnpm run lint
+
+      - name: TypeScript compilation check
+        run: |
+          echo "Checking TypeScript compilation..."
+          pnpm run type-check
+
+  # 테스트 실행 (변경된 패키지 기준)
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: [pr-info]
+    if: github.event.pull_request.draft == false
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        if: needs.pr-info.outputs.has-package-changes == 'true'
+        run: pnpm run db:generate
+
+      - name: Run unit tests with coverage
+        run: pnpm run test:coverage
+        env:
+          REDIS_URL: redis://localhost:6379
+
+      - name: Coverage comment
+        if: github.event_name == 'pull_request'
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          lcov-file: ./coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          delete-old-comments: true
+
+  # 빌드 검증
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [pr-info]
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Check for build errors
+        run: |
+          echo "Checking build outputs..."
+          if [ -d "apps/web/.next" ]; then
+            echo "✅ Next.js app built successfully"
+          else
+            echo "❌ Next.js build failed"
+          fi
+
+  # 의존성 및 보안 검사
+  dependency-check:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+    needs: [pr-info]
+    if: |
+      github.event.pull_request.draft == false && 
+      (needs.pr-info.outputs.has-config-changes == 'true' || 
+       needs.pr-info.outputs.has-package-changes == 'true')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for security vulnerabilities
+        run: |
+          echo "Running security audit..."
+          pnpm audit --audit-level high || {
+            echo "⚠️ Security vulnerabilities found"
+            pnpm audit --audit-level high --json > audit-results.json || true
+          }
+
+      - name: Check license compatibility
+        run: |
+          echo "Checking license compatibility..."
+          npx license-checker --summary || echo "License check completed"
+
+  # PR 체크 완료 상태
+  pr-check-complete:
+    name: PR Check Complete
+    runs-on: ubuntu-latest
+    needs: [code-quality, tests, build-check]
+    if: always() && github.event.pull_request.draft == false
+
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "Code Quality: ${{ needs.code-quality.result }}"
+          echo "Tests: ${{ needs.tests.result }}"
+          echo "Build Check: ${{ needs.build-check.result }}"
+
+          if [[ "${{ needs.code-quality.result }}" != "success" || 
+                "${{ needs.tests.result }}" != "success" || 
+                "${{ needs.build-check.result }}" != "success" ]]; then
+            echo "❌ PR checks failed"
+            exit 1
+          else
+            echo "✅ All PR checks passed"
+          fi
+
+      - name: Add success comment
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ All automated checks passed! This PR is ready for review.'
+            })
+
+      - name: Add failure comment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Some automated checks failed. Please review the failed jobs and fix the issues.'
+            })

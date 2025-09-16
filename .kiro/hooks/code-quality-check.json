@@ -3,12 +3,7 @@
   "description": "코드 변경 시 자동으로 품질 검사를 수행합니다 (린트, 타입 체크, 테스트)",
   "trigger": {
     "type": "file_change",
-    "patterns": [
-      "**/*.ts",
-      "**/*.tsx", 
-      "**/*.js",
-      "**/*.jsx"
-    ],
+    "patterns": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     "exclude_patterns": [
       "node_modules/**",
       "dist/**",

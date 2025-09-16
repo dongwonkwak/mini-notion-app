@@ -1,0 +1,310 @@
+name: Code Quality & Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # 매주 월요일 오전 9시 (UTC)에 보안 검사 실행
+    - cron: '0 9 * * 1'
+
+jobs:
+  # 고급 린팅 및 코드 품질
+  advanced-linting:
+    name: Advanced Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint with detailed reporting
+        run: |
+          echo "Running ESLint..."
+          pnpm run lint
+
+  # 보안 취약점 검사
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run npm audit
+        run: |
+          echo "Running security audit..."
+          pnpm audit --audit-level moderate --json > audit-report.json || true
+
+          # 심각한 취약점 체크
+          HIGH_VULNS=$(jq '.metadata.vulnerabilities.high // 0' audit-report.json)
+          CRITICAL_VULNS=$(jq '.metadata.vulnerabilities.critical // 0' audit-report.json)
+
+          echo "Critical vulnerabilities: $CRITICAL_VULNS"
+          echo "High vulnerabilities: $HIGH_VULNS"
+
+          if [ "$CRITICAL_VULNS" -gt 0 ]; then
+            echo "❌ Critical security vulnerabilities found!"
+            pnpm audit --audit-level critical
+            exit 1
+          elif [ "$HIGH_VULNS" -gt 0 ]; then
+            echo "⚠️ High severity vulnerabilities found"
+            pnpm audit --audit-level high
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: audit-report.json
+
+  # CodeQL 보안 분석
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule' || github.ref == 'refs/heads/main'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: |
+          echo "Generating Prisma client..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
+
+      - name: Build project for analysis
+        run: pnpm run build || echo "Build failed, continuing with analysis"
+        env:
+          DATABASE_URL: 'file:./dev.db'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # 의존성 라이선스 검사
+  license-check:
+    name: License Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check licenses
+        run: |
+          echo "Checking dependency licenses..."
+          # license-checker가 설치되어 있지 않을 수 있으므로 설치
+          npx license-checker --summary --excludePrivatePackages > license-summary.txt || echo "License check completed"
+
+          echo "License summary:"
+          cat license-summary.txt || echo "No license summary available"
+
+          # 금지된 라이선스 체크 (license-checker가 있는 경우에만)
+          if command -v npx >/dev/null 2>&1; then
+            FORBIDDEN_LICENSES="GPL-3.0;AGPL-3.0;LGPL-2.1"
+            for license in $(echo $FORBIDDEN_LICENSES | tr ";" "\n"); do
+              if npx license-checker --summary --excludePrivatePackages 2>/dev/null | grep -q "$license"; then
+                echo "❌ Forbidden license found: $license"
+                exit 1
+              fi
+            done
+          else
+            echo "⚠️ license-checker not available, skipping license validation"
+          fi
+
+  # Docker 이미지 보안 스캔 (미래 사용)
+  docker-security:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    if: false # 현재는 비활성화, Docker 이미지 구축 후 활성화
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          echo "Docker security scan will be enabled when Docker images are implemented"
+
+  # 번들 크기 분석
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client for bundle analysis
+        run: |
+          echo "Generating Prisma client for bundle analysis..."
+          cd packages/database
+          DATABASE_URL="file:./dev.db" pnpm prisma generate
+          cd ../..
+        env:
+          DATABASE_URL: 'file:./dev.db'
+      - name: Build and analyze bundle
+        working-directory: apps/web
+        run: |
+          echo "Building Next.js app for bundle analysis..."
+          ANALYZE=true pnpm run build || pnpm run build
+
+          # 번들 크기 정보 추출
+          if [ -f ".next/analyze.json" ]; then
+            echo "Bundle analysis completed"
+          else
+            echo "Bundle analysis file not found, but build succeeded"
+          fi
+        env:
+          DATABASE_URL: 'file:./dev.db'
+
+      - name: Bundle size comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            try {
+              // 번들 크기 정보가 있다면 댓글로 추가
+              const comment = '📦 Bundle size analysis completed. Check the build logs for details.';
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Bundle analysis comment skipped:', error.message);
+            }
+
+  # 코드 품질 종합 리포트
+  quality-report:
+    name: Quality Report
+    runs-on: ubuntu-latest
+    needs: [advanced-linting, security-scan, license-check]
+    if: always()
+
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Generate quality summary
+        run: |
+          echo "## 🔍 Code Quality Report" > quality-summary.md
+          echo "" >> quality-summary.md
+
+          echo "### Job Results:" >> quality-summary.md
+          echo "- Advanced Linting: ${{ needs.advanced-linting.result }}" >> quality-summary.md
+          echo "- Security Scan: ${{ needs.security-scan.result }}" >> quality-summary.md
+          echo "- License Check: ${{ needs.license-check.result }}" >> quality-summary.md
+          echo "" >> quality-summary.md
+
+          if [[ "${{ needs.advanced-linting.result }}" == "success" && 
+                "${{ needs.security-scan.result }}" == "success" && 
+                "${{ needs.license-check.result }}" == "success" ]]; then
+            echo "✅ All quality checks passed!" >> quality-summary.md
+          else
+            echo "❌ Some quality checks failed. Please review the logs." >> quality-summary.md
+          fi
+
+          cat quality-summary.md
+
+      - name: Upload quality summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-summary
+          path: quality-summary.md

@@ -1,13 +1,14 @@
 import { describe, expect, it } from '@jest/globals';
+
 import type {
-    ApiResponse,
-    AwarenessState,
-    Block,
-    BlockType,
-    Comment,
-    User,
-    UserPermission,
-    Workspace
+  ApiResponse,
+  AwarenessState,
+  Block,
+  BlockType,
+  Comment,
+  User,
+  UserPermission,
+  Workspace,
 } from '../index';
 
 describe('Type Definitions', () => {
@@ -19,7 +20,7 @@ describe('Type Definitions', () => {
       provider: 'email',
       mfaEnabled: false,
       createdAt: new Date(),
-      lastActiveAt: new Date()
+      lastActiveAt: new Date(),
     };
 
     expect(user.id).toBe('user-123');
@@ -33,20 +34,22 @@ describe('Type Definitions', () => {
       id: 'workspace-123',
       name: 'Test Workspace',
       ownerId: 'user-123',
-      members: [{
-        userId: 'user-123',
-        role: 'owner',
-        joinedAt: new Date()
-      }],
+      members: [
+        {
+          userId: 'user-123',
+          role: 'owner',
+          joinedAt: new Date(),
+        },
+      ],
       settings: {
         isPublic: false,
-        allowInvites: true
+        allowInvites: true,
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
-    expect(workspace.members[0].role).toBe('owner');
+    expect(workspace.members[0]?.role).toBe('owner');
     expect(workspace.settings.isPublic).toBe(false);
   });
 
@@ -60,7 +63,7 @@ describe('Type Definitions', () => {
       'table',
       'quote',
       'divider',
-      'file'
+      'file',
     ];
 
     blockTypes.forEach(type => {
@@ -73,8 +76,8 @@ describe('Type Definitions', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           createdBy: 'user-123',
-          version: 1
-        }
+          version: 1,
+        },
       };
 
       expect(block.type).toBe(type);
@@ -87,17 +90,17 @@ describe('Type Definitions', () => {
       user: {
         id: 'user-123',
         name: 'Test User',
-        color: '#ff0000'
+        color: '#ff0000',
       },
       cursor: {
         anchor: 0,
-        head: 10
+        head: 10,
       },
       selection: {
         from: 0,
-        to: 10
+        to: 10,
       },
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
     };
 
     expect(awarenessState.user.color).toBe('#ff0000');
@@ -115,14 +118,14 @@ describe('Type Definitions', () => {
         provider: 'email',
         mfaEnabled: false,
         createdAt: new Date(),
-        lastActiveAt: new Date()
-      }
+        lastActiveAt: new Date(),
+      },
     };
 
     const errorResponse: ApiResponse = {
       success: false,
       error: 'User not found',
-      message: 'The requested user does not exist'
+      message: 'The requested user does not exist',
     };
 
     expect(successResponse.success).toBe(true);
@@ -133,7 +136,7 @@ describe('Type Definitions', () => {
 
   it('should define UserPermission type correctly', () => {
     const permissions: UserPermission[] = ['read', 'write', 'admin'];
-    
+
     permissions.forEach(permission => {
       expect(['read', 'write', 'admin']).toContain(permission);
     });
@@ -147,7 +150,7 @@ describe('Type Definitions', () => {
       content: 'This is a parent comment',
       resolved: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     const replyComment: Comment = {
@@ -160,7 +163,7 @@ describe('Type Definitions', () => {
       positionEnd: 20,
       resolved: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     expect(parentComment.parentId).toBeUndefined();

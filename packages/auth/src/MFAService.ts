@@ -2,16 +2,13 @@
  * 다중 인증(MFA) 서비스
  * TOTP 기반 MFA 설정, 검증, 백업 코드 관리를 담당합니다.
  */
-
-import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
-import { getPrisma } from '@editor/database';
-import type { 
-  MFASetup
-} from '@editor/types';
-import { AuthErrorCode, AuthError } from '@editor/types';
+import speakeasy from 'speakeasy';
 
-const prisma = getPrisma();
+import { logger } from '@editor/config';
+import { getPrisma, PrismaJsonNull } from '@editor/database';
+import type { MFASetup } from '@editor/types';
+import { AuthError, AuthErrorCode } from '@editor/types';
 
 export class MFAService {
   private readonly MFA_WINDOW = 2; // TOTP 시간 윈도우
@@ -34,7 +31,7 @@ export class MFAService {
       const secret = speakeasy.generateSecret({
         name: `Collaborative Editor (${user.email})`,
         issuer: 'Collaborative Editor',
-        length: 32
+        length: 32,
       });
 
       // QR 코드 생성
@@ -44,25 +41,27 @@ export class MFAService {
       const backupCodes = this.generateBackupCodes();
 
       // 데이터베이스에 MFA 시크릿 저장 (아직 활성화하지 않음)
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
         data: {
           mfaSecret: secret.base32,
-          mfaBackupCodes: backupCodes
-        }
+          mfaBackupCodes: backupCodes,
+        },
       });
 
       return {
         secret: secret.base32!,
         qrCode,
-        backupCodes
+        backupCodes,
       };
     } catch (error) {
       if (error instanceof AuthError) {
         throw error;
       }
-      
-      console.error('MFA setup error:', error);
+
+      logger.error('MFA setup error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_SETUP_FAILED,
         'MFA 설정에 실패했습니다.',
@@ -76,8 +75,8 @@ export class MFAService {
    */
   async enableMFA(userId: string, token: string): Promise<boolean> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: userId }
+      const user = await getPrisma().user.findUnique({
+        where: { id: userId },
       });
 
       if (!user || !user.mfaSecret) {
@@ -97,9 +96,9 @@ export class MFAService {
       }
 
       // MFA 활성화
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
-        data: { mfaEnabled: true }
+        data: { mfaEnabled: true },
       });
 
       return true;
@@ -107,8 +106,10 @@ export class MFAService {
       if (error instanceof AuthError) {
         throw error;
       }
-      
-      console.error('MFA enable error:', error);
+
+      logger.error('MFA enable error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_ENABLE_FAILED,
         'MFA 활성화에 실패했습니다.',
@@ -122,20 +123,22 @@ export class MFAService {
    */
   async disableMFA(userId: string): Promise<boolean> {
     try {
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
-        data: { 
+        data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: null
-        }
+          mfaBackupCodes: PrismaJsonNull,
+        },
       });
 
       return true;
     } catch (error) {
-      console.error('MFA disable error:', error);
+      logger.error('MFA disable error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
-        AuthErrorCode.MFA_ENABLE_FAILED,
+        AuthErrorCode.MFA_DISABLE_FAILED,
         'MFA 비활성화에 실패했습니다.',
         error
       );
@@ -151,10 +154,12 @@ export class MFAService {
         secret,
         encoding: 'base32',
         token,
-        window: this.MFA_WINDOW
+        window: this.MFA_WINDOW,
       });
     } catch (error) {
-      console.error('MFA verification error:', error);
+      logger.error('MFA verification error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -164,19 +169,24 @@ export class MFAService {
    */
   async verifyBackupCode(userId: string, backupCode: string): Promise<boolean> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await getPrisma().user.findUnique({
         where: { id: userId },
-        select: { mfaBackupCodes: true }
+        select: { mfaBackupCodes: true },
       });
 
-      if (!user || !user.mfaBackupCodes) {
+      if (
+        !user ||
+        !user.mfaBackupCodes ||
+        !Array.isArray(user.mfaBackupCodes)
+      ) {
         return false;
       }
 
       // 백업 코드 목록에서 검색 (대소문자 무시)
       const normalizedCode = backupCode.toUpperCase();
       const codeIndex = user.mfaBackupCodes.findIndex(
-        code => code.toUpperCase() === normalizedCode
+        (code: unknown) =>
+          typeof code === 'string' && code.toUpperCase() === normalizedCode
       );
 
       if (codeIndex === -1) {
@@ -184,15 +194,19 @@ export class MFAService {
       }
 
       // 사용된 백업 코드 제거
-      const updatedCodes = user.mfaBackupCodes.filter((_, index) => index !== codeIndex);
-      await prisma.user.update({
+      const updatedCodes = user.mfaBackupCodes.filter(
+        (_: unknown, index: number) => index !== codeIndex
+      );
+      await getPrisma().user.update({
         where: { id: userId },
-        data: { mfaBackupCodes: updatedCodes }
+        data: { mfaBackupCodes: updatedCodes },
       });
 
       return true;
     } catch (error) {
-      console.error('Backup code verification error:', error);
+      logger.error('Backup code verification error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }
@@ -212,9 +226,9 @@ export class MFAService {
 
       const newBackupCodes = this.generateBackupCodes();
 
-      await prisma.user.update({
+      await getPrisma().user.update({
         where: { id: userId },
-        data: { mfaBackupCodes: newBackupCodes }
+        data: { mfaBackupCodes: newBackupCodes },
       });
 
       return newBackupCodes;
@@ -222,8 +236,10 @@ export class MFAService {
       if (error instanceof AuthError) {
         throw error;
       }
-      
-      console.error('Backup codes regeneration error:', error);
+
+      logger.error('Backup codes regeneration error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.MFA_SETUP_FAILED,
         '백업 코드 재생성에 실패했습니다.',
@@ -241,12 +257,12 @@ export class MFAService {
     backupCodesCount: number;
   }> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await getPrisma().user.findUnique({
         where: { id: userId },
-        select: { 
-          mfaEnabled: true, 
-          mfaBackupCodes: true 
-        }
+        select: {
+          mfaEnabled: true,
+          mfaBackupCodes: true,
+        },
       });
 
       if (!user) {
@@ -258,15 +274,22 @@ export class MFAService {
 
       return {
         enabled: user.mfaEnabled,
-        hasBackupCodes: !!user.mfaBackupCodes && user.mfaBackupCodes.length > 0,
-        backupCodesCount: user.mfaBackupCodes?.length || 0
+        hasBackupCodes:
+          !!user.mfaBackupCodes &&
+          Array.isArray(user.mfaBackupCodes) &&
+          user.mfaBackupCodes.length > 0,
+        backupCodesCount: Array.isArray(user.mfaBackupCodes)
+          ? user.mfaBackupCodes.length
+          : 0,
       };
     } catch (error) {
       if (error instanceof AuthError) {
         throw error;
       }
-      
-      console.error('MFA status check error:', error);
+
+      logger.error('MFA status check error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new AuthError(
         AuthErrorCode.AUTHENTICATION_ERROR,
         'MFA 상태 확인에 실패했습니다.',
@@ -279,7 +302,7 @@ export class MFAService {
    * 백업 코드 생성
    */
   private generateBackupCodes(): string[] {
-    return Array.from({ length: this.BACKUP_CODES_COUNT }, () => 
+    return Array.from({ length: this.BACKUP_CODES_COUNT }, () =>
       Math.random().toString(36).substring(2, 10).toUpperCase()
     );
   }
@@ -288,8 +311,8 @@ export class MFAService {
    * 사용자 정보 조회
    */
   private async getUserById(id: string) {
-    return prisma.user.findUnique({
-      where: { id }
+    return getPrisma().user.findUnique({
+      where: { id },
     });
   }
 
@@ -299,7 +322,7 @@ export class MFAService {
   generateTestToken(secret: string): string {
     return speakeasy.totp({
       secret,
-      encoding: 'base32'
+      encoding: 'base32',
     });
   }
 }
