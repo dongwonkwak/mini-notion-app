@@ -3,7 +3,8 @@
  * 사용자의 인증 관련 활동을 추적하고 로깅합니다.
  */
 import { logger } from '@editor/config';
-import { getPrisma, type AuthEvent as PrismaAuthEvent } from '@editor/database';
+import type { AuthEvent as PrismaAuthEvent } from '@editor/database';
+import { getPrisma } from '@editor/database';
 
 export interface AuthEvent {
   type:

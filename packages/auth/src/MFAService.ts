@@ -6,7 +6,7 @@ import QRCode from 'qrcode';
 import speakeasy from 'speakeasy';
 
 import { logger } from '@editor/config';
-import { getPrisma, Prisma } from '@editor/database';
+import { getPrisma, PrismaJsonNull } from '@editor/database';
 import type { MFASetup } from '@editor/types';
 import { AuthError, AuthErrorCode } from '@editor/types';
 
@@ -128,7 +128,7 @@ export class MFAService {
         data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: Prisma.JsonNull,
+          mfaBackupCodes: PrismaJsonNull,
         },
       });
 

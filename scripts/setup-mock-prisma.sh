@@ -22,10 +22,12 @@ export declare class PrismaClient {
   comment: any;
   fileUpload: any;
   authEvent: any;
-  constructor(): PrismaClient;
+  constructor(options?: any): PrismaClient;
   $connect(): Promise<void>;
   $disconnect(): Promise<void>;
   $transaction<T>(fn: (prisma: PrismaClient) => Promise<T>): Promise<T>;
+  $queryRaw<T = unknown>(query: TemplateStringsArray | string, ...values: any[]): Promise<T>;
+  $executeRaw(query: TemplateStringsArray | string, ...values: any[]): Promise<number>;
 }
 
 export declare namespace Prisma {
@@ -34,6 +36,11 @@ export declare namespace Prisma {
   export type PageCreateInput = any;
   export type DocumentCreateInput = any;
   export type CommentCreateInput = any;
+  export type LogLevel = 'info' | 'query' | 'warn' | 'error';
+  export type LogDefinition = {
+    level: LogLevel;
+    emit: 'stdout' | 'event';
+  };
 }
 
 export declare type User = any;
@@ -53,7 +60,7 @@ EOF
 # Create Mock implementation
 cat > node_modules/@prisma/client/index.js << 'EOF'
 class MockPrismaClient {
-  constructor() {
+  constructor(options = {}) {
     console.log('🧪 Using Mock Prisma Client for CI');
     this.user = {};
     this.session = {};
@@ -69,6 +76,14 @@ class MockPrismaClient {
   async $connect() { return Promise.resolve(); }
   async $disconnect() { return Promise.resolve(); }
   async $transaction(fn) { return fn(this); }
+  async $queryRaw(query, ...values) {
+    console.log('🧪 Mock $queryRaw called:', query);
+    return Promise.resolve([]);
+  }
+  async $executeRaw(query, ...values) {
+    console.log('🧪 Mock $executeRaw called:', query);
+    return Promise.resolve(0);
+  }
 }
 
 const Prisma = {

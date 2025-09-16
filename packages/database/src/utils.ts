@@ -3,6 +3,16 @@
  */
 import { PrismaClient } from '@prisma/client';
 
+// Create a client to access Prisma namespace values
+const client = new PrismaClient();
+
+// Export individual Prisma values that are commonly used
+export const PrismaJsonNull = (client as any).constructor.JsonNull;
+export const PrismaDbNull = (client as any).constructor.DbNull;
+
+// Disconnect the temporary client
+client.$disconnect();
+
 // 워커별 Prisma client instance (Jest 워커 격리를 위해)
 const prismaInstances = new Map<string, PrismaClient>();
 

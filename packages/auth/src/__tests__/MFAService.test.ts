@@ -5,7 +5,7 @@
 import QRCode from 'qrcode';
 import speakeasy from 'speakeasy';
 
-import { Prisma } from '@editor/database';
+import { PrismaJsonNull } from '@editor/database';
 import { AuthError } from '@editor/types';
 
 import { MFAService } from '../MFAService';
@@ -187,7 +187,7 @@ describe('MFAService', () => {
         data: {
           mfaEnabled: false,
           mfaSecret: null,
-          mfaBackupCodes: Prisma.JsonNull,
+          mfaBackupCodes: PrismaJsonNull,
         },
       });
     });
