@@ -1,9 +1,9 @@
 # Implementation Plan
 
-- [ ] 1. 모노레포 기본 구조 생성
+- [x] 1. 모노레포 기본 구조 생성
   - [x] 루트 디렉토리에 pnpm 워크스페이스 설정
-  - [ ] apps/, packages/, tools/, docs/ 디렉토리 구조 생성
-  - [ ] 기본 .gitignore, README.md 파일 작성
+  - [x] apps/, packages/, tools/, docs/ 디렉토리 구조 생성
+  - [x] 기본 .gitignore, README.md 파일 작성
   - _Requirements: 1.1, 1.2, 1.3_
 
 - [ ] 2. 패키지 매니저 및 빌드 시스템 설정
