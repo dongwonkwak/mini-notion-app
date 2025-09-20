@@ -1,0 +1,13 @@
+{
+  "telemetry": false,
+  "ui": true,
+  "daemon": true,
+  "cache": {
+    "dir": ".turbo",
+    "signature": true
+  },
+  "experimental": {
+    "ui": true,
+    "spaces": true
+  }
+}

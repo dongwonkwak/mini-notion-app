@@ -1,0 +1,315 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "remoteCache": {
+    "signature": true
+  },
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "contracts:generate", "db:generate"],
+      "outputs": ["dist/**", ".next/**", "build/**", "lib/**"],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "public/**", 
+        "package.json", 
+        "tsconfig.json", 
+        "vite.config.ts", 
+        "nest-cli.json",
+        "tailwind.config.js",
+        "postcss.config.js",
+        "index.html",
+        "*.config.js",
+        "*.config.ts"
+      ],
+      "env": ["NODE_ENV", "VITE_*", "BUILD_*"],
+      "passThroughEnv": ["CI", "VERCEL", "NETLIFY", "GITHUB_ACTIONS"],
+      "persistent": false,
+      "cache": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build", "contracts:generate", "db:generate"],
+      "env": [
+        "NODE_ENV", 
+        "PORT", 
+        "HOST",
+        "VITE_*", 
+        "DATABASE_URL", 
+        "REDIS_URL", 
+        "JWT_SECRET",
+        "HOCUSPOCUS_PORT"
+      ],
+      "passThroughEnv": ["CI", "DEBUG", "FORCE_COLOR"]
+    },
+    "test": {
+      "dependsOn": ["^build", "db:generate"],
+      "outputs": ["coverage/**", "test-results/**", "junit.xml"],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "tests/**/*.ts", 
+        "tests/**/*.tsx", 
+        "**/*.test.ts", 
+        "**/*.spec.ts", 
+        "vitest.config.ts", 
+        "jest.config.js",
+        "playwright.config.ts",
+        "setupTests.ts",
+        "test-setup.ts"
+      ],
+      "env": ["NODE_ENV", "DATABASE_URL", "REDIS_URL", "TEST_*"],
+      "passThroughEnv": ["CI", "GITHUB_ACTIONS", "JEST_*", "VITEST_*"],
+      "cache": true,
+      "persistent": false
+    },
+    "test:unit": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "**/*.test.ts", 
+        "**/*.spec.ts", 
+        "vitest.config.ts"
+      ],
+      "env": ["NODE_ENV"],
+      "passThroughEnv": ["CI"]
+    },
+    "test:integration": {
+      "dependsOn": ["^build", "db:generate"],
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "tests/**/*.ts", 
+        "tests/**/*.tsx", 
+        "vitest.config.ts", 
+        "jest.config.js",
+        "prisma/schema.prisma"
+      ],
+      "env": ["NODE_ENV", "DATABASE_URL", "REDIS_URL"],
+      "passThroughEnv": ["CI", "TESTCONTAINERS_*"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "outputs": ["test-results/**", "playwright-report/**"],
+      "inputs": [
+        "tests/**/*.ts", 
+        "e2e/**/*.ts", 
+        "playwright.config.ts"
+      ],
+      "env": ["NODE_ENV", "BASE_URL", "DATABASE_URL"],
+      "passThroughEnv": ["CI", "PLAYWRIGHT_*"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"],
+      "env": ["NODE_ENV"],
+      "passThroughEnv": ["CI"]
+    },
+    "lint": {
+      "outputs": ["eslint-report.json", "eslint-report.html"],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "**/*.js", 
+        "**/*.jsx", 
+        "**/*.json", 
+        ".eslintrc.js", 
+        ".eslintrc.json", 
+        "eslint.config.js",
+        ".eslintignore"
+      ],
+      "passThroughEnv": ["CI", "ESLINT_*"],
+      "cache": true,
+      "persistent": false
+    },
+    "lint:fix": {
+      "cache": false,
+      "outputs": [],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "**/*.js", 
+        "**/*.jsx", 
+        ".eslintrc.js", 
+        ".eslintrc.json", 
+        "eslint.config.js"
+      ]
+    },
+    "type-check": {
+      "dependsOn": ["^build", "contracts:generate", "db:generate"],
+      "outputs": ["tsc-output.log"],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "tsconfig.json", 
+        "tsconfig.*.json",
+        "types/**/*.ts",
+        "*.d.ts"
+      ],
+      "passThroughEnv": ["CI", "TS_*"],
+      "cache": true,
+      "persistent": false
+    },
+    "format": {
+      "cache": false,
+      "outputs": [],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "**/*.js", 
+        "**/*.jsx", 
+        "**/*.json", 
+        "**/*.md", 
+        ".prettierrc", 
+        ".prettierrc.json", 
+        "prettier.config.js"
+      ]
+    },
+    "format:check": {
+      "outputs": [],
+      "inputs": [
+        "src/**/*.tsx", 
+        "src/**/*.ts", 
+        "**/*.js", 
+        "**/*.jsx", 
+        "**/*.json", 
+        "**/*.md", 
+        ".prettierrc", 
+        ".prettierrc.json", 
+        "prettier.config.js"
+      ],
+      "passThroughEnv": ["CI"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "contracts:generate": {
+      "outputs": ["generated/**", "src/types/api.ts", "lib/types/**"],
+      "inputs": [
+        "openapi/**/*.yaml", 
+        "openapi/**/*.yml", 
+        "scripts/**/*.js",
+        "package.json",
+        "openapi-typescript.config.js"
+      ],
+      "passThroughEnv": ["CI"],
+      "cache": true,
+      "persistent": false
+    },
+    "contracts:mock": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["contracts:generate"],
+      "env": ["PORT", "MOCK_PORT"],
+      "passThroughEnv": ["CI"]
+    },
+    "db:generate": {
+      "outputs": [
+        "node_modules/.prisma/**", 
+        "prisma/generated/**",
+        "src/types/prisma.ts"
+      ],
+      "inputs": [
+        "prisma/schema.prisma", 
+        "package.json",
+        "prisma/migrations/**"
+      ],
+      "env": ["DATABASE_URL", "PRISMA_*"],
+      "passThroughEnv": ["CI"],
+      "cache": true,
+      "persistent": false
+    },
+    "db:push": {
+      "cache": false,
+      "dependsOn": ["db:generate"],
+      "env": ["DATABASE_URL"],
+      "passThroughEnv": ["CI"]
+    },
+    "db:migrate": {
+      "cache": false,
+      "dependsOn": ["db:generate"],
+      "env": ["DATABASE_URL"],
+      "passThroughEnv": ["CI"]
+    },
+    "db:seed": {
+      "cache": false,
+      "dependsOn": ["db:push"],
+      "env": ["DATABASE_URL"],
+      "passThroughEnv": ["CI"]
+    },
+    "docker:up": {
+      "cache": false,
+      "inputs": ["docker-compose.yml", "tools/docker/**"]
+    },
+    "docker:down": {
+      "cache": false
+    }
+  },
+  "globalDependencies": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.test",
+    ".env.production",
+    ".env.staging",
+    "turbo.json",
+    "tsconfig.json",
+    ".eslintrc.js",
+    ".eslintrc.json",
+    "eslint.config.js",
+    ".prettierrc",
+    ".prettierrc.json",
+    "prettier.config.js",
+    "docker-compose.yml",
+    "tailwind.config.js",
+    "postcss.config.js",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    ".gitignore",
+    ".dockerignore",
+    "Dockerfile",
+    "nest-cli.json"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "NETLIFY",
+    "GITHUB_ACTIONS",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "JWT_SECRET",
+    "VITE_API_BASE_URL",
+    "VITE_WS_URL",
+    "VITE_APP_NAME",
+    "VITE_ENVIRONMENT",
+    "HOCUSPOCUS_PORT",
+    "BUILD_ID",
+    "COMMIT_SHA",
+    "BRANCH_NAME"
+  ],
+  "globalPassThroughEnv": [
+    "PATH",
+    "HOME",
+    "USER",
+    "SHELL",
+    "LANG",
+    "LC_ALL",
+    "TMPDIR",
+    "TZ",
+    "TERM",
+    "COLORTERM",
+    "FORCE_COLOR",
+    "NO_COLOR",
+    "DEBUG",
+    "VERBOSE"
+  ],
+  "cacheDir": ".turbo"
+}
