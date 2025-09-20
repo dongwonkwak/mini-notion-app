@@ -52,48 +52,45 @@
   - [x] 기존 코드에 JSDoc 주석 적용 (공통 유틸리티 함수 우선)
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 3.3 Frontend 핵심 패키지 설치
-- [ ] 3.3.1 React 19, TypeScript, Vite 관련 패키지 설치
+- [x] 3.3 Frontend 핵심 패키지 설치
+- [x] 3.3.1 React 19, TypeScript, Vite 관련 패키지 설치
   - React 19, React DOM 최신 버전 설치
   - TypeScript 및 관련 타입 정의 설치 (@types/react, @types/react-dom)
   - Vite 및 React 플러그인 설치 (@vitejs/plugin-react)
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.3.2 Tiptap 에디터 패키지 설치
+- [x] 3.3.2 Tiptap 에디터 패키지 설치
   - @tiptap/react, @tiptap/pm, @tiptap/starter-kit 설치
   - 에디터 확장 패키지 설치 (@tiptap/extension-*)
   - _Requirements: 3.1_
 
-- [ ] 3.3.3 실시간 협업 패키지 설치
+- [x] 3.3.3 실시간 협업 패키지 설치
   - yjs, y-prosemirror, @hocuspocus/provider 설치
   - Y.js 관련 유틸리티 패키지 설치
   - _Requirements: 3.2_
 
-- [ ] 3.3.4 스타일링 패키지 설치
-  - TailwindCSS, PostCSS, Autoprefixer 설치
-  - 관련 설정 도구 및 플러그인 설치
-  - _Requirements: 2.1, 2.2_
-
-- [ ] 3.3.5 상태 관리 및 기타 패키지 설치
-  - Zustand 상태 관리 라이브러리 설치
-  - react-dropzone 파일 업로드 라이브러리 설치
-  - 기타 유틸리티 패키지 설치
-  - _Requirements: 2.1_
-
-- [ ] 3.4 TailwindCSS 및 Shadcn/ui 설정
-- [ ] 3.4.1 TailwindCSS 설정 파일 생성 및 기본 스타일 적용
+- [x] 3.3.4 TailwindCSS 설치 및 설정
+  - TailwindCSS 및 관련 패키지 설치
   - tailwind.config.js 파일 생성 및 설정
   - 기본 CSS 파일에 Tailwind 지시문 추가
   - PostCSS 설정 파일 생성
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.4.2 Shadcn/ui 초기화 및 components.json 설정
+- [x] 3.3.5 상태 관리 및 기타 패키지 설치
+  - Zustand 상태 관리 라이브러리 설치
+  - react-dropzone 파일 업로드 라이브러리 설치
+  - 기타 유틸리티 패키지 설치
+  - _Requirements: 2.1_
+
+- [ ] 3.4 Shadcn/ui 설정
+
+- [ ] 3.4.1 Shadcn/ui 초기화 및 components.json 설정
   - Shadcn/ui CLI 초기화 실행
   - components.json 설정 파일 구성
   - 기본 디렉토리 구조 설정
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.4.3 기본 UI 컴포넌트 설치
+- [ ] 3.4.2 기본 UI 컴포넌트 설치
   - Button, Input, Card 컴포넌트 설치
   - 컴포넌트 스타일 및 variants 설정
   - 컴포넌트 export 설정
