@@ -72,39 +72,39 @@ mini-notion/
 **Core Dependencies:**
 ```json
 {
-  "react": "^19.0.0",
-  "typescript": "^5.6.0",
-  "vite": "^6.0.0",
-  "@tiptap/react": "^2.8.0",
-  "@tiptap/pm": "^2.8.0",
-  "y-prosemirror": "^1.2.0",
-  "yjs": "^13.6.0",
-  "@hocuspocus/provider": "^2.13.0",
-  "zustand": "^5.0.0",
-  "tailwindcss": "^3.4.0",
-  "class-variance-authority": "^0.7.0",
-  "clsx": "^2.1.0",
-  "tailwind-merge": "^2.5.0",
-  "lucide-react": "^0.446.0",
-  "react-dropzone": "^14.2.0"
+  "react": "latest",
+  "typescript": "latest",
+  "vite": "latest",
+  "@tiptap/react": "latest",
+  "@tiptap/pm": "latest",
+  "y-prosemirror": "latest",
+  "yjs": "latest",
+  "@hocuspocus/provider": "latest",
+  "zustand": "latest",
+  "tailwindcss": "latest",
+  "class-variance-authority": "latest",
+  "clsx": "latest",
+  "tailwind-merge": "latest",
+  "lucide-react": "latest",
+  "react-dropzone": "latest"
 }
 ```
 
 **Development Tools:**
 ```json
 {
-  "@vitejs/plugin-react": "^4.3.0",
-  "vitest": "^2.1.0",
-  "@testing-library/react": "^16.0.0",
-  "@testing-library/jest-dom": "^6.5.0",
-  "eslint": "^9.0.0",
-  "@typescript-eslint/eslint-plugin": "^8.8.0",
-  "@typescript-eslint/parser": "^8.8.0",
-  "eslint-plugin-react": "^7.37.0",
-  "eslint-plugin-react-hooks": "^4.6.0",
-  "prettier": "^3.3.0",
-  "autoprefixer": "^10.4.20",
-  "postcss": "^8.4.47"
+  "@vitejs/plugin-react": "latest",
+  "vitest": "latest",
+  "@testing-library/react": "latest",
+  "@testing-library/jest-dom": "latest",
+  "eslint": "latest",
+  "@typescript-eslint/eslint-plugin": "latest",
+  "@typescript-eslint/parser": "latest",
+  "eslint-plugin-react": "latest",
+  "eslint-plugin-react-hooks": "latest",
+  "prettier": "latest",
+  "autoprefixer": "latest",
+  "postcss": "latest"
 }
 ```
 
@@ -113,37 +113,37 @@ mini-notion/
 **Core Dependencies:**
 ```json
 {
-  "@nestjs/core": "^10.4.0",
-  "@nestjs/common": "^10.4.0",
-  "@nestjs/platform-express": "^10.4.0",
-  "@nestjs/jwt": "^10.2.0",
-  "@nestjs/passport": "^10.0.3",
-  "passport": "^0.7.0",
-  "passport-jwt": "^4.0.1",
-  "@hocuspocus/server": "^2.13.0",
-  "@prisma/client": "^5.20.0",
-  "prisma": "^5.20.0",
-  "ioredis": "^5.4.0",
-  "zod": "^3.23.0",
-  "helmet": "^8.0.0",
-  "express-rate-limit": "^7.4.0",
-  "multer": "^1.4.5-lts.1",
-  "@nestjs/platform-express": "^10.4.0",
-  "minio": "^8.0.1"
+  "@nestjs/core": "latest",
+  "@nestjs/common": "latest",
+  "@nestjs/platform-express": "latest",
+  "@nestjs/jwt": "latest",
+  "@nestjs/passport": "latest",
+  "passport": "latest",
+  "passport-jwt": "latest",
+  "@hocuspocus/server": "latest",
+  "@prisma/client": "latest",
+  "prisma": "latest",
+  "ioredis": "latest",
+  "zod": "latest",
+  "helmet": "latest",
+  "express-rate-limit": "latest",
+  "multer": "latest",
+  "@nestjs/platform-express": "latest",
+  "minio": "latest"
 }
 ```
 
 **Development Tools:**
 ```json
 {
-  "@nestjs/testing": "^10.4.0",
-  "@nestjs/cli": "^10.4.0",
-  "supertest": "^7.0.0",
-  "testcontainers": "^10.13.0",
-  "@testcontainers/postgresql": "^10.13.0",
-  "@testcontainers/redis": "^10.13.0",
-  "@types/passport-jwt": "^4.0.1",
-  "@types/multer": "^1.4.12"
+  "@nestjs/testing": "latest",
+  "@nestjs/cli": "latest",
+  "supertest": "latest",
+  "testcontainers": "latest",
+  "@testcontainers/postgresql": "latest",
+  "@testcontainers/redis": "latest",
+  "@types/passport-jwt": "latest",
+  "@types/multer": "latest"
 }
 ```
 
@@ -166,8 +166,8 @@ mini-notion/
 **Contract Generation Tools:**
 ```json
 {
-  "openapi-typescript": "^7.4.0",
-  "@stoplight/prism-cli": "^5.8.0"
+  "openapi-typescript": "latest",
+  "@stoplight/prism-cli": "latest"
 }
 ```
 
@@ -249,7 +249,7 @@ volumes:
     "apps/*",
     "packages/*"
   ],
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"

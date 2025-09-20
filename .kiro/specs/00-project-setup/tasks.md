@@ -7,10 +7,10 @@
   - _Requirements: 1.1, 1.2, 1.3_
 
 - [ ] 2. 패키지 매니저 및 빌드 시스템 설정
-- [ ] 2.1 pnpm 워크스페이스 구성
-  - [ ] 루트 package.json에 workspaces 설정
-  - [ ] packageManager 필드로 pnpm 버전 고정
-  - [ ] engines 필드로 Node.js 버전 제약 설정
+- [x] 2.1 pnpm 워크스페이스 구성
+  - [x] 루트 package.json에 workspaces 설정
+  - [x] packageManager 필드로 pnpm 버전 고정
+  - [x] engines 필드로 Node.js 버전 제약 설정
   - _Requirements: 1.1, 1.3_
 
 - [ ] 2.2 Turbo 빌드 시스템 설정
