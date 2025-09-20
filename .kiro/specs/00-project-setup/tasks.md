@@ -45,11 +45,11 @@
   - [x] JSDoc 문서화 적용 및 타입 테스트 파일 생성
   - _Requirements: 1.2, 2.1, 6.1_
 
-- [ ] 3.2.3 JSDoc 표준 적용 및 ESLint 통합
-  - [ ] 루트 package.json에 eslint-plugin-jsdoc 의존성 추가
-  - [ ] packages/config ESLint 설정에 JSDoc 규칙 통합
-  - [ ] VS Code 스니펫 및 JSDoc 템플릿 생성
-  - [ ] 기존 코드에 JSDoc 주석 적용 (공통 유틸리티 함수 우선)
+- [x] 3.2.3 JSDoc 표준 적용 및 ESLint 통합
+  - [x] 루트 package.json에 eslint-plugin-jsdoc 의존성 추가
+  - [x] packages/config ESLint 설정에 JSDoc 규칙 통합
+  - [x] VS Code 스니펫 및 JSDoc 템플릿 생성
+  - [x] 기존 코드에 JSDoc 주석 적용 (공통 유틸리티 함수 우선)
   - _Requirements: 4.1, 4.2, 4.3_
 
 - [ ] 3.3 Frontend 핵심 패키지 설치
