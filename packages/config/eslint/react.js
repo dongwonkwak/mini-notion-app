@@ -120,5 +120,21 @@ export default [
       'jsdoc/require-jsdoc': 'off',
       'jsdoc/require-example': 'off'
     }
+  },
+  
+  // No JSDoc rules for Shadcn/ui components
+  {
+    files: ['**/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'jsdoc/require-jsdoc': 'off',
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-param-description': 'off',
+      'jsdoc/require-returns': 'off',
+      'jsdoc/require-returns-description': 'off',
+      'jsdoc/require-example': 'off',
+      'jsdoc/check-param-names': 'off',
+      'jsdoc/check-tag-names': 'off',
+      'react-refresh/only-export-components': 'off'
+    }
   }
 ]

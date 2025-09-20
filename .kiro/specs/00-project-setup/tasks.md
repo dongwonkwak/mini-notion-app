@@ -82,21 +82,21 @@
   - 기타 유틸리티 패키지 설치
   - _Requirements: 2.1_
 
-- [ ] 3.4 Shadcn/ui 설정
+- [x] 3.4 Shadcn/ui 설정
 
-- [ ] 3.4.1 Shadcn/ui 초기화 및 components.json 설정
+- [x] 3.4.1 Shadcn/ui 초기화 및 components.json 설정
   - Shadcn/ui CLI 초기화 실행
   - components.json 설정 파일 구성
   - 기본 디렉토리 구조 설정
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.4.2 기본 UI 컴포넌트 설치
+- [x] 3.4.2 기본 UI 컴포넌트 설치
   - Button, Input, Card 컴포넌트 설치
   - 컴포넌트 스타일 및 variants 설정
   - 컴포넌트 export 설정
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.4.4 디자인 토큰 및 CSS 변수 설정
+- [x] 3.4.3 디자인 토큰 및 CSS 변수 설정
   - CSS 변수 기반 디자인 토큰 정의
   - 다크/라이트 테마 설정
   - 색상 팔레트 및 타이포그래피 설정

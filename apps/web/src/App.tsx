@@ -3,6 +3,7 @@ import type { User } from '@mini-notion/types/domain'
 import type { ApiResponse } from '@mini-notion/types/common'
 import { useExampleStore } from './stores'
 import { FileUpload } from './components/FileUpload'
+import { UIShowcase } from './components/UIShowcase'
 import { formatDate, formatFileSize, cn } from './utils'
 import { Upload, Download } from 'lucide-react'
 import './App.css'
@@ -164,6 +165,12 @@ function App() {
               clsx + tailwind-merge 조합으로 클래스 병합
             </p>
           </div>
+        </div>
+
+        {/* Shadcn/ui 컴포넌트 쇼케이스 */}
+        <div className="card">
+          <h3 className="text-lg font-semibold mb-4">Shadcn/ui 컴포넌트</h3>
+          <UIShowcase />
         </div>
       </main>
     </div>

@@ -1,6 +1,10 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
+  /* 기본 색상 팔레트 */
   --color-primary: #3b82f6;
   --color-primary-foreground: #ffffff;
   --color-secondary: #f1f5f9;
@@ -20,15 +24,80 @@
   --color-card-foreground: #0f172a;
   --color-popover: #ffffff;
   --color-popover-foreground: #0f172a;
+
+  /* 미니 노션 특화 색상 */
+  --color-editor-background: #ffffff;
+  --color-editor-foreground: #0f172a;
+  --color-block-hover: #f8fafc;
+  --color-block-selected: #dbeafe;
+  --color-block-border: #e5e7eb;
+  --color-toolbar-background: #ffffff;
+  --color-toolbar-border: #e5e7eb;
+  --color-sidebar-background: #f9fafb;
+  --color-sidebar-hover: #f3f4f6;
   
+  /* 협업 관련 색상 */
+  --color-collaboration-user-1: #ef4444;
+  --color-collaboration-user-2: #f97316;
+  --color-collaboration-user-3: #eab308;
+  --color-collaboration-user-4: #22c55e;
+  --color-collaboration-user-5: #06b6d4;
+  --color-collaboration-user-6: #3b82f6;
+  --color-collaboration-user-7: #8b5cf6;
+  --color-collaboration-user-8: #ec4899;
+  
+  /* 상태 색상 */
+  --color-success: #22c55e;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+  --color-info: #3b82f6;
+  --color-info-foreground: #ffffff;
+
+  /* 반지름 및 간격 */
   --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
   
+  /* 간격 시스템 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* 폰트 패밀리 */
   --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   --font-family-mono: 'JetBrains Mono', Monaco, 'Cascadia Code', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
+  
+  /* 폰트 크기 */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  /* 라인 높이 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   @theme {
+    /* 기본 다크 테마 색상 */
     --color-background: #0f172a;
     --color-foreground: #f8fafc;
     --color-muted: #1e293b;
@@ -43,57 +112,257 @@
     --color-secondary-foreground: #f8fafc;
     --color-accent: #1e293b;
     --color-accent-foreground: #f8fafc;
+    
+    /* 미니 노션 다크 테마 특화 색상 */
+    --color-editor-background: #0f172a;
+    --color-editor-foreground: #f8fafc;
+    --color-block-hover: #1e293b;
+    --color-block-selected: #1e3a8a;
+    --color-block-border: #475569;
+    --color-toolbar-background: #1e293b;
+    --color-toolbar-border: #475569;
+    --color-sidebar-background: #0f172a;
+    --color-sidebar-hover: #1e293b;
+    
+    /* 다크 테마 그림자 */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
   }
 }
 
 /* Base styles */
 * {
-  border-color: theme(colors.border);
+  border-color: var(--color-border);
 }
 
 body {
-  background-color: theme(colors.background);
-  color: theme(colors.foreground);
-  font-family: theme(fontFamily.sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-family-sans);
 }
 
-/* Editor specific styles */
+/* 에디터 관련 스타일 */
 .ProseMirror {
   outline: none;
-  padding: 1rem;
+  padding: var(--spacing-md);
   min-height: 200px;
+  background-color: var(--color-editor-background);
+  color: var(--color-editor-foreground);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: theme(colors.muted.foreground);
+  color: var(--color-muted-foreground);
   pointer-events: none;
   height: 0;
 }
 
-/* Collaboration cursor styles */
+/* 블록 관련 스타일 */
+.block-wrapper {
+  position: relative;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+}
+
+.block-wrapper:hover {
+  background-color: var(--color-block-hover);
+}
+
+.block-wrapper.selected {
+  background-color: var(--color-block-selected);
+  border: 1px solid var(--color-block-border);
+}
+
+.block-handle {
+  position: absolute;
+  left: -2rem;
+  top: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  opacity: 0;
+  cursor: grab;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-muted);
+  transition: opacity 0.15s ease;
+}
+
+.block-wrapper:hover .block-handle {
+  opacity: 1;
+}
+
+/* 협업 커서 스타일 */
 .collaboration-cursor__caret {
   position: relative;
   margin-left: -1px;
   margin-right: -1px;
-  border-left: 1px solid #0d0d0d;
-  border-right: 1px solid #0d0d0d;
+  border-left: 2px solid var(--cursor-color, var(--color-primary));
+  border-right: 2px solid var(--cursor-color, var(--color-primary));
   word-break: normal;
   pointer-events: none;
 }
 
 .collaboration-cursor__label {
   position: absolute;
-  top: -1.4em;
+  top: -1.8em;
   left: -1px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-style: normal;
   font-weight: 600;
-  line-height: normal;
+  line-height: var(--line-height-tight);
   user-select: none;
-  color: #0d0d0d;
-  padding: 0.1rem 0.3rem;
-  border-radius: 3px 3px 3px 0;
+  color: white;
+  background-color: var(--cursor-color, var(--color-primary));
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) 0;
   white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 툴바 스타일 */
+.editor-toolbar {
+  background-color: var(--color-toolbar-background);
+  border: 1px solid var(--color-toolbar-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* 사이드바 스타일 */
+.workspace-sidebar {
+  background-color: var(--color-sidebar-background);
+  border-right: 1px solid var(--color-border);
+  padding: var(--spacing-md);
+}
+
+.sidebar-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background-color: var(--color-sidebar-hover);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
