@@ -1,0 +1,50 @@
+{
+  "name": "@mini-notion/shared",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "vitest --run",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@mini-notion/config": "workspace:*",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "zod": "^3.23.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
+    },
+    "./types/common": {
+      "types": "./dist/types/common/index.d.ts",
+      "default": "./dist/types/common/index.js"
+    },
+    "./types/domain": {
+      "types": "./dist/types/domain/index.d.ts",
+      "default": "./dist/types/domain/index.js"
+    },
+    "./types/editor": {
+      "types": "./dist/types/editor/index.d.ts",
+      "default": "./dist/types/editor/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas/index.d.ts",
+      "default": "./dist/schemas/index.js"
+    }
+  }
+}

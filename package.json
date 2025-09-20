@@ -2,6 +2,7 @@
     "name": "mini-notion",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "description": "블록 기반 실시간 협업 에디터 - 미니 노션",
     "workspaces": [
         "apps/*",

@@ -7,9 +7,9 @@
  * 캐싱 및 의존성 설정이 예상대로 동작하는지 확인합니다.
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 console.log('🔍 Turbo 설정 검증 시작...\n');
 
@@ -80,7 +80,7 @@ try {
     try {
       execSync(`pnpm turbo run ${task} --dry-run`, { stdio: 'pipe' });
       console.log(`✅ ${task} 태스크 설정 유효`);
-    } catch (taskError) {
+    } catch {
       console.warn(`⚠️  ${task} 태스크 설정 문제 (패키지 없음으로 인한 것일 수 있음)`);
     }
   }
@@ -108,7 +108,7 @@ try {
   console.log(`   - 원격 캐시: ${turboConfig.remoteCache?.signature ? '활성화' : '비활성화'}`);
   console.log(`   - 캐시 디렉토리: ${turboConfig.cacheDir || '.turbo'}`);
   
-} catch (error) {
+} catch {
   console.warn('⚠️  설정 요약 생성 실패');
 }
 

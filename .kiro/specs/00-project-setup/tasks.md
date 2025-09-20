@@ -29,20 +29,20 @@
   - _Requirements: 2.1, 2.2_
 
 - [ ] 3.2 모노레포 설정 표준화 구현
-- [ ] 3.2.1 packages/config 패키지 생성
-  - [ ] packages/config 디렉토리 및 package.json 생성
-  - [ ] TypeScript 설정 파일들 생성 (base.json, react.json, node.json)
-  - [ ] ESLint 설정 파일들 생성 (base.js, react.js, jsdoc.js)
-  - [ ] Prettier 설정 파일 생성 (index.js)
-  - [ ] peerDependencies 설정 및 exports 경로 정의
+- [x] 3.2.1 packages/config 패키지 생성
+  - [x] packages/config 디렉토리 및 package.json 생성
+  - [x] TypeScript 설정 파일들 생성 (base.json, react.json, node.json)
+  - [x] ESLint 설정 파일들 생성 (base.js, react.js, jsdoc.js)
+  - [x] Prettier 설정 파일 생성 (index.js)
+  - [x] peerDependencies 설정 및 exports 경로 정의
   - _Requirements: 1.1, 1.2, 4.1, 4.2_
 
-- [ ] 3.2.2 공통 타입 패키지 구조 정립
-  - [ ] packages/shared/src/types 디렉토리 구조 생성
-  - [ ] 도메인별 타입 파일 생성 (user.types.ts, document.types.ts, collaboration.types.ts)
-  - [ ] 공통 기본 타입 파일 생성 (base.types.ts, api.types.ts)
-  - [ ] 에디터 특화 타입 파일 생성 (blocks.types.ts, commands.types.ts)
-  - [ ] JSDoc 문서화 적용 및 타입 테스트 파일 생성
+- [x] 3.2.2 공통 타입 패키지 구조 정립
+  - [x] packages/shared/src/types 디렉토리 구조 생성
+  - [x] 도메인별 타입 파일 생성 (user.types.ts, document.types.ts, collaboration.types.ts)
+  - [x] 공통 기본 타입 파일 생성 (base.types.ts, api.types.ts)
+  - [x] 에디터 특화 타입 파일 생성 (blocks.types.ts, commands.types.ts)
+  - [x] JSDoc 문서화 적용 및 타입 테스트 파일 생성
   - _Requirements: 1.2, 2.1, 6.1_
 
 - [ ] 3.2.3 JSDoc 표준 적용 및 ESLint 통합
