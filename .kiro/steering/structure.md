@@ -498,6 +498,7 @@ import { DocumentEditor, BlockSelector } from '@/components/editor';
 - [ ] 컴포넌트명이 PascalCase인가?
 - [ ] `index.ts`에서 re-export 했는가?
 - [ ] Props 타입을 정의했는가?
+- [ ] JSDoc 주석이 필요한 경우 작성했는가?
 - [ ] 필요시 테스트 파일을 추가했는가?
 
 ### API 모듈 체크리스트
@@ -505,11 +506,13 @@ import { DocumentEditor, BlockSelector } from '@/components/editor';
 - [ ] DTO 스키마를 Zod로 정의했는가?
 - [ ] 적절한 HTTP 메서드를 사용했는가?
 - [ ] 에러 처리를 구현했는가?
+- [ ] 공개 API 함수에 JSDoc 주석을 작성했는가?
 
 ### Hook 체크리스트
 - [ ] `use` prefix를 사용했는가?
 - [ ] 적절한 카테고리 디렉토리에 위치하는가?
 - [ ] 반환값의 타입을 명시했는가?
 - [ ] 의존성 배열을 올바르게 설정했는가?
+- [ ] 커스텀 훅에 JSDoc 주석을 작성했는가?
 
 이 가이드를 따르면 일관성 있고 유지보수하기 쉬운 코드베이스를 구축할 수 있습니다.

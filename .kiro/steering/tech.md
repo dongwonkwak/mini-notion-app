@@ -35,6 +35,7 @@ inclusion: always
 
 ### 개발 도구
 - **Turbo** 모노레포 with pnpm workspaces
+- **packages/config** 중앙화된 설정 관리
 - **Docker + Docker Compose** 컨테이너화된 개발
 
 ## 개발 원칙
@@ -117,6 +118,7 @@ inclusion: always
 - `eslint-plugin-react-hooks` - React Hooks 규칙
 - `eslint-plugin-jsx-a11y` - 접근성 규칙
 - `eslint-plugin-import` - Import 순서 및 구조 규칙
+- `eslint-plugin-jsdoc` - JSDoc 문서화 규칙
 
 **TypeScript 엄격 규칙**
 - `@typescript-eslint/no-explicit-any` - any 타입 사용 금지
@@ -145,6 +147,14 @@ inclusion: always
 - `jsx-a11y/click-events-have-key-events` - 클릭 이벤트 키보드 접근성
 - `jsx-a11y/no-autofocus` - 자동 포커스 제한
 - `jsx-a11y/heading-has-content` - 헤딩 요소 콘텐츠 필수
+
+**JSDoc 문서화 규칙**
+- `jsdoc/require-jsdoc` - 외부 공개 함수 JSDoc 필수
+- `jsdoc/require-param` - 매개변수 문서화 필수
+- `jsdoc/require-returns` - 반환값 문서화 필수
+- `jsdoc/require-example` - 복잡한 함수 사용 예시 권장
+- `jsdoc/check-param-names` - 매개변수 이름 일치성 검증
+- `jsdoc/check-tag-names` - JSDoc 태그 유효성 검증
 
 ### Prettier 설정 표준
 
@@ -191,11 +201,23 @@ inclusion: always
 
 ### 모노레포 설정
 
+**중앙화된 설정 관리**
+- `packages/config` 패키지에서 모든 공통 설정 관리
+- 계층적 설정 구조: base → environment → app
+- 명시적 export 경로로 설정 선택적 사용
+- peerDependencies로 버전 호환성 관리
+
 **패키지별 설정 상속**
 - 루트 ESLint 설정을 기본으로 상속
 - 패키지별 특화 규칙 오버라이드 허용
 - 프론트엔드/백엔드 환경별 규칙 분리
 - 공통 규칙 변경 시 전체 패키지 일괄 적용
+
+**의존성 관리 원칙**
+- 공통 도구는 루트 레벨에 설치
+- workspace 프로토콜로 내부 패키지 참조
+- 최신 버전 우선 정책 적용
+- 호이스팅을 통한 중복 설치 방지
 
 **Turbo 통합**
 - `turbo lint` 명령어로 전체 패키지 린팅

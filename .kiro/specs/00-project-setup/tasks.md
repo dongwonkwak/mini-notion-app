@@ -20,15 +20,39 @@
   - _Requirements: 1.1, 1.3_
 
 - [ ] 3. Frontend 앱 (apps/web) 초기 설정
-- [ ] 3.1 Vite + React 19 프로젝트 생성
-  - [ ] apps/web 디렉토리에 Vite 기반 React 19 프로젝트 초기화
-  - [ ] package.json 설정 (name: @mini-notion/web, 최신 패키지 버전)
-  - [ ] TypeScript strict 모드 설정 및 tsconfig.json 구성
-  - [ ] Vite 설정 파일 생성 (포트 3000, 절대 경로 @/ 별칭)
-  - [ ] 기본 App.tsx 및 main.tsx 파일 생성
+- [x] 3.1 Vite + React 19 프로젝트 생성
+  - [x] apps/web 디렉토리에 Vite 기반 React 19 프로젝트 초기화
+  - [x] package.json 설정 (name: @mini-notion/web, 최신 패키지 버전)
+  - [x] TypeScript strict 모드 설정 및 tsconfig.json 구성
+  - [x] Vite 설정 파일 생성 (포트 3000, 절대 경로 @/ 별칭)
+  - [x] 기본 App.tsx 및 main.tsx 파일 생성
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.2 Frontend 핵심 패키지 설치
+- [ ] 3.2 모노레포 설정 표준화 구현
+- [ ] 3.2.1 packages/config 패키지 생성
+  - [ ] packages/config 디렉토리 및 package.json 생성
+  - [ ] TypeScript 설정 파일들 생성 (base.json, react.json, node.json)
+  - [ ] ESLint 설정 파일들 생성 (base.js, react.js, jsdoc.js)
+  - [ ] Prettier 설정 파일 생성 (index.js)
+  - [ ] peerDependencies 설정 및 exports 경로 정의
+  - _Requirements: 1.1, 1.2, 4.1, 4.2_
+
+- [ ] 3.2.2 공통 타입 패키지 구조 정립
+  - [ ] packages/shared/src/types 디렉토리 구조 생성
+  - [ ] 도메인별 타입 파일 생성 (user.types.ts, document.types.ts, collaboration.types.ts)
+  - [ ] 공통 기본 타입 파일 생성 (base.types.ts, api.types.ts)
+  - [ ] 에디터 특화 타입 파일 생성 (blocks.types.ts, commands.types.ts)
+  - [ ] JSDoc 문서화 적용 및 타입 테스트 파일 생성
+  - _Requirements: 1.2, 2.1, 6.1_
+
+- [ ] 3.2.3 JSDoc 표준 적용 및 ESLint 통합
+  - [ ] 루트 package.json에 eslint-plugin-jsdoc 의존성 추가
+  - [ ] packages/config ESLint 설정에 JSDoc 규칙 통합
+  - [ ] VS Code 스니펫 및 JSDoc 템플릿 생성
+  - [ ] 기존 코드에 JSDoc 주석 적용 (공통 유틸리티 함수 우선)
+  - _Requirements: 4.1, 4.2, 4.3_
+
+- [ ] 3.3 Frontend 핵심 패키지 설치
   - [ ] React 19, TypeScript, Vite 관련 패키지 설치
   - [ ] @tiptap/react, @tiptap/pm, @tiptap/starter-kit 설치
   - [ ] yjs, y-prosemirror, @hocuspocus/provider 설치
@@ -36,14 +60,14 @@
   - [ ] Zustand, react-dropzone 설치
   - _Requirements: 2.1, 2.2, 3.1, 3.2_
 
-- [ ] 3.3 TailwindCSS 및 Shadcn/ui 설정
+- [ ] 3.4 TailwindCSS 및 Shadcn/ui 설정
   - [ ] TailwindCSS 설정 파일 생성 및 기본 스타일 적용
   - [ ] Shadcn/ui 초기화 및 components.json 설정
   - [ ] 기본 UI 컴포넌트 (Button, Input, Card) 설치
   - [ ] 디자인 토큰 및 CSS 변수 설정
   - _Requirements: 2.1, 2.2_
 
-- [ ] 3.4 기본 프로젝트 구조 생성
+- [ ] 3.5 기본 프로젝트 구조 생성
   - [ ] src/components, src/pages, src/hooks, src/stores 디렉토리 생성
   - [ ] 기본 라우팅 설정 (React Router 설치 및 설정)
   - [ ] 환경변수 타입 정의 및 Zod 스키마 생성

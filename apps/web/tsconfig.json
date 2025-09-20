@@ -1,0 +1,12 @@
+{
+  "extends": "@mini-notion/config/typescript/react",
+  "compilerOptions": {
+    /* Path mapping */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
