@@ -1,0 +1,9 @@
+packages:
+  # Frontend and Backend Applications
+  - 'apps/*'
+  
+  # Shared Libraries and Components
+  - 'packages/*'
+  
+  # Tools and Scripts (if needed in the future)
+  - 'tools/*'

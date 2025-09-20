@@ -1,0 +1,50 @@
+{
+    "name": "mini-notion",
+    "version": "0.1.0",
+    "private": true,
+    "description": "블록 기반 실시간 협업 에디터 - 미니 노션",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "packageManager": "pnpm@10.16.1",
+    "engines": {
+        "node": ">=20.0.0",
+        "pnpm": ">=9.0.0"
+    },
+    "scripts": {
+        "dev": "turbo dev",
+        "build": "turbo build",
+        "test": "turbo test",
+        "lint": "turbo lint",
+        "format": "prettier --write .",
+        "type-check": "turbo type-check",
+        "docker:up": "docker-compose up -d",
+        "docker:down": "docker-compose down",
+        "setup": "pnpm install && pnpm docker:up",
+        "contracts:generate": "pnpm --filter contracts generate",
+        "contracts:mock": "pnpm --filter contracts mock",
+        "prepare": "husky install"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^19.8.1",
+        "@commitlint/config-conventional": "^19.8.1",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.1.6",
+        "prettier": "^3.6.2",
+        "turbo": "^2.5.6"
+    },
+    "keywords": [
+        "notion",
+        "editor",
+        "collaboration",
+        "realtime",
+        "yjs",
+        "tiptap",
+        "react",
+        "nestjs",
+        "monorepo"
+    ],
+    "author": "Mini Notion Team",
+    "license": "MIT"
+}
