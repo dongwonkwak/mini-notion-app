@@ -182,3 +182,4 @@ temp/
 # 테스트 관련
 .vscode-test/
 .tern-port
+**/.DS_Store
